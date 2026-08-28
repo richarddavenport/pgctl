@@ -3,6 +3,8 @@ package tui
 import (
 	"context"
 	"fmt"
+	"strings"
+	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
 
@@ -11,6 +13,13 @@ import (
 
 // eventMsg carries one engine event into the update loop.
 type eventMsg engine.Event
+
+// tickMsg drives the once-a-second redraw of a running operation.
+type tickMsg time.Time
+
+func tick() tea.Cmd {
+	return tea.Tick(time.Second, func(t time.Time) tea.Msg { return tickMsg(t) })
+}
 
 // doneMsg ends a run.
 type doneMsg struct {
@@ -25,7 +34,9 @@ func (m *Model) startSnapshot(env string) tea.Cmd {
 		databases = append(databases, d.Name)
 	}
 
-	return m.start("snapshot "+env, func(ctx context.Context, report engine.Reporter) (string, error) {
+	explain := fmt.Sprintf("Copying %s from %s into %s. Nothing is written to %s.",
+		strings.Join(databases, ", "), env, m.engine.StorageDir(), env)
+	return m.start("snapshot "+env, explain, func(ctx context.Context, report engine.Reporter) (string, error) {
 		for _, db := range databases {
 			if _, err := m.engine.Dump(ctx, engine.DumpRequest{
 				Environment: env,
@@ -42,7 +53,13 @@ func (m *Model) startSnapshot(env string) tea.Cmd {
 // not a fresh one that might differ from it.
 func (m *Model) startApply() tea.Cmd {
 	plan := m.plan
-	return m.start("apply "+plan.Snapshot.ID, func(ctx context.Context, report engine.Reporter) (string, error) {
+	what := fmt.Sprintf("%d tables", len(plan.Selection))
+	if plan.WholeDatabase {
+		what = "the whole " + plan.Snapshot.Database + " database"
+	}
+	explain := fmt.Sprintf("Replacing %s on %s with the contents of %s.",
+		what, plan.Target.Env.Name, plan.Snapshot.ID)
+	return m.start("apply "+plan.Snapshot.ID, explain, func(ctx context.Context, report engine.Reporter) (string, error) {
 		if err := m.engine.Execute(ctx, plan, report); err != nil {
 			return "", err
 		}
@@ -76,10 +93,11 @@ type planMsg struct {
 
 // start runs an operation in the background, forwarding its events into the
 // update loop.
-func (m *Model) start(kind string, op func(context.Context, engine.Reporter) (string, error)) tea.Cmd {
+func (m *Model) start(kind, explain string, op func(context.Context, engine.Reporter) (string, error)) tea.Cmd {
 	ctx, cancel := context.WithCancel(context.Background())
 	r := &run{
-		kind: kind,
+		kind:    kind,
+		explain: explain,
 		// Buffered: the engine must not block on a UI that is mid-render, and
 		// an operation that outruns the buffer is one whose intermediate
 		// progress nobody could have read anyway.
@@ -93,6 +111,8 @@ func (m *Model) start(kind string, op func(context.Context, engine.Reporter) (st
 	m.startedAt = nowFunc()
 	m.err = nil
 	m.status = ""
+	m.progress = engine.Event{}
+	m.progressStep = ""
 
 	summary := make(chan string, 1)
 	go func() {
@@ -107,7 +127,7 @@ func (m *Model) start(kind string, op func(context.Context, engine.Reporter) (st
 		r.done <- err
 	}()
 
-	return tea.Batch(m.waitForEvent(), func() tea.Msg {
+	return tea.Batch(tick(), m.waitForEvent(), func() tea.Msg {
 		err := <-r.done
 		return doneMsg{err: err, summary: <-summary}
 	})

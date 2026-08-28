@@ -45,3 +45,7 @@ func (e *Engine) database(name string) (config.Database, bool) {
 	}
 	return config.Database{}, false
 }
+
+// StorageDir is where snapshots are written, for a message that tells an
+// operator where their gigabytes went.
+func (e *Engine) StorageDir() string { return e.storageRoot() }

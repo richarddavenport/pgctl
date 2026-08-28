@@ -3,7 +3,6 @@ package tui
 import (
 	"context"
 	"fmt"
-	"strings"
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -57,6 +56,11 @@ type Model struct {
 	events    []engine.Event
 	startedAt time.Time
 
+	// progress is the latest progress event, redrawn in place rather than
+	// appended, and progressStep the step it belongs to.
+	progress     engine.Event
+	progressStep string
+
 	// confirmation is the typed name for a guarded environment.
 	confirmation string
 	confirming   bool
@@ -68,10 +72,15 @@ type Model struct {
 // run is an operation executing in the background, with the channel its events
 // arrive on.
 type run struct {
-	kind   string
-	events chan engine.Event
-	done   chan error
-	cancel context.CancelFunc
+	kind string
+	// explain is one plain sentence saying what the operation does and where
+	// its output goes. "Snapshot" means nothing to someone who has not read
+	// the design notes; "reading qat into .pgctl/snapshots" means something to
+	// anyone.
+	explain string
+	events  chan engine.Event
+	done    chan error
+	cancel  context.CancelFunc
 }
 
 // New builds the model.
@@ -113,8 +122,30 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		return m, nil
 
+	case tickMsg:
+		// A running operation redraws once a second whether or not anything
+		// has happened. Without this the screen freezes at whatever the last
+		// event said, and an operation that is working looks identical to one
+		// that has hung — which is exactly how it looked.
+		if m.stage != stageRunning {
+			return m, nil
+		}
+		return m, tick()
+
 	case eventMsg:
-		m.events = append(m.events, engine.Event(msg))
+		ev := engine.Event(msg)
+		if ev.Kind == engine.EventProgress && ev.Step == m.progressStep {
+			// Progress replaces the previous progress line for the same step
+			// rather than scrolling it, so a byte counter counts in place.
+			m.progress = ev
+			return m, m.waitForEvent()
+		}
+		if ev.Kind == engine.EventProgress {
+			m.progressStep = ev.Step
+			m.progress = ev
+			return m, m.waitForEvent()
+		}
+		m.events = append(m.events, ev)
 		return m, m.waitForEvent()
 
 	case doneMsg:
@@ -343,7 +374,19 @@ const planTimeout = 2 * time.Minute
 // nowFunc is a seam for tests.
 var nowFunc = time.Now
 
+// elapsed formats a running duration as m:ss, or h:mm:ss past an hour.
+//
+// Not time.Duration.String(): "1m0s" and "1h0m0s" are hard to read at a glance
+// and change width as they tick, which makes a status line jitter.
 func elapsed(since time.Time) string {
-	d := time.Since(since).Round(time.Second)
-	return strings.TrimSuffix(d.String(), "0s") + ""
+	d := time.Since(since)
+	if d < 0 {
+		d = 0
+	}
+	total := int(d.Round(time.Second).Seconds())
+	h, m, sec := total/3600, (total%3600)/60, total%60
+	if h > 0 {
+		return fmt.Sprintf("%d:%02d:%02d", h, m, sec)
+	}
+	return fmt.Sprintf("%d:%02d", m, sec)
 }

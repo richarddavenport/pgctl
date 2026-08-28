@@ -25,6 +25,7 @@ var (
 	warnStyle     = lipgloss.NewStyle().Foreground(warning)
 	okStyle       = lipgloss.NewStyle().Foreground(ok)
 	selectedStyle = lipgloss.NewStyle().Foreground(selectFg).Background(selectedBg).Bold(true)
+	accentStyle   = lipgloss.NewStyle().Foreground(accent)
 	footerStyle   = lipgloss.NewStyle().Foreground(muted)
 	boxStyle      = lipgloss.NewStyle().Border(lipgloss.RoundedBorder()).
 			BorderForeground(muted).Padding(0, 1)

@@ -3,6 +3,7 @@ package tui
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/richarddavenport/pgctl/internal/engine"
 )
@@ -125,14 +126,19 @@ func (m *Model) viewPlan() string {
 
 func (m *Model) viewRunning() string {
 	var b strings.Builder
-	fmt.Fprintf(&b, "%s  %s\n\n", titleStyle.Render(m.run.kind), mutedStyle.Render(elapsed(m.startedAt)))
 
-	// The last dozen lines: an operation emits hundreds, and what matters is
-	// where it is now.
-	for _, ev := range m.summariseEvents(12) {
+	// A running operation must answer three questions without being asked:
+	// what is happening, how long it has been happening, and whether it is
+	// still alive. The elapsed time redraws every second, so a screen that has
+	// stopped moving means something is genuinely wrong rather than merely
+	// quiet.
+	fmt.Fprintf(&b, "%s  %s\n", titleStyle.Render(m.run.kind), mutedStyle.Render(elapsed(m.startedAt)))
+	fmt.Fprintf(&b, "%s\n\n", mutedStyle.Render(m.run.explain))
+
+	for _, ev := range m.summariseEvents(10) {
 		switch ev.Kind {
 		case engine.EventStep:
-			fmt.Fprintf(&b, "  → %s: %s\n", ev.Step, ev.Message)
+			fmt.Fprintf(&b, "  %s %s\n", mutedStyle.Render("·"), ev.Message)
 		case engine.EventTable:
 			fmt.Fprintf(&b, "    %s %s\n", ev.Table, mutedStyle.Render(ev.Message))
 		case engine.EventWarning:
@@ -141,11 +147,22 @@ func (m *Model) viewRunning() string {
 			b.WriteString("  " + okStyle.Render("✓ "+ev.Message) + "\n")
 		case engine.EventFailed:
 			b.WriteString("  " + dangerStyle.Render("✗ "+ev.Message) + "\n")
-		default:
-			fmt.Fprintf(&b, "    %s\n", mutedStyle.Render(ev.Message))
 		}
 	}
+
+	// The progress line redraws in place, so a byte counter counts rather than
+	// scrolling a hundred near-identical lines past.
+	if m.progress.Message != "" {
+		fmt.Fprintf(&b, "\n  %s %s\n", accentStyle.Render(spinner(m.startedAt)), m.progress.Message)
+	}
 	return b.String()
+}
+
+// spinner is a frame chosen by the clock rather than by a counter, so it turns
+// at a steady rate no matter how often the view is rebuilt.
+func spinner(since time.Time) string {
+	frames := []string{"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"}
+	return frames[int(time.Since(since)/(100*time.Millisecond))%len(frames)]
 }
 
 // row renders one list line, highlighted when the cursor is on it.

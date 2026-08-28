@@ -220,3 +220,95 @@ func mkdir(t *testing.T, dir string) {
 		t.Fatalf("mkdir: %v", err)
 	}
 }
+
+func TestElapsedFormatting(t *testing.T) {
+	// The old implementation trimmed a trailing "0s", so ten seconds rendered
+	// as "1" and twenty as "2".
+	now := time.Now()
+	for _, c := range []struct {
+		ago  time.Duration
+		want string
+	}{
+		{1 * time.Second, "0:01"},
+		{10 * time.Second, "0:10"},
+		{20 * time.Second, "0:20"},
+		{90 * time.Second, "1:30"},
+		{60 * time.Minute, "1:00:00"},
+		{3*time.Hour + 4*time.Minute + 5*time.Second, "3:04:05"},
+	} {
+		if got := elapsed(now.Add(-c.ago)); got != c.want {
+			t.Errorf("elapsed(%s ago) = %q, want %q", c.ago, got, c.want)
+		}
+	}
+}
+
+func TestRunningViewSaysWhatIsHappening(t *testing.T) {
+	m := model(t)
+	m.stage = stageRunning
+	m.startedAt = time.Now().Add(-95 * time.Second)
+	m.run = &run{
+		kind:    "snapshot qat",
+		explain: "Copying product-development from qat into .pgctl/snapshots. Nothing is written to qat.",
+	}
+	m.events = []engine.Event{{Kind: engine.EventStep, Step: "dump", Message: "writing to .pgctl/snapshots/qat"}}
+	m.progress = engine.Event{Kind: engine.EventProgress, Step: "dump", Message: "505.0 MB written, 4.1 MB/s"}
+
+	view := m.View()
+	for _, want := range []string{
+		// What it is doing, in words rather than in jargon.
+		"Nothing is written to qat",
+		// How long it has been doing it, correctly formatted.
+		"1:35",
+		// That it is still moving, and how fast.
+		"505.0 MB written, 4.1 MB/s",
+	} {
+		if !strings.Contains(view, want) {
+			t.Errorf("the running view does not show %q:\n%s", want, view)
+		}
+	}
+}
+
+func TestProgressRedrawsInPlace(t *testing.T) {
+	// A byte counter must count, not scroll: a hundred near-identical progress
+	// lines would push the steps that give them meaning off the screen.
+	m := model(t)
+	m.stage = stageRunning
+	m.startedAt = time.Now()
+	m.run = &run{kind: "snapshot qat"}
+
+	for _, msg := range []string{"1.0 MB written", "2.0 MB written", "3.0 MB written"} {
+		m.Update(eventMsg(engine.Event{Kind: engine.EventProgress, Step: "dump", Message: msg}))
+	}
+	if len(m.events) != 0 {
+		t.Errorf("progress events were appended to the log: %v", m.events)
+	}
+	if m.progress.Message != "3.0 MB written" {
+		t.Errorf("progress = %q, want the newest", m.progress.Message)
+	}
+	view := m.View()
+	if strings.Contains(view, "1.0 MB written") {
+		t.Error("a superseded progress line is still on screen")
+	}
+	if !strings.Contains(view, "3.0 MB written") {
+		t.Error("the newest progress line is not on screen")
+	}
+}
+
+func TestTickKeepsRedrawingOnlyWhileRunning(t *testing.T) {
+	m := model(t)
+	m.stage = stageRunning
+	m.startedAt = time.Now()
+	m.run = &run{kind: "snapshot qat"}
+
+	// While running, a tick schedules the next one — this is what stops the
+	// screen freezing at the last event for the length of a multi-minute dump.
+	if _, cmd := m.Update(tickMsg(time.Now())); cmd == nil {
+		t.Error("a tick during a run did not schedule the next one")
+	}
+	// Once it is over, the ticking stops rather than waking the process every
+	// second forever.
+	m.stage = stageSnapshots
+	if _, cmd := m.Update(tickMsg(time.Now())); cmd != nil {
+		t.Error("ticking continued after the run finished")
+	}
+}

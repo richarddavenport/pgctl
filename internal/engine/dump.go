@@ -151,8 +151,9 @@ func (e *Engine) Dump(ctx context.Context, req DumpRequest, report Reporter) (*s
 		return nil, fmt.Errorf("create snapshot directory: %w", err)
 	}
 
-	report.step("dump", fmt.Sprintf("pg_dump %d tables, %d jobs, %s",
+	report.step("dump", fmt.Sprintf("reading %d tables with %d parallel jobs, compressing with %s",
 		len(m.Tables), m.Jobs, m.Compression))
+	report.step("dump", "writing to "+dir)
 	if err := e.runPgDump(ctx, target, db, m, dir, excludeData, report); err != nil {
 		return nil, err
 	}
@@ -231,11 +232,58 @@ func (e *Engine) runPgDump(ctx context.Context, target *Target, db config.Databa
 	cmd.Env = target.SubprocessEnv(os.Environ())
 	var errb bytes.Buffer
 	cmd.Stderr = &errb
-	if err := cmd.Run(); err != nil {
+
+	// pg_dump says nothing until it is finished, and a dump of a real database
+	// takes minutes. Watching the archive grow is the only progress signal
+	// available without --verbose (whose output is per-table noise, not a
+	// measure of how far along it is), and it is the one that answers the
+	// question an operator actually has: is this working, and how fast.
+	stop := watchGrowth(ctx, filepath.Join(dir, snapshot.DumpDir), "dump", report)
+	err := cmd.Run()
+	stop()
+
+	if err != nil {
 		return fmt.Errorf("pg_dump: %w: %s", err, lastLines(errb.String(), 5))
 	}
-	report.send(Event{Kind: EventProgress, Step: "dump", Message: "pg_dump complete"})
 	return nil
+}
+
+// watchGrowth reports the size of a directory as it fills, once a second, and
+// returns a function that stops it.
+func watchGrowth(ctx context.Context, dir, step string, report Reporter) func() {
+	if report == nil {
+		return func() {}
+	}
+	ctx, cancel := context.WithCancel(ctx)
+	done := make(chan struct{})
+
+	go func() {
+		defer close(done)
+		ticker := time.NewTicker(time.Second)
+		defer ticker.Stop()
+
+		started := time.Now()
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-ticker.C:
+				n := dirSize(dir)
+				seconds := time.Since(started).Seconds()
+				rate := ""
+				if seconds > 0 && n > 0 {
+					rate = fmt.Sprintf(", %s/s", humanBytes(int64(float64(n)/seconds)))
+				}
+				report.send(Event{Kind: EventProgress, Step: step, Bytes: n,
+					Message: fmt.Sprintf("%s written%s", humanBytes(n), rate)})
+			}
+		}
+	}()
+
+	return func() {
+		cancel()
+		<-done
+	}
 }
 
 // unmatchedRules reports rules that select nothing. A rule naming a table that
