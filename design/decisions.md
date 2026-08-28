@@ -141,3 +141,34 @@ skipping masking that is required is a disclosure.
 The pipeline therefore has the seam in the right place — a per-table transform
 applied as rows land — and ships with no rules and no masking. When the policy
 lands, rules go in `pgctl.yaml` next to the `where:` predicates they resemble.
+
+## 11. pgx for everything that is not pg_dump
+
+`pg_dump` and `pg_restore` have to be subprocesses — there is no library form of
+them, and reimplementing an archive format is not a thing to do. Everything
+else talks to PostgreSQL through pgx rather than by shelling out to `psql`:
+catalog introspection, the DDL an apply performs, and both directions of the
+filtered `COPY`.
+
+The deciding factor is `COPY`. pgx exposes the protocol-level copy in and out,
+so a filtered table streams `COPY (SELECT …) TO STDOUT (FORMAT binary)` through
+a zstd encoder and into a file without a temporary file, a shell pipeline, or a
+psql `\copy` whose failures arrive as text on stderr. Doing that through `psql`
+would mean parsing its output to find out whether it worked.
+
+The secondary factor is credentials. A subprocess needs the password in its
+environment; pgx takes it in a struct, and pgctl already has to redact pgx's
+errors because they quote the connection string.
+
+## 12. A snapshot stays a tree in blob storage, not a tarball
+
+The obvious way to put a directory-format dump in object storage is to tar it
+into one blob. That would throw away the property decision #2 was chosen for.
+
+Kept as a tree — one blob per archive file, the snapshot's id as the prefix — a
+set-level restore from blob storage downloads the table of contents and the
+files for the tables it needs, and nothing else. Moving the claims tables out of
+a 2 GB nightly costs the claims tables. Tarred, it costs 2 GB every time.
+
+The price is many small blobs per snapshot and a listing that has to be
+prefix-based. Both are what object storage is good at.
