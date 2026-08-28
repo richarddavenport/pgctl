@@ -1,0 +1,36 @@
+# golangci-lint v2 config. Run: golangci-lint run ./...
+version: "2"
+
+linters:
+  default: standard # errcheck, govet, ineffassign, staticcheck, unused
+  enable:
+    - copyloopvar
+    - errname
+    - errorlint
+    - gocritic
+    - misspell
+    - nilerr
+    - nolintlint
+    - prealloc
+    - revive
+    - unconvert
+    - unparam
+    - usestdlibvars
+    - wastedassign
+  settings:
+    revive:
+      rules:
+        - name: exported # exported identifiers need doc comments
+        - name: package-comments
+          disabled: true # package docs required only where they add value
+  exclusions:
+    rules:
+      - path: _test\.go
+        linters:
+          - errcheck
+          - prealloc
+
+formatters:
+  enable:
+    - gofmt
+    - goimports

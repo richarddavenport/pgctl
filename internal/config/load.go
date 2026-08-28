@@ -101,6 +101,12 @@ func (c *Config) applyDefaults() {
 	if c.Defaults.LockTimeout == 0 {
 		c.Defaults.LockTimeout = 30 * time.Second
 	}
+	if c.Credentials.HostKey == "" {
+		c.Credentials.HostKey = "POSTGRES_HOST"
+	}
+	if c.Credentials.PortKey == "" {
+		c.Credentials.PortKey = "POSTGRES_PORT"
+	}
 	if c.Credentials.UserKey == "" {
 		c.Credentials.UserKey = "POSTGRES_USERNAME"
 	}
@@ -121,9 +127,6 @@ func (c *Config) applyDefaults() {
 	}
 	for i := range c.Postgres {
 		s := c.Postgres[i]
-		if s.Port == 0 {
-			s.Port = 5432
-		}
 		if s.MaintenanceDB == "" {
 			s.MaintenanceDB = "postgres"
 		}

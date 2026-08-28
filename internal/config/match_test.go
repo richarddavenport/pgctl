@@ -17,6 +17,14 @@ func TestMatchPattern(t *testing.T) {
 		// a different table, and truncating the wrong one is unrecoverable.
 		{"operations.*", "operations.policy", true},
 		{"policy", "operations.policy", false},
+		// Leading and surrounding wildcards, which the shell scripts this
+		// replaces needed to exclude Hasura's event and log tables.
+		{"hdb_catalog.*_log", "hdb_catalog.event_log", true},
+		{"hdb_catalog.*_log", "hdb_catalog.event_invocation_logs", false},
+		{"hdb_catalog.*event*", "hdb_catalog.event_invocation_logs", true},
+		{"hdb_catalog.*event*", "hdb_catalog.hdb_event_log_cleanups", true},
+		{"hdb_catalog.*event*", "hdb_catalog.hdb_source_catalog_version", false},
+		{"hdb_catalog.*log*", "hdb_catalog.event_invocation_logs", true},
 		{"operations.policy", "policy", false},
 	}
 	for _, c := range cases {

@@ -3,12 +3,18 @@ package config
 import "strings"
 
 // MatchPattern reports whether a schema-qualified table name matches a
-// pattern. Patterns are exact, or a trailing `*` on the table part
-// (`operations.policy_contract*`), or a whole schema (`audit.*`).
+// pattern. The table part may carry a `*` at its start, its end, or both:
 //
-// Deliberately not glob or regexp: a pattern that selects tables for
-// truncation should be legible at a glance to whoever reviews the config, and
-// `*` at the end is the only form anyone has needed.
+//	operations.policy_contract    exactly that table
+//	operations.policy_contract*   anything starting with it
+//	hdb_catalog.*_log             anything ending with it
+//	hdb_catalog.*event*           anything containing it
+//	audit.*                       every table in the schema
+//
+// Deliberately not glob or regexp. A pattern that selects tables for
+// truncation has to be legible at a glance to whoever reviews the config, and
+// these four forms cover everything the rules in practice need — including the
+// `*_log*` and `*event*` exclusions the shell scripts this replaces used.
 func MatchPattern(pattern, table string) bool {
 	pSchema, pTable, ok := strings.Cut(pattern, ".")
 	if !ok {
@@ -18,10 +24,19 @@ func MatchPattern(pattern, table string) bool {
 	if !ok || pSchema != tSchema {
 		return false
 	}
-	if prefix, wild := strings.CutSuffix(pTable, "*"); wild {
-		return strings.HasPrefix(tTable, prefix)
+
+	body, leading := strings.CutPrefix(pTable, "*")
+	body, trailing := strings.CutSuffix(body, "*")
+	switch {
+	case leading && trailing:
+		return strings.Contains(tTable, body)
+	case leading:
+		return strings.HasSuffix(tTable, body)
+	case trailing:
+		return strings.HasPrefix(tTable, body)
+	default:
+		return pTable == tTable
 	}
-	return pTable == tTable
 }
 
 // Matches reports whether a table belongs to the set: included by some

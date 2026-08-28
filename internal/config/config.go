@@ -20,9 +20,11 @@ type Config struct {
 	// (and overriding) anything read from EnvironmentsFrom.
 	Environments []Environment `yaml:"environments"`
 
-	// Postgres supplies the connection detail swarmctl does not know, keyed by
-	// environment name. A name here that no swarmctl environment matches
-	// declares an environment of its own — which is how `local` exists.
+	// Postgres overrides connection detail per environment, and declares
+	// environments that have none of their own — a name here matching no
+	// swarmctl environment becomes one, which is how `local` exists. For a
+	// real environment nothing needs to be said: host, port, user and password
+	// come out of its sops-encrypted secrets file (see Credentials).
 	Postgres map[string]Server `yaml:"postgres"`
 
 	Credentials Credentials `yaml:"credentials"`
@@ -91,6 +93,8 @@ type Secrets struct {
 
 // Server is how to reach one environment's PostgreSQL.
 type Server struct {
+	// Host and Port override the environment's secrets file. Needed only for
+	// an environment that has no secrets file, such as a local cluster.
 	Host string `yaml:"host"`
 	Port int    `yaml:"port"`
 
@@ -104,10 +108,18 @@ type Server struct {
 	Jobs int `yaml:"jobs"`
 }
 
-// Credentials names the environment-file keys holding database credentials,
-// rather than the credentials themselves. pgctl never stores a password: it
-// decrypts the environment's secrets file at the moment it needs one.
+// Credentials names the environment-file keys holding connection detail,
+// rather than the detail itself. pgctl never stores a password: it decrypts the
+// environment's secrets file at the moment it needs one, and holds the result
+// in memory for that operation only.
+//
+// The host is read from there too, rather than restated in pgctl.yaml. An
+// environment file that names one host while pgctl.yaml names another is a
+// restore pointed at the wrong server, and the only way to be sure that cannot
+// happen is for there to be one place to look.
 type Credentials struct {
+	HostKey     string `yaml:"hostKey"`
+	PortKey     string `yaml:"portKey"`
 	UserKey     string `yaml:"userKey"`
 	PasswordKey string `yaml:"passwordKey"`
 }

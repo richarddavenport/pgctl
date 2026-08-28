@@ -78,10 +78,14 @@ func (c *Config) Validate() error {
 		}
 	}
 
+	// An environment needs a host from somewhere: its secrets file, or an
+	// override here. Neither is not fatal — the other environments still work,
+	// and a config that fails to load helps nobody.
 	for _, e := range c.Environments {
-		if e.Server.Host == "" {
-			c.Warnings = append(c.Warnings,
-				fmt.Sprintf("environment %q has no postgres host — declare postgres.%s", e.Name, e.Name))
+		if e.Server.Host == "" && e.Secrets.File == "" {
+			c.Warnings = append(c.Warnings, fmt.Sprintf(
+				"environment %q has neither a secrets file nor postgres.%s.host, so pgctl cannot reach it",
+				e.Name, e.Name))
 		}
 	}
 	for _, r := range c.Retentions() {
@@ -111,8 +115,8 @@ func validPattern(pat string) error {
 	if strings.Contains(schema, "*") {
 		return fmt.Errorf("table pattern %q: wildcards are allowed in the table part only", pat)
 	}
-	if i := strings.Index(table, "*"); i >= 0 && i != len(table)-1 {
-		return fmt.Errorf("table pattern %q: `*` is only allowed at the end", pat)
+	if inner := strings.Trim(table, "*"); strings.Contains(inner, "*") {
+		return fmt.Errorf("table pattern %q: `*` is only allowed at the start or the end", pat)
 	}
 	return nil
 }
