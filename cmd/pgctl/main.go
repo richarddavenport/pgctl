@@ -58,6 +58,8 @@ func usage() {
 A snapshot may be named in full (prd/product-development/20260828T030000Z), by
 its timestamp alone when that is unambiguous, or as <env>/latest.
 
+  pgctl prune                 report what a retention policy would delete (--apply to do it)
+
   pgctl version               print the version
   pgctl help                  this text
 `)

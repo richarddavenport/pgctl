@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/richarddavenport/pgctl/internal/engine"
+	"github.com/richarddavenport/pgctl/internal/snapshot"
 )
 
 func runSnapshot(ctx context.Context, args []string) error {
@@ -228,4 +229,63 @@ func confirm(plan *engine.Plan, f applyFlags) error {
 func interactive() bool {
 	info, err := os.Stdin.Stat()
 	return err == nil && info.Mode()&os.ModeCharDevice != 0
+}
+
+func runPrune(_ context.Context, args []string) error {
+	fs := flag.NewFlagSet("prune", flag.ExitOnError)
+	configPath := fs.String("config", "", "path to a pgctl config")
+	env := fs.String("env", "", "only this environment")
+	apply := fs.Bool("apply", false, "actually delete; without it, prune only reports")
+	_ = fs.Parse(Permute(fs, args))
+
+	e, err := load(*configPath)
+	if err != nil {
+		return err
+	}
+	policy := snapshot.Policy{
+		Daily:   e.Config().Storage.Retention.Daily,
+		Weekly:  e.Config().Storage.Retention.Weekly,
+		Monthly: e.Config().Storage.Retention.Monthly,
+	}
+	if policy.Unset() {
+		return fmt.Errorf("no storage.retention configured, so there is nothing to prune")
+	}
+
+	groups, err := e.SnapshotGroups(*env)
+	if err != nil {
+		return err
+	}
+
+	var deleted, freed int64
+	for _, group := range groups {
+		keep, remove := snapshot.Keep(group.Snapshots, policy)
+		if len(remove) == 0 {
+			continue
+		}
+		fmt.Printf("%s/%s: keeping %d, removing %d\n", group.Environment, group.Database, len(keep), len(remove))
+		for _, m := range remove {
+			fmt.Printf("  %s  %s  %s\n", m.ID,
+				m.StartedAt.Local().Format("2006-01-02 15:04"), engine.HumanBytes(m.Bytes))
+			freed += m.Bytes
+			deleted++
+			if *apply {
+				if err := e.DeleteSnapshot(m.ID); err != nil {
+					return err
+				}
+			}
+		}
+	}
+
+	switch {
+	case deleted == 0:
+		fmt.Println("nothing to prune")
+	case *apply:
+		fmt.Printf("removed %d snapshot(s), %s freed\n", deleted, engine.HumanBytes(freed))
+	default:
+		// Reporting by default rather than deleting by default: a retention
+		// policy is easy to get wrong, and the run that discovers it should not
+		// be the run that acts on it.
+		fmt.Printf("%d snapshot(s), %s — re-run with --apply to delete\n", deleted, engine.HumanBytes(freed))
+	}
+	return nil
 }

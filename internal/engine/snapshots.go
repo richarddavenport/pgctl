@@ -98,3 +98,58 @@ func (e *Engine) Snapshots() ([]*snapshot.Manifest, error) {
 	})
 	return out, nil
 }
+
+// Group is one environment's snapshots of one database. Retention applies per
+// group: an environment's history of one database says nothing about how much
+// of another's to keep.
+type Group struct {
+	Environment string
+	Database    string
+	Snapshots   []*snapshot.Manifest
+}
+
+// SnapshotGroups returns the snapshots grouped by environment and database,
+// optionally restricted to one environment.
+func (e *Engine) SnapshotGroups(env string) ([]Group, error) {
+	all, err := e.Snapshots()
+	if err != nil {
+		return nil, err
+	}
+
+	index := map[string]*Group{}
+	var order []string
+	for _, m := range all {
+		if env != "" && m.Environment != env {
+			continue
+		}
+		key := m.Environment + "/" + m.Database
+		if index[key] == nil {
+			index[key] = &Group{Environment: m.Environment, Database: m.Database}
+			order = append(order, key)
+		}
+		index[key].Snapshots = append(index[key].Snapshots, m)
+	}
+
+	sort.Strings(order)
+	out := make([]Group, 0, len(order))
+	for _, key := range order {
+		out = append(out, *index[key])
+	}
+	return out, nil
+}
+
+// DeleteSnapshot removes a snapshot from local storage.
+//
+// The manifest goes first. A directory whose manifest is gone is not a snapshot
+// pgctl will offer, so an interrupted delete leaves something invisible rather
+// than something restorable-looking and half-deleted.
+func (e *Engine) DeleteSnapshot(id string) error {
+	dir := snapshot.Path(e.storageRoot(), id)
+	if err := os.Remove(filepath.Join(dir, snapshot.ManifestName)); err != nil && !errors.Is(err, os.ErrNotExist) {
+		return fmt.Errorf("delete manifest of %s: %w", id, err)
+	}
+	if err := os.RemoveAll(dir); err != nil {
+		return fmt.Errorf("delete snapshot %s: %w", id, err)
+	}
+	return nil
+}
