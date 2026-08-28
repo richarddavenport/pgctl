@@ -312,3 +312,21 @@ func TestTickKeepsRedrawingOnlyWhileRunning(t *testing.T) {
 		t.Error("ticking continued after the run finished")
 	}
 }
+
+func TestSpinnerAdvancesOneFramePerTick(t *testing.T) {
+	// The spinner reads as flicker rather than rotation whenever the redraw
+	// interval and the frame interval disagree: at one redraw a second and one
+	// frame per 100ms it jumped ten frames between draws, landing back near
+	// where it started. One tick must move it exactly one frame.
+	now := time.Now()
+	for i := range spinnerFrames {
+		since := now.Add(-time.Duration(i) * tickInterval)
+		if got, want := spinner(since), spinnerFrames[i]; got != want {
+			t.Errorf("after %d ticks the spinner showed %q, want %q", i, got, want)
+		}
+	}
+	// And it wraps rather than running off the end.
+	if got := spinner(now.Add(-time.Duration(len(spinnerFrames)) * tickInterval)); got != spinnerFrames[0] {
+		t.Errorf("the spinner did not wrap: got %q", got)
+	}
+}

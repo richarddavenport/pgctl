@@ -14,11 +14,17 @@ import (
 // eventMsg carries one engine event into the update loop.
 type eventMsg engine.Event
 
-// tickMsg drives the once-a-second redraw of a running operation.
+// tickMsg drives the redraw of a running operation.
 type tickMsg time.Time
 
+// tickInterval has to match the spinner's frame rate, not the rate at which
+// anything interesting happens. Redrawing once a second while the spinner
+// advances every 100ms means it jumps ten frames between redraws, which reads
+// as flicker rather than rotation.
+const tickInterval = 100 * time.Millisecond
+
 func tick() tea.Cmd {
-	return tea.Tick(time.Second, func(t time.Time) tea.Msg { return tickMsg(t) })
+	return tea.Tick(tickInterval, func(t time.Time) tea.Msg { return tickMsg(t) })
 }
 
 // doneMsg ends a run.

@@ -262,18 +262,24 @@ func watchGrowth(ctx context.Context, dir, step string, report Reporter) func() 
 		ticker := time.NewTicker(time.Second)
 		defer ticker.Stop()
 
-		started := time.Now()
+		// Rate over the last interval, not an average since the watch began.
+		// pg_dump spends its first seconds reading the catalog and writing
+		// nothing, so a cumulative average reports a throughput the dump never
+		// had and takes minutes to recover from — it read 78 KB/s for a link
+		// doing several megabytes a second.
+		var lastBytes int64
+		lastAt := time.Now()
 		for {
 			select {
 			case <-ctx.Done():
 				return
-			case <-ticker.C:
+			case now := <-ticker.C:
 				n := dirSize(dir)
-				seconds := time.Since(started).Seconds()
 				rate := ""
-				if seconds > 0 && n > 0 {
-					rate = fmt.Sprintf(", %s/s", humanBytes(int64(float64(n)/seconds)))
+				if seconds := now.Sub(lastAt).Seconds(); seconds > 0 && n > lastBytes {
+					rate = fmt.Sprintf(", %s/s", humanBytes(int64(float64(n-lastBytes)/seconds)))
 				}
+				lastBytes, lastAt = n, now
 				report.send(Event{Kind: EventProgress, Step: step, Bytes: n,
 					Message: fmt.Sprintf("%s written%s", humanBytes(n), rate)})
 			}

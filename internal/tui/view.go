@@ -158,11 +158,14 @@ func (m *Model) viewRunning() string {
 	return b.String()
 }
 
-// spinner is a frame chosen by the clock rather than by a counter, so it turns
-// at a steady rate no matter how often the view is rebuilt.
+// spinnerFrames turn in one direction at one dot per frame, so a dropped
+// redraw looks like a pause rather than a reversal.
+var spinnerFrames = []string{"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"}
+
+// spinner picks its frame from the clock rather than from a counter, so it
+// turns at a steady rate however often the view happens to be rebuilt.
 func spinner(since time.Time) string {
-	frames := []string{"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"}
-	return frames[int(time.Since(since)/(100*time.Millisecond))%len(frames)]
+	return spinnerFrames[int(time.Since(since)/tickInterval)%len(spinnerFrames)]
 }
 
 // row renders one list line, highlighted when the cursor is on it.
