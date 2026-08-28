@@ -96,6 +96,10 @@ func (e *Engine) applyWholeDatabase(ctx context.Context, plan *Plan, dir string,
 
 	args := []string{
 		fmt.Sprintf("--jobs=%d", jobs),
+		// See runPgDump: pg_restore prompts on /dev/tty too, and with --create
+		// it reconnects to the database it has just made — a second chance to
+		// hang on authentication, long after anyone stopped watching.
+		"--no-password",
 		"--clean",
 		"--if-exists",
 		"--create",
@@ -237,6 +241,7 @@ func (e *Engine) loadSelection(ctx context.Context, plan *Plan, dir string,
 		report.step("load", fmt.Sprintf("pg_restore %d entries, %d jobs", len(selected), jobs))
 		args := []string{
 			fmt.Sprintf("--jobs=%d", jobs),
+			"--no-password",
 			"--data-only",
 			"--no-owner",
 			"--no-acl",
@@ -336,7 +341,7 @@ func asDrops(fks []pg.FK) []FKDrop {
 // runPgRestore invokes pg_restore, with the password out of argv.
 func (e *Engine) runPgRestore(ctx context.Context, target *Target, args []string, report Reporter) error {
 	cmd := exec.CommandContext(ctx, "pg_restore", args...)
-	cmd.Env = append(os.Environ(), "PGPASSWORD="+target.Password)
+	cmd.Env = target.SubprocessEnv(os.Environ())
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("pg_restore: %w: %s", err, lastLines(string(out), 8))

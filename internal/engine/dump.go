@@ -79,6 +79,11 @@ func (e *Engine) Dump(ctx context.Context, req DumpRequest, report Reporter) (*s
 		return nil, err
 	}
 
+	extensions, err := pg.Extensions(ctx, conn)
+	if err != nil {
+		return nil, err
+	}
+
 	m := &snapshot.Manifest{
 		ID:              id,
 		Environment:     target.Env.Name,
@@ -89,6 +94,7 @@ func (e *Engine) Dump(ctx context.Context, req DumpRequest, report Reporter) (*s
 		Compression:     e.cfg.Defaults.Compression,
 		Jobs:            target.Jobs(e.cfg.Defaults),
 		ExcludedSchemas: db.ExcludeSchemas,
+		Extensions:      extensions,
 		ForeignKeys:     cat.FKs,
 	}
 
@@ -182,6 +188,12 @@ func (e *Engine) runPgDump(ctx context.Context, target *Target, db config.Databa
 		// for a materially faster dump. What protects a snapshot is the copy
 		// in blob storage, not whether this local one survived a power cut.
 		"--no-sync",
+		// Never prompt. Without this, a wrong or missing password makes pg_dump
+		// block on a password prompt it reads from /dev/tty — not stdin — so
+		// redirecting stdin does not save it. In CI, or in any backgrounded
+		// run, that is an indefinite hang with no output: a far worse failure
+		// than an error message.
+		"--no-password",
 		"--file="+filepath.Join(dir, snapshot.DumpDir),
 		"--host="+target.Host,
 		fmt.Sprintf("--port=%d", target.Port),
@@ -199,7 +211,7 @@ func (e *Engine) runPgDump(ctx context.Context, target *Target, db config.Databa
 	args = append(args, target.Database)
 
 	cmd := exec.CommandContext(ctx, "pg_dump", args...)
-	cmd.Env = append(os.Environ(), "PGPASSWORD="+target.Password)
+	cmd.Env = target.SubprocessEnv(os.Environ())
 	var errb bytes.Buffer
 	cmd.Stderr = &errb
 	if err := cmd.Run(); err != nil {

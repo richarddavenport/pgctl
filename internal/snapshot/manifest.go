@@ -60,6 +60,13 @@ type Manifest struct {
 
 	ExcludedSchemas []string `json:"excludedSchemas,omitempty"`
 
+	// Extensions the source database had installed. A target that cannot
+	// install one of them cannot hold this snapshot: functions written in a
+	// missing procedural language fail to create, and every object depending
+	// on them fails after that. Recorded so the mismatch is a refusal before
+	// the load rather than a pile of errors during it.
+	Extensions []pg.Extension `json:"extensions,omitempty"`
+
 	Tables []TableEntry `json:"tables"`
 
 	// ForeignKeys is the source's referential structure at the moment of the

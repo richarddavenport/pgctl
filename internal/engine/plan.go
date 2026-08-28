@@ -130,6 +130,9 @@ func (e *Engine) Plan(ctx context.Context, req ApplyRequest, report Reporter) (*
 			plan.Warnings = append(plan.Warnings, fmt.Sprintf(
 				"%s does not exist on %s yet and will be created", man.Database, target.Env.Name))
 		}
+		if err := e.checkExtensions(ctx, target, man); err != nil {
+			return nil, err
+		}
 		return plan, nil
 	}
 
@@ -142,6 +145,9 @@ func (e *Engine) Plan(ctx context.Context, req ApplyRequest, report Reporter) (*
 
 	cat, err := pg.Introspect(ctx, conn, db.ExcludeSchemas)
 	if err != nil {
+		return nil, err
+	}
+	if err := e.checkExtensions(ctx, target, man); err != nil {
 		return nil, err
 	}
 
@@ -202,6 +208,55 @@ func (e *Engine) Plan(ctx context.Context, req ApplyRequest, report Reporter) (*
 		}
 	}
 	return plan, nil
+}
+
+// checkExtensions refuses a snapshot the target cannot hold.
+//
+// The failure this prevents: the source's functions are written in a
+// procedural language — plv8, in this project — that the target's server does
+// not have on disk. Every one of those functions fails to create, and so does
+// every table with a default, trigger or generated column that calls one. What
+// arrives is a database that looks restored and is not, reported as a few
+// hundred lines of pg_restore errors an hour into the load.
+//
+// Checked against pg_available_extensions rather than pg_extension: an
+// extension the target could install is not a problem, because the archive
+// installs it.
+func (e *Engine) checkExtensions(ctx context.Context, target *Target, man *snapshot.Manifest) error {
+	if len(man.Extensions) == 0 {
+		// Snapshots taken before pgctl recorded extensions say nothing about
+		// them, which is not the same as saying there are none.
+		return nil
+	}
+	conn, err := target.Connect(ctx, target.MaintenanceDB())
+	if err != nil {
+		return err
+	}
+	defer conn.Close(ctx) //nolint:errcheck // nothing useful to do with a close failure
+
+	available, err := pg.AvailableExtensions(ctx, conn)
+	if err != nil {
+		return err
+	}
+
+	var missing []string
+	for _, ext := range man.Extensions {
+		// plpgsql is in every database and in every server; listing it as
+		// missing would only ever be noise.
+		if ext.Name == "plpgsql" {
+			continue
+		}
+		if !available[ext.Name] {
+			missing = append(missing, ext.Name)
+		}
+	}
+	if len(missing) > 0 {
+		return &RefusalError{fmt.Sprintf(
+			"%s cannot install %s, which %s uses. Restoring would fail on every function "+
+				"written in it, and on everything depending on those.",
+			target.Env.Name, strings.Join(missing, ", "), man.Environment)}
+	}
+	return nil
 }
 
 // databaseExists asks the maintenance database whether the target database is

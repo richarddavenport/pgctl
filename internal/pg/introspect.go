@@ -151,6 +151,54 @@ func readFKs(ctx context.Context, conn *pgx.Conn, excluded []string) ([]FK, erro
 	return out, rows.Err()
 }
 
+// Extensions returns the extensions installed in the connected database, with
+// their versions.
+func Extensions(ctx context.Context, conn *pgx.Conn) ([]Extension, error) {
+	const q = `SELECT extname, extversion FROM pg_extension ORDER BY 1`
+	rows, err := conn.Query(ctx, q)
+	if err != nil {
+		return nil, fmt.Errorf("list extensions: %w", err)
+	}
+	defer rows.Close()
+
+	var out []Extension
+	for rows.Next() {
+		var e Extension
+		if err := rows.Scan(&e.Name, &e.Version); err != nil {
+			return nil, err
+		}
+		out = append(out, e)
+	}
+	return out, rows.Err()
+}
+
+// AvailableExtensions returns the extensions the connected server could install
+// — what is on its disk, not what is loaded.
+func AvailableExtensions(ctx context.Context, conn *pgx.Conn) (map[string]bool, error) {
+	const q = `SELECT name FROM pg_available_extensions`
+	rows, err := conn.Query(ctx, q)
+	if err != nil {
+		return nil, fmt.Errorf("list available extensions: %w", err)
+	}
+	defer rows.Close()
+
+	out := map[string]bool{}
+	for rows.Next() {
+		var name string
+		if err := rows.Scan(&name); err != nil {
+			return nil, err
+		}
+		out[name] = true
+	}
+	return out, rows.Err()
+}
+
+// Extension is one installed extension.
+type Extension struct {
+	Name    string `json:"name"`
+	Version string `json:"version"`
+}
+
 // Indexes reads the secondary indexes on the given tables, so that a
 // set-level apply can drop them before loading and rebuild them after.
 //

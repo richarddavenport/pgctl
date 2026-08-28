@@ -96,6 +96,34 @@ func orNone(s string) string {
 	return s
 }
 
+// SubprocessEnv is the environment pg_dump and pg_restore run with: the
+// password, and the same connection policy pgctl's own connections use.
+//
+// gssencmode=disable is not an optimisation. libpq is linked against krb5 and
+// attempts a GSSAPI-encrypted connection before anything else; where a
+// Kerberos lookup blackholes rather than refuses — a sandbox, a corporate
+// network, a VPN with no KDC route — that attempt blocks with no timeout, and
+// pg_dump hangs producing nothing. pgctl authenticates with a password out of
+// an encrypted secrets file and has no use for Kerberos, so the attempt buys
+// nothing and can cost everything. This bit is easy to miss because pgctl's own
+// connections go through pgx, which never tries GSSAPI: the tool looks healthy
+// right up to the moment it shells out.
+//
+// sslmode follows Target.Connect: Azure requires TLS, a loopback cluster
+// usually has none configured, and neither can verify a certificate without a
+// CA bundle pgctl does not ship.
+func (t *Target) SubprocessEnv(base []string) []string {
+	sslmode := "require"
+	if isLoopback(t.Host) {
+		sslmode = "prefer"
+	}
+	return append(base,
+		"PGPASSWORD="+t.Password,
+		"PGGSSENCMODE=disable",
+		"PGSSLMODE="+sslmode,
+	)
+}
+
 // Jobs is the parallelism to use against this target.
 func (t *Target) Jobs(def config.Defaults) int {
 	if t.Env.Server.Jobs > 0 {
