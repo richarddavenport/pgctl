@@ -30,7 +30,7 @@ func (e *Engine) openSnapshotIn(ctx context.Context, id string, report Reporter)
 
 	if env, ok := strings.CutSuffix(id, "/latest"); ok {
 		for i := len(entries) - 1; i >= 0; i-- {
-			if entries[i].Manifest.Environment == env && entries[i].Manifest.Complete() {
+			if entries[i].Manifest.Connection == env && entries[i].Manifest.Complete() {
 				return entries[i].Manifest, entries[i].Local, nil
 			}
 		}
@@ -100,14 +100,14 @@ func (e *Engine) Snapshots() ([]*snapshot.Manifest, error) {
 // group: an environment's history of one database says nothing about how much
 // of another's to keep.
 type Group struct {
-	Environment string
-	Database    string
-	Snapshots   []*snapshot.Manifest
+	Connection string
+	Database   string
+	Snapshots  []*snapshot.Manifest
 }
 
 // SnapshotGroups returns the snapshots grouped by environment and database,
 // optionally restricted to one environment.
-func (e *Engine) SnapshotGroups(ctx context.Context, env string, report Reporter) ([]Group, error) {
+func (e *Engine) SnapshotGroups(ctx context.Context, connection string, report Reporter) ([]Group, error) {
 	entries, err := e.Index(ctx, report)
 	if err != nil {
 		return nil, err
@@ -117,12 +117,12 @@ func (e *Engine) SnapshotGroups(ctx context.Context, env string, report Reporter
 	var order []string
 	for _, entry := range entries {
 		m := entry.Manifest
-		if env != "" && m.Environment != env {
+		if connection != "" && m.Connection != connection {
 			continue
 		}
-		key := m.Environment + "/" + m.Database
+		key := m.Connection + "/" + m.Database
 		if index[key] == nil {
-			index[key] = &Group{Environment: m.Environment, Database: m.Database}
+			index[key] = &Group{Connection: m.Connection, Database: m.Database}
 			order = append(order, key)
 		}
 		index[key].Snapshots = append(index[key].Snapshots, m)
@@ -143,7 +143,7 @@ func (e *Engine) DeleteSnapshotEverywhere(ctx context.Context, id string) error 
 	if err := e.DeleteSnapshot(id); err != nil {
 		return err
 	}
-	remote, err := e.remote(ctx, environmentOf(id))
+	remote, err := e.remote(ctx, connectionOf(id))
 	if err != nil || remote == nil {
 		return err
 	}
@@ -195,7 +195,7 @@ func (e *Engine) Prune(ctx context.Context, env string, apply bool, report Repor
 			continue
 		}
 		report.step("prune", fmt.Sprintf("%s/%s: keeping %d, removing %d",
-			group.Environment, group.Database, len(keep), len(remove)))
+			group.Connection, group.Database, len(keep), len(remove)))
 		for _, m := range remove {
 			report.table("prune", m.ID, fmt.Sprintf("%s, taken %s",
 				humanBytes(m.Bytes), m.StartedAt.Local().Format("2006-01-02 15:04")))

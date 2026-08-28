@@ -15,27 +15,21 @@ import (
 )
 
 const uiConfig = `
-protect: [prd]
-
-environments:
-  - name: prd
+connections:
+  prd:
+    dsn: "service=prd"
+    protected: true
+  qat:
+    dsn: "service=qat"
     guarded: true
-  - name: qat
-    guarded: true
-  - name: scratch
-
-postgres:
-  prd: { host: prd.example }
-  qat: { host: qat.example }
-  scratch: { host: 127.0.0.1 }
+  scratch: "postgres://127.0.0.1/postgres"
 
 storage:
   kind: local
   retention: { daily: 7, weekly: 4 }
 
 databases:
-  - name: product-development
-  - name: claims
+  exclude: [postgres]
 
 sets:
   - name: claims
@@ -61,6 +55,19 @@ func model(t *testing.T) *Model {
 
 	m := New(engine.New(cfg))
 	m.width, m.height = 140, 44
+
+	// Databases come from the server now, so a model with no probe has none.
+	// Every connection answers in these tests unless a test says otherwise.
+	for _, name := range []string{"prd", "qat", "scratch"} {
+		m.probes[name] = &engine.Probe{
+			Connection: name, Reachable: true, ServerVersion: 170004,
+			ProbedAt: time.Now(),
+			Databases: []engine.DatabaseInfo{
+				{Name: "product-development", Bytes: 11 << 30},
+				{Name: "claims", Bytes: 48 << 20},
+			},
+		}
+	}
 	return m
 }
 
@@ -103,7 +110,7 @@ func withSnapshot(t *testing.T, m *Model) *snapshot.Manifest {
 	}
 	man := &snapshot.Manifest{
 		ID:          id,
-		Environment: "prd",
+		Connection:  "prd",
 		Database:    "product-development",
 		StartedAt:   time.Now().Add(-14 * time.Hour),
 		FinishedAt:  time.Now().Add(-13 * time.Hour),
@@ -135,7 +142,7 @@ func TestPanelsAreAHierarchy(t *testing.T) {
 	// Moving to another environment must change what the snapshots panel is
 	// about, or the hierarchy the layout implies is a lie.
 	press(t, m, "down")
-	if env, _ := m.selectedEnv(); env.Name != "qat" {
+	if env, _ := m.selectedConn(); env.Name != "qat" {
 		t.Fatalf("cursor moved to %q, want qat", env.Name)
 	}
 	if got := len(m.snapshots()); got != 0 {
@@ -278,7 +285,7 @@ func TestFilterNarrowsOnlyTheFocusedPanel(t *testing.T) {
 	withSnapshot(t, m)
 
 	press(t, m, "/", "q", "a", "t", "enter")
-	if got := len(m.environments()); got != 1 {
+	if got := len(m.connections()); got != 1 {
 		t.Errorf("the filter matched %d environments, want qat alone", got)
 	}
 	// The databases panel is not focused, so it keeps everything: a filter
@@ -287,7 +294,7 @@ func TestFilterNarrowsOnlyTheFocusedPanel(t *testing.T) {
 		t.Errorf("the filter also narrowed the databases panel to %d", got)
 	}
 	press(t, m, "esc")
-	if got := len(m.environments()); got != 3 {
+	if got := len(m.connections()); got != 3 {
 		t.Errorf("esc left %d environments, want the filter cleared", got)
 	}
 }
@@ -371,7 +378,7 @@ func TestViewRendersWithoutData(t *testing.T) {
 	m := model(t)
 	m.now = time.Now()
 	view := m.View()
-	for _, want := range []string{"Environments", "Databases", "Snapshots", "Sets", "Runs"} {
+	for _, want := range []string{"Connections", "Databases", "Snapshots", "Sets", "Runs"} {
 		if !strings.Contains(view, want) {
 			t.Errorf("the first frame is missing the %s panel", want)
 		}
@@ -392,7 +399,7 @@ func TestRendersBeforeAWindowSizeArrives(t *testing.T) {
 	if strings.Contains(view, "starting") {
 		t.Errorf("the UI is still waiting for a size:\n%s", view)
 	}
-	if !strings.Contains(view, "Environments") {
+	if !strings.Contains(view, "Connections") {
 		t.Errorf("nothing rendered without a window size:\n%s", view)
 	}
 }

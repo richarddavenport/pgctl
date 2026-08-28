@@ -2,7 +2,6 @@ package config
 
 import (
 	"os"
-	"path/filepath"
 	"testing"
 )
 
@@ -14,64 +13,43 @@ func TestExampleConfigParses(t *testing.T) {
 	if err != nil {
 		t.Fatalf("read example: %v", err)
 	}
-	// The example takes its environments from swarmctl's config, so the test
-	// supplies one — which also exercises the merge.
-	dir := t.TempDir()
-	swarmctl := []byte(`
-environments:
-  - name: latest
-    domain: mbpi-latest.com
-    ssh: { host: mbpi-latest.com, port: 50120 }
-    secrets: { file: envs/latest.env }
-  - name: qat
-    domain: mbpi-qat.com
-    ssh: { host: mbpi-qat.com, port: 50120 }
-    secrets: { file: envs/qat.env }
-  - name: prd
-    domain: mbpnetwork.com
-    guarded: true
-    secrets: { file: envs/prd.env }
-`)
-	if err := os.WriteFile(filepath.Join(dir, "swarmctl.yaml"), swarmctl, 0o600); err != nil {
-		t.Fatalf("write stub swarmctl config: %v", err)
-	}
-
-	cfg, err := Parse(data, dir)
+	cfg, err := Parse(data, t.TempDir())
 	if err != nil {
 		t.Fatalf("parse example: %v", err)
 	}
 
-	// Environments arrive from swarmctl, and `local` from pgctl's own postgres
-	// block, so the picker shows all four.
+	// Both connection forms, and the flags that make one safe.
 	for _, name := range []string{"latest", "qat", "prd", "local"} {
-		if _, ok := cfg.LookupEnv(name); !ok {
-			t.Errorf("environment %q missing after the merge", name)
+		if _, ok := cfg.Lookup(name); !ok {
+			t.Errorf("connection %q missing", name)
 		}
 	}
-	// prd is guarded upstream and protected here; nothing else is a target
-	// nobody may write to.
-	if env, _ := cfg.LookupEnv("qat"); env.Protected {
-		t.Error("qat came out protected, which would make a QAT refresh impossible")
+	if prd, _ := cfg.Lookup("prd"); !prd.Protected {
+		t.Error("prd is not protected in the example")
 	}
-	if env, _ := cfg.LookupEnv("prd"); !env.Guarded {
-		t.Error("prd lost its guarded flag in the merge")
+	if qat, _ := cfg.Lookup("qat"); !qat.Guarded {
+		t.Error("qat is not guarded in the example")
+	}
+	if latest, _ := cfg.Lookup("latest"); latest.DSN != "service=latest" {
+		t.Errorf("the bare-string shorthand did not become a DSN: %q", latest.DSN)
 	}
 
-	if len(cfg.Databases) == 0 {
-		t.Error("the example declares no databases")
+	// No secret may appear in a config that gets committed.
+	for _, conn := range cfg.All() {
+		if containsFold(conn.DSN, "password") {
+			t.Errorf("connection %q has a password in its DSN", conn.Name)
+		}
 	}
+
 	if len(cfg.Sets) == 0 {
 		t.Error("the example declares no sets")
 	}
-
-	// The rule that motivated the whole filtered-COPY mechanism.
 	if r := cfg.RuleFor("quotes.quote"); r.Data != DataFiltered || r.Where == "" {
 		t.Errorf("quotes.quote rule = %+v, want a filtered rule with a predicate", r)
 	}
 	if r := cfg.RuleFor("audit.logged_actions"); r.Data != DataNone {
 		t.Errorf("audit.logged_actions rule = %+v, want data: none", r)
 	}
-	// The Hasura exclusions have to actually match the tables that exist.
 	for _, table := range []string{"hdb_catalog.event_log", "hdb_catalog.event_invocation_logs"} {
 		if r := cfg.RuleFor(table); r.Data != DataNone {
 			t.Errorf("%s rule = %+v, want data: none", table, r)
@@ -83,18 +61,39 @@ environments:
 		t.Errorf("hdb_source_catalog_version rule = %+v, want the default", r)
 	}
 
-	// Every environment named in `protect:` must exist, or the protection is a
-	// typo that protects nothing.
-	if cfg.Protect != nil {
-		for _, name := range *cfg.Protect {
-			env, ok := cfg.LookupEnv(name)
-			if !ok {
-				t.Errorf("protect names %q, which is not an environment in this config", name)
-				continue
-			}
-			if !env.Protected {
-				t.Errorf("%q is in protect but did not come out protected", name)
-			}
+	// No schema is excluded, which the example explains at length.
+	if len(cfg.Databases.ExcludeSchemas) != 0 {
+		t.Errorf("the example excludes schemas: %v", cfg.Databases.ExcludeSchemas)
+	}
+	if cfg.ManagesDatabase("postgres") {
+		t.Error("the maintenance database is not excluded")
+	}
+}
+
+func containsFold(s, sub string) bool {
+	for i := 0; i+len(sub) <= len(s); i++ {
+		if equalFold(s[i:i+len(sub)], sub) {
+			return true
 		}
 	}
+	return false
+}
+
+func equalFold(a, b string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		x, y := a[i], b[i]
+		if 'A' <= x && x <= 'Z' {
+			x += 'a' - 'A'
+		}
+		if 'A' <= y && y <= 'Z' {
+			y += 'a' - 'A'
+		}
+		if x != y {
+			return false
+		}
+	}
+	return true
 }

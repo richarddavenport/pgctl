@@ -236,10 +236,10 @@ func window(count, height, cursor, offset int) (visible, newOffset int) {
 
 func (m *Model) emptyPanel(panel int) string {
 	switch panel {
-	case panelEnvironments:
+	case panelConnections:
 		return "none declared"
 	case panelDatabases:
-		if env, ok := m.selectedEnv(); ok {
+		if env, ok := m.selectedConn(); ok {
 			if p := m.probes[env.Name]; p != nil && !p.Reachable {
 				return "unreachable"
 			}

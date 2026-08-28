@@ -40,9 +40,9 @@ func (e *Engine) Move(ctx context.Context, req MoveRequest, report Reporter) err
 	if err != nil {
 		return err
 	}
-	if target.Env.Protected {
+	if target.Conn.Protected {
 		return &RefusalError{fmt.Sprintf(
-			"%s is a protected environment and can never be an apply target", target.Env.Name)}
+			"%s is a protected environment and can never be an apply target", target.Conn.Name)}
 	}
 
 	// The staging directory is named after the snapshot it holds, under a
@@ -70,10 +70,10 @@ func (e *Engine) Move(ctx context.Context, req MoveRequest, report Reporter) err
 	report.step("move", fmt.Sprintf("%s → %s, staging in %s", req.From, req.To, staging))
 
 	if _, err := e.Dump(ctx, DumpRequest{
-		Environment: req.From,
-		Database:    req.Database,
-		Dir:         dir,
-		At:          at,
+		Connection: req.From,
+		Database:   req.Database,
+		Dir:        dir,
+		At:         at,
 		// Nothing is uploaded: this snapshot exists for the next few minutes.
 		NoPush: true,
 	}, report); err != nil {

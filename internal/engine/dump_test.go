@@ -79,9 +79,9 @@ func TestDumpAgainstRealServer(t *testing.T) {
 
 	at := time.Date(2026, 8, 28, 3, 0, 0, 0, time.UTC)
 	m, err := e.Dump(ctx, DumpRequest{
-		Environment: "local",
-		Database:    "product-development",
-		At:          at,
+		Connection: "local",
+		Database:   "product-development",
+		At:         at,
 	}, report)
 	if err != nil {
 		t.Fatalf("Dump: %v", err)

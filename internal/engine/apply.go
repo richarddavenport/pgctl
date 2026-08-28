@@ -42,11 +42,11 @@ func (e *Engine) Apply(ctx context.Context, req ApplyRequest, report Reporter) (
 // end can show the plan, take a confirmation, and then run the same plan rather
 // than recomputing one that may have changed underneath the confirmation.
 func (e *Engine) Execute(ctx context.Context, plan *Plan, report Reporter) (err error) {
-	if plan.Target.Env.Protected {
-		return &RefusalError{fmt.Sprintf("%s is a protected environment", plan.Target.Env.Name)}
+	if plan.Target.Conn.Protected {
+		return &RefusalError{fmt.Sprintf("%s is a protected environment", plan.Target.Conn.Name)}
 	}
 
-	env := hookEnv(plan.Target.Env.Name, plan.Snapshot.Database, plan.Snapshot.ID)
+	env := hookEnv(plan.Target.Conn.Name, plan.Snapshot.Database, plan.Snapshot.ID)
 	if err := e.runHooks(ctx, "preApply", e.cfg.Hooks.PreApply, env, true, report); err != nil {
 		return err
 	}
@@ -90,7 +90,7 @@ func (e *Engine) Execute(ctx context.Context, plan *Plan, report Reporter) (err 
 	}
 
 	report.send(Event{Kind: EventDone, Message: fmt.Sprintf("applied %s to %s",
-		plan.Snapshot.ID, plan.Target.Env.Name)})
+		plan.Snapshot.ID, plan.Target.Conn.Name)})
 	return nil
 }
 

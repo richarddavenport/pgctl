@@ -10,43 +10,46 @@ import (
 	"github.com/richarddavenport/pgctl/internal/snapshot"
 )
 
-func (m *Model) viewEnvironmentTab(tab, width int) string {
-	env, ok := m.selectedEnv()
+func (m *Model) viewConnectionTab(tab, width int) string {
+	conn, ok := m.selectedConn()
 	if !ok {
 		return mutedStyle.Render("no environments declared in " + m.cfg.Source)
 	}
-	probe := m.probes[env.Name]
+	probe := m.probes[conn.Name]
 
 	switch tab {
 	case 1: // Databases
 		if probe == nil || !probe.Reachable {
-			return m.unreachable(env.Name, probe)
+			return m.unreachable(conn.Name, probe)
 		}
 		rows := make([][]string, 0, len(probe.Databases))
 		for _, db := range probe.Databases {
-			declared := okStyle.Render("yes")
-			if !db.Declared {
-				declared = mutedStyle.Render("no")
-			}
-			rows = append(rows, []string{db.Name, engine.HumanBytes(db.Bytes), declared})
+			rows = append(rows, []string{db.Name, engine.HumanBytes(db.Bytes)})
 		}
-		return renderTable(width, []string{"DATABASE", "SIZE", "MANAGED"}, []int{0, 10, 8}, rows)
+		return renderTable(width, []string{"DATABASE", "SIZE"}, []int{0, 12}, rows)
 
 	case 2: // Config
 		var b strings.Builder
-		b.WriteString(field("name", env.Name) + "\n")
-		b.WriteString(field("domain", orDash(env.Domain)) + "\n")
-		b.WriteString(field("secrets", orDash(env.Secrets.File)) + "\n")
-		b.WriteString(field("ssh", orDash(env.SSH.Host)) + "\n")
-		b.WriteString(field("guarded", yesNo(env.Guarded)) + "\n")
-		b.WriteString(field("protected", yesNo(env.Protected)) + "\n")
-		b.WriteString(field("jobs", fmt.Sprint(env.Server.Jobs)) + "\n")
+		b.WriteString(field("name", conn.Name) + "\n")
+		b.WriteString(field("dsn", orDash(conn.DSN)) + "\n")
+		b.WriteString(field("guarded", yesNo(conn.Guarded)) + "\n")
+		b.WriteString(field("protected", yesNo(conn.Protected)) + "\n")
+		if conn.Jobs > 0 {
+			b.WriteString(field("jobs", fmt.Sprint(conn.Jobs)) + "\n")
+		}
+		b.WriteString(field("maintenance", conn.MaintenanceDB) + "\n")
+
+		b.WriteString(section("how this resolves"))
+		b.WriteString(mutedStyle.Render(
+			"The DSN is handed to libpq unchanged, so ~/.pg_service.conf,\n"+
+				"~/.pgpass and the PG* variables apply exactly as they do to psql.\n"+
+				"pgctl never stores a password.") + "\n")
 		b.WriteString(section("meaning"))
 		switch {
-		case env.Protected:
+		case conn.Protected:
 			b.WriteString(dangerStyle.Render("This environment can never be an apply target.") + "\n")
 			b.WriteString(mutedStyle.Render("There is no flag that changes that.") + "\n")
-		case env.Guarded:
+		case conn.Guarded:
 			b.WriteString(warnStyle.Render("An apply here needs the environment's name typed in full.") + "\n")
 		default:
 			b.WriteString(mutedStyle.Render("An apply here needs only a confirmation.") + "\n")
@@ -55,11 +58,11 @@ func (m *Model) viewEnvironmentTab(tab, width int) string {
 
 	default: // Overview
 		var b strings.Builder
-		title := env.Name
+		title := conn.Name
 		switch {
-		case env.Protected:
+		case conn.Protected:
 			title += "  " + dangerStyle.Render("protected — never a target")
-		case env.Guarded:
+		case conn.Guarded:
 			title += "  " + warnStyle.Render("guarded")
 		}
 		b.WriteString(titleStyle.Render(title) + "\n\n")
@@ -69,7 +72,7 @@ func (m *Model) viewEnvironmentTab(tab, width int) string {
 			return b.String()
 		}
 		if !probe.Reachable {
-			return b.String() + m.unreachable(env.Name, probe)
+			return b.String() + m.unreachable(conn.Name, probe)
 		}
 
 		b.WriteString(field("host", fmt.Sprintf("%s:%d", probe.Host, probe.Port)) + "\n")
@@ -88,7 +91,7 @@ func (m *Model) viewEnvironmentTab(tab, width int) string {
 		var newest *engine.Entry
 		count := 0
 		for _, entry := range m.entries {
-			if entry.Manifest.Environment == env.Name {
+			if entry.Manifest.Connection == conn.Name {
 				count++
 				if newest == nil || entry.Manifest.StartedAt.After(newest.Manifest.StartedAt) {
 					newest = entry
@@ -122,12 +125,12 @@ func (m *Model) unreachable(name string, probe *engine.Probe) string {
 }
 
 func (m *Model) viewDatabaseTab(tab, width int) string {
-	env, hasEnv := m.selectedEnv()
+	conn, hasEnv := m.selectedConn()
 	db, hasDB := m.selectedDatabase()
 	if !hasEnv || !hasDB {
 		return mutedStyle.Render("no database selected")
 	}
-	key := liveKey(env.Name, db.Name)
+	key := liveKey(conn.Name, db.Name)
 
 	switch tab {
 	case 1: // Rules
@@ -298,16 +301,16 @@ func (m *Model) viewSnapshotTab(tab, width int) string {
 // viewDrift compares the snapshot's source structure with a live environment's,
 // which is the question "will this restore cleanly" asked before it is tried.
 func (m *Model) viewDrift(man *snapshot.Manifest) string {
-	env, ok := m.selectedEnv()
+	conn, ok := m.selectedConn()
 	if !ok {
 		return mutedStyle.Render("select an environment to compare against")
 	}
-	key := liveKey(env.Name, man.Database)
+	key := liveKey(conn.Name, man.Database)
 	tables := m.liveTable[key]
 	if tables == nil {
 		return mutedStyle.Render(fmt.Sprintf(
 			"Comparing %s against %s.\n\n%s reading %s…\n\n%s",
-			man.ID, env.Name, spinner(m.now), env.Name,
+			man.ID, conn.Name, spinner(m.now), conn.Name,
 			mutedStyle.Render("Open the Databases panel's Tables tab to load it.")))
 	}
 
@@ -336,20 +339,20 @@ func (m *Model) viewDrift(man *snapshot.Manifest) string {
 
 	var b strings.Builder
 	b.WriteString(field("snapshot", man.ID) + "\n")
-	b.WriteString(field("compared to", env.Name) + "\n")
+	b.WriteString(field("compared to", conn.Name) + "\n")
 	if len(onlyLive) == 0 && len(onlySnapshot) == 0 {
 		b.WriteString("\n" + okStyle.Render("The same tables exist on both sides."))
 		return b.String()
 	}
 	if len(onlySnapshot) > 0 {
-		b.WriteString(section(fmt.Sprintf("in the snapshot, not on %s (%d)", env.Name, len(onlySnapshot))))
+		b.WriteString(section(fmt.Sprintf("in the snapshot, not on %s (%d)", conn.Name, len(onlySnapshot))))
 		b.WriteString(mutedStyle.Render("A migration dropped these, or the snapshot is newer.\n"))
 		for _, n := range onlySnapshot {
 			b.WriteString("  " + n + "\n")
 		}
 	}
 	if len(onlyLive) > 0 {
-		b.WriteString(section(fmt.Sprintf("on %s, not in the snapshot (%d)", env.Name, len(onlyLive))))
+		b.WriteString(section(fmt.Sprintf("on %s, not in the snapshot (%d)", conn.Name, len(onlyLive))))
 		b.WriteString(warnStyle.Render("A whole-database apply drops these. A set-level apply leaves them,\n" +
 			"holding rows that reference data about to be replaced.\n"))
 		for _, n := range onlyLive {
@@ -365,9 +368,9 @@ func (m *Model) viewSetTab(tab, width int) string {
 		return mutedStyle.Render("no sets declared for this database.\n\n" +
 			"A set is a named group of tables that move together — declare one in " + m.cfg.Source + ".")
 	}
-	env, _ := m.selectedEnv()
+	conn, _ := m.selectedConn()
 	db, _ := m.selectedDatabase()
-	info := m.setInfo[setKey(env.Name, db.Name, set.Name)]
+	info := m.setInfo[setKey(conn.Name, db.Name, set.Name)]
 
 	var b strings.Builder
 	b.WriteString(titleStyle.Render(set.Name) + "\n")
@@ -377,7 +380,7 @@ func (m *Model) viewSetTab(tab, width int) string {
 	b.WriteString("\n")
 
 	if info == nil || info.loading {
-		return b.String() + mutedStyle.Render(spinner(m.now)+" resolving against "+env.Name+"…")
+		return b.String() + mutedStyle.Render(spinner(m.now)+" resolving against "+conn.Name+"…")
 	}
 	if info.err != nil {
 		return b.String() + dangerStyle.Render("could not resolve") + "\n\n" + wrap(info.err.Error(), 70)
@@ -411,14 +414,14 @@ func (m *Model) viewSetTab(tab, width int) string {
 		if len(set.Exclude) > 0 {
 			b.WriteString(field("excluding", strings.Join(set.Exclude, ", ")) + "\n")
 		}
-		b.WriteString(field("matches", fmt.Sprintf("%d tables on %s", len(info.members), env.Name)) + "\n")
+		b.WriteString(field("matches", fmt.Sprintf("%d tables on %s", len(info.members), conn.Name)) + "\n")
 		if len(info.added) > 0 {
 			b.WriteString(field("closure", warnStyle.Render(fmt.Sprintf("+%d more — see Closure", len(info.added)))) + "\n")
 		}
 		b.WriteString(section("members"))
 
 		sizes := map[string]int64{}
-		for _, t := range m.liveTable[liveKey(env.Name, db.Name)] {
+		for _, t := range m.liveTable[liveKey(conn.Name, db.Name)] {
 			sizes[t.Name] = t.Bytes
 		}
 		rows := make([][]string, 0, len(info.members))

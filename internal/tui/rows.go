@@ -11,8 +11,8 @@ import (
 // for its content but not for selection, which the panel applies.
 func (m *Model) panelRows(panel int) []string {
 	switch panel {
-	case panelEnvironments:
-		return m.environmentRows()
+	case panelConnections:
+		return m.connectionRows()
 	case panelDatabases:
 		return m.databaseRows()
 	case panelSnapshots:
@@ -25,33 +25,33 @@ func (m *Model) panelRows(panel int) []string {
 	return nil
 }
 
-func (m *Model) environmentRows() []string {
-	envs := m.environments()
-	out := make([]string, 0, len(envs))
-	for _, env := range envs {
+func (m *Model) connectionRows() []string {
+	conns := m.connections()
+	out := make([]string, 0, len(conns))
+	for _, conn := range conns {
 		// The marker answers "can I reach it" before the name answers "which
 		// is it", because an unreachable environment changes what every panel
 		// below is showing.
 		mark := mutedStyle.Render("○")
 		note := ""
 		switch {
-		case m.probing[env.Name]:
+		case m.probing[conn.Name]:
 			mark = mutedStyle.Render(spinner(m.now))
-		case m.probes[env.Name] == nil:
-		case m.probes[env.Name].Reachable:
+		case m.probes[conn.Name] == nil:
+		case m.probes[conn.Name].Reachable:
 			mark = okStyle.Render("●")
-			note = mutedStyle.Render(" " + formatServerVersion(m.probes[env.Name].ServerVersion))
+			note = mutedStyle.Render(" " + formatServerVersion(m.probes[conn.Name].ServerVersion))
 		default:
 			mark = dangerStyle.Render("✗")
 		}
 
 		switch {
-		case env.Protected:
+		case conn.Protected:
 			note = dangerStyle.Render(" protected")
-		case env.Guarded:
+		case conn.Guarded:
 			note = warnStyle.Render(" guarded")
 		}
-		out = append(out, fmt.Sprintf("%s %-9s%s", mark, truncate(env.Name, 9), note))
+		out = append(out, fmt.Sprintf("%s %-9s%s", mark, truncate(conn.Name, 9), note))
 	}
 	return out
 }
@@ -67,13 +67,7 @@ func (m *Model) databaseRows() []string {
 		// The name takes whatever the size column leaves, so a long database
 		// name is only shortened when it genuinely does not fit.
 		width := panelInner - 9
-		name := truncate(db.Name, width)
-		if !db.Declared {
-			// Present on the server, absent from the config: it cannot be
-			// snapshotted, and hiding it would make that puzzling.
-			name = mutedStyle.Render(name)
-		}
-		out = append(out, fmt.Sprintf("%-*s %s", width, name, size))
+		out = append(out, fmt.Sprintf("%-*s %s", width, truncate(db.Name, width), size))
 	}
 	return out
 }
@@ -103,14 +97,14 @@ func (m *Model) snapshotRows() []string {
 }
 
 func (m *Model) setRows() []string {
-	env, _ := m.selectedEnv()
+	conn, _ := m.selectedConn()
 	db, _ := m.selectedDatabase()
 
 	sets := m.sets()
 	out := make([]string, 0, len(sets))
 	for _, set := range sets {
 		note := mutedStyle.Render(" ?")
-		if s := m.setInfo[setKey(env.Name, db.Name, set.Name)]; s != nil {
+		if s := m.setInfo[setKey(conn.Name, db.Name, set.Name)]; s != nil {
 			switch {
 			case s.loading:
 				note = mutedStyle.Render(" " + spinner(m.now))

@@ -32,16 +32,30 @@ first, which table is too big to move whole — are the parts that go wrong.
 ## Requirements
 
 PostgreSQL **16 or newer**, server and client tools both — below 16 there is no
-`zstd` compression, and pgctl's speed starts there. `sops` on PATH if your
-environments keep their credentials in encrypted dotenv files.
+`zstd` compression, and pgctl's speed starts there.
+
+Nothing else. There is no credential store to set up: pgctl connects the way
+`psql` does.
 
 ## Getting started
 
+With no configuration at all, pgctl connects wherever `psql` with no arguments
+would:
+
 ```sh
-pgctl snapshot --env prd              # every declared database
-pgctl ls                              # what is on disk
+pgctl                                 # the terminal UI
+pgctl snapshot --from default         # every database on that server
+```
+
+Naming your servers takes a `pgctl.yaml`:
+
+```sh
+pgctl snapshot --from prd             # every database there
+pgctl ls                              # what is on disk and in storage
 pgctl plan prd/latest --to qat        # what a refresh would do
 pgctl apply prd/latest --to qat       # do it
+pgctl move --from prd --to qat        # refresh without keeping a snapshot
+pgctl prune                           # what retention would remove
 ```
 
 Restore a slice instead of everything:
@@ -56,26 +70,20 @@ selection that is not closed is refused and the missing tables are named.
 
 ## Configuration
 
-`pgctl.yaml`, committed next to the schema it describes:
+`pgctl.yaml`, committed next to the schema it describes. Every key is optional.
 
 ```yaml
-# Environments come from swarmctl's config when there is one, so that "which
-# host is prd" has a single answer. Host, port, user and password are read from
-# each environment's sops-encrypted secrets file.
-environmentsFrom: swarmctl.yaml
-
-storage:
-  kind: azureblob
-  container: pg-snapshots
-  retention: { daily: 7, weekly: 4, monthly: 3 }
-
-defaults:
-  jobs: 8
-  compression: zstd:3
+connections:
+  prd:
+    dsn: "service=prd"      # anything libpq accepts
+    protected: true         # never an apply target
+  qat:
+    dsn: "service=qat"
+    guarded: true           # an apply needs the name typed in full
+  local: "postgres://localhost/postgres"
 
 databases:
-  - name: product-development
-    excludeSchemas: [hdb_catalog]
+  exclude: [postgres]       # the rest are discovered from the server
 
 sets:
   - name: claims
@@ -86,24 +94,36 @@ rules:
   - table: quotes.quote
     where: "created_at > now() - interval '30 days'"
     why: "20 GB of jsonb payloads; recent quotes are enough to work with"
-
-  - table: audit.logged_actions
-    data: none
-
-# Quiescing a target is project-specific, so it is a hook rather than a
-# built-in step. Terminating database connections is built in — that is about
-# the database, not about what is connected to it.
-hooks:
-  preApply:
-    - name: scale the app down
-      run: swarmctl set api_api --replicas 0 --env "$PGCTL_ENV"
-  postApply:
-    - name: scale the app up
-      run: swarmctl set api_api --replicas 2 --env "$PGCTL_ENV"
-  onFailure:
-    - name: scale the app back up
-      run: swarmctl set api_api --replicas 2 --env "$PGCTL_ENV"
 ```
+
+See `pgctl.example.yaml` for the whole surface, including hooks and storage.
+
+### Credentials
+
+There are none in the config, and pgctl has no credential store of its own.
+
+A `dsn` is a libpq connection string: a service name (`service=prd`, resolved
+from `~/.pg_service.conf`), a URI, or keyword pairs. pgctl resolves it with pgx
+and hands the identical string to `pg_dump` and `pg_restore` — so both halves of
+an operation connect by exactly the same rules, and the password comes from
+`~/.pgpass` or `PGPASSWORD` as it does for every other PostgreSQL tool.
+
+```
+# ~/.pg_service.conf
+[prd]
+host=postgres.example.com
+user=mbpiadmin
+dbname=product-development
+sslmode=require
+
+# ~/.pgpass   (chmod 600)
+postgres.example.com:5432:*:mbpiadmin:the-password
+```
+
+The trade is deliberate: connection details are per-machine rather than shared
+through the repository. Each person sets theirs up once, and CI writes a
+`.pgpass` from its secret store — which is the same thing every other
+PostgreSQL tool in the stack already needs.
 
 ## Safety
 

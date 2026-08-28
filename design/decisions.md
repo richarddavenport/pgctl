@@ -107,21 +107,44 @@ Swarm services is one project's answer to quiescing and belongs in config.
 A failed `postApply` is reported but does not fail the apply — the data is
 already in. A failed `preApply` aborts before anything is touched.
 
-## 8. Environments are read from swarmctl.yaml when it is there
+## 8. A connection is a libpq DSN, and nothing else
 
-The environments pgctl needs — name, SSH host/port, sops-encrypted secrets file,
-and which ones are guarded — are exactly what `swarmctl.yaml` already declares,
-in the same repository. Restating them in `pgctl.yaml` creates two truths about
-which host is prd, and the failure mode of them disagreeing is a restore
-pointed at the wrong environment.
+*Superseded the original decision, which read environments out of swarmctl's
+config. That was wrong twice over: it tied a database tool to a deploy tool, and
+it invented a credential scheme PostgreSQL already has.*
 
-So `pgctl.yaml` declares databases, sets, table rules, storage and hooks, and
-takes its environments from `environmentsFrom: swarmctl.yaml` (the default when
-that file exists). Inline `environments:` is supported for projects with no
-swarmctl.
+PostgreSQL has a complete, standard description of how to reach a server:
+connection strings, `~/.pg_service.conf`, `~/.pgpass`, and the `PG*` variables.
+libpq implements it, pgx implements the same resolution, and `pg_dump` is libpq.
+So a connection in `pgctl.yaml` is a DSN and two safety flags:
 
-The coupling is to a *stable subset* of swarmctl's schema — four fields — parsed
-independently, not to swarmctl's Go types. pgctl does not import swarmctl.
+    connections:
+      prd: { dsn: "service=prd", protected: true }
+      qat: "service=qat"
+
+pgctl resolves that string with pgx for its own queries and hands the identical
+string to `pg_dump` and `pg_restore` — appending `dbname=` to reach one database
+of many. Both halves of an operation therefore connect by exactly the same
+rules, which is not true of any scheme that reads credentials itself and passes
+them on.
+
+What this deletes is the point of it: an `environmentsFrom` key, a `credentials`
+block mapping four config keys to four environment-file keys, a `postgres` map
+of hosts, sops decryption, and a `Secrets` type. None of it was doing anything
+`.pgpass` does not do, and all of it was something to get wrong.
+
+The cost is real and worth stating: connection details become per-machine rather
+than shared through the repository, so each person sets up a service file once
+and CI writes a `.pgpass` from its secret store. That is the same setup every
+other PostgreSQL client on those machines already needs.
+
+## 8a. Databases are discovered, not declared
+
+The same principle one level down. A server knows which databases it has; a list
+in a config file can only ever disagree with it, and the disagreement shows up
+as a database greyed out for reasons nobody remembers. `databases.exclude` trims
+what is not interesting, and everything else is fair game — including the one
+somebody added last week.
 
 ## 9. Production is never a target, and guarded environments need typed consent
 

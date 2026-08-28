@@ -18,14 +18,14 @@ import (
 func runSnapshot(ctx context.Context, args []string) error {
 	fs := flag.NewFlagSet("snapshot", flag.ExitOnError)
 	configPath := fs.String("config", "", "path to a pgctl config")
-	env := fs.String("env", "", "environment to snapshot")
+	from := fs.String("from", "", "connection to snapshot")
 	database := fs.String("db", "", "database to snapshot (default: every declared database)")
 	verbose := fs.Bool("v", false, "report every table")
 	noPush := fs.Bool("no-push", false, "keep the snapshot local even when remote storage is configured")
 	_ = fs.Parse(Permute(fs, args))
 
-	if *env == "" {
-		return fmt.Errorf("--env is required")
+	if *from == "" {
+		return fmt.Errorf("--from is required")
 	}
 	e, err := load(*configPath)
 	if err != nil {
@@ -34,9 +34,10 @@ func runSnapshot(ctx context.Context, args []string) error {
 
 	databases := []string{*database}
 	if *database == "" {
-		databases = nil
-		for _, d := range e.Config().Databases {
-			databases = append(databases, d.Name)
+		// Every database the server has, since the config no longer claims to
+		// know which exist.
+		if databases, err = e.DatabaseNames(ctx, *from); err != nil {
+			return err
 		}
 	}
 
@@ -46,10 +47,10 @@ func runSnapshot(ctx context.Context, args []string) error {
 	report := printer(*verbose)
 	for _, db := range databases {
 		if _, err := e.Dump(ctx, engine.DumpRequest{
-			Environment: *env,
-			Database:    db,
-			At:          at,
-			NoPush:      *noPush,
+			Connection: *from,
+			Database:   db,
+			At:         at,
+			NoPush:     *noPush,
 		}, report); err != nil {
 			return err
 		}
@@ -60,7 +61,7 @@ func runSnapshot(ctx context.Context, args []string) error {
 func runList(ctx context.Context, args []string) error {
 	fs := flag.NewFlagSet("ls", flag.ExitOnError)
 	configPath := fs.String("config", "", "path to a pgctl config")
-	env := fs.String("env", "", "only this environment")
+	from := fs.String("from", "", "only this connection")
 	_ = fs.Parse(Permute(fs, args))
 
 	e, err := load(*configPath)
@@ -77,7 +78,7 @@ func runList(ctx context.Context, args []string) error {
 	for i := len(entries) - 1; i >= 0; i-- {
 		entry := entries[i]
 		m := entry.Manifest
-		if *env != "" && m.Environment != *env {
+		if *from != "" && m.Connection != *from {
 			continue
 		}
 		state := "complete"
@@ -107,14 +108,14 @@ type applyFlags struct {
 
 func (a *applyFlags) bind(fs *flag.FlagSet) {
 	fs.StringVar(&a.config, "config", "", "path to a pgctl config")
-	fs.StringVar(&a.to, "to", "", "environment to apply to")
+	fs.StringVar(&a.to, "to", "", "connection to apply to")
 	fs.StringVar(&a.set, "set", "", "restore only this table set")
 	fs.StringVar(&a.tables, "tables", "", "restore only these tables (comma separated, schema-qualified)")
 	fs.BoolVar(&a.widen, "widen", false, "include tables the selection references but does not name")
 	fs.BoolVar(&a.verbose, "v", false, "report every table")
 	fs.BoolVar(&a.yes, "yes", false, "skip the confirmation prompt")
 	fs.StringVar(&a.confirm, "confirm", "",
-		"name of the environment being written to, required for a guarded one")
+		"name of the connection being written to, required for a guarded one")
 }
 
 func (a *applyFlags) request() engine.ApplyRequest {
@@ -195,24 +196,24 @@ func (a *applyFlags) validate() error {
 
 // confirm gates a destructive apply.
 func confirm(plan *engine.Plan, f applyFlags) error {
-	return confirmEnv(plan.Target.Env, f.confirm, f.yes, "Apply?")
+	return confirmConn(plan.Target.Conn, f.confirm, f.yes, "Apply?")
 }
 
-// confirmEnv is the gate itself.
+// confirmConn is the gate itself.
 //
 // A guarded environment always needs its name typed, and --yes does not waive
 // it: --yes exists so a routine refresh of a scratch environment is not a
 // prompt, and a guarded environment is by definition not routine. In a
 // non-interactive run the name comes from --confirm, which a CI job has to
 // spell out in the workflow file where a reviewer can see it.
-func confirmEnv(env config.Environment, confirmFlag string, yes bool, question string) error {
-	name := env.Name
-	if env.Guarded {
+func confirmConn(conn config.Connection, confirmFlag string, yes bool, question string) error {
+	name := conn.Name
+	if conn.Guarded {
 		if confirmFlag == name {
 			return nil
 		}
 		if confirmFlag != "" {
-			return fmt.Errorf("--confirm %q does not name the target environment %q", confirmFlag, name)
+			return fmt.Errorf("--confirm %q does not name the target connection %q", confirmFlag, name)
 		}
 		if !interactive() {
 			return fmt.Errorf("%s is guarded: pass --confirm %s", name, name)
@@ -244,7 +245,7 @@ func interactive() bool {
 func runPrune(ctx context.Context, args []string) error {
 	fs := flag.NewFlagSet("prune", flag.ExitOnError)
 	configPath := fs.String("config", "", "path to a pgctl config")
-	env := fs.String("env", "", "only this environment")
+	from := fs.String("from", "", "only this connection")
 	apply := fs.Bool("apply", false, "actually delete; without it, prune only reports")
 	_ = fs.Parse(Permute(fs, args))
 
@@ -261,7 +262,7 @@ func runPrune(ctx context.Context, args []string) error {
 		return fmt.Errorf("no storage.retention configured, so there is nothing to prune")
 	}
 
-	groups, err := e.SnapshotGroups(ctx, *env, printer(false))
+	groups, err := e.SnapshotGroups(ctx, *from, printer(false))
 	if err != nil {
 		return err
 	}
@@ -272,7 +273,7 @@ func runPrune(ctx context.Context, args []string) error {
 		if len(remove) == 0 {
 			continue
 		}
-		fmt.Printf("%s/%s: keeping %d, removing %d\n", group.Environment, group.Database, len(keep), len(remove))
+		fmt.Printf("%s/%s: keeping %d, removing %d\n", group.Connection, group.Database, len(keep), len(remove))
 		for _, m := range remove {
 			fmt.Printf("  %s  %s  %s\n", m.ID,
 				m.StartedAt.Local().Format("2006-01-02 15:04"), engine.HumanBytes(m.Bytes))
@@ -303,8 +304,8 @@ func runPrune(ctx context.Context, args []string) error {
 func runMove(ctx context.Context, args []string) error {
 	fs := flag.NewFlagSet("move", flag.ExitOnError)
 	configPath := fs.String("config", "", "path to a pgctl config")
-	from := fs.String("from", "", "environment to read")
-	to := fs.String("to", "", "environment to write")
+	source := fs.String("from", "", "connection to read")
+	to := fs.String("to", "", "connection to write")
 	database := fs.String("db", "", "database to move (default: every declared database)")
 	set := fs.String("set", "", "move only this table set")
 	tables := fs.String("tables", "", "move only these tables (comma separated, schema-qualified)")
@@ -313,10 +314,10 @@ func runMove(ctx context.Context, args []string) error {
 	verbose := fs.Bool("v", false, "report every table")
 	yes := fs.Bool("yes", false, "skip the confirmation prompt")
 	confirmName := fs.String("confirm", "",
-		"name of the environment being written to, required for a guarded one")
+		"name of the connection being written to, required for a guarded one")
 	_ = fs.Parse(Permute(fs, args))
 
-	if *from == "" || *to == "" {
+	if *source == "" || *to == "" {
 		return fmt.Errorf("--from and --to are both required")
 	}
 	e, err := load(*configPath)
@@ -327,27 +328,26 @@ func runMove(ctx context.Context, args []string) error {
 	// A guarded target is confirmed once, before any work: a move takes a
 	// snapshot first, and asking after that has spent the time is asking too
 	// late to be a choice.
-	env, ok := e.Config().LookupEnv(*to)
+	conn, ok := e.Config().Lookup(*to)
 	if !ok {
-		return fmt.Errorf("unknown environment %q", *to)
+		return fmt.Errorf("unknown connection %q", *to)
 	}
-	if err := confirmEnv(env, *confirmName, *yes,
-		fmt.Sprintf("Refresh %s from %s?", *to, *from)); err != nil {
+	if err := confirmConn(conn, *confirmName, *yes,
+		fmt.Sprintf("Refresh %s from %s?", *to, *source)); err != nil {
 		return err
 	}
 
 	databases := []string{*database}
 	if *database == "" {
-		databases = nil
-		for _, d := range e.Config().Databases {
-			databases = append(databases, d.Name)
+		if databases, err = e.DatabaseNames(ctx, *source); err != nil {
+			return err
 		}
 	}
 
 	report := printer(*verbose)
 	for _, db := range databases {
 		if err := e.Move(ctx, engine.MoveRequest{
-			From:     *from,
+			From:     *source,
 			To:       *to,
 			Database: db,
 			Set:      *set,

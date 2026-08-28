@@ -1,7 +1,6 @@
 package engine
 
 import (
-	"crypto/tls"
 	"errors"
 	"strings"
 )
@@ -18,17 +17,4 @@ func redact(err error, secret string) error {
 		return err
 	}
 	return errors.New(strings.ReplaceAll(msg, secret, "«redacted»"))
-}
-
-// tlsPreferred is TLS without certificate verification: what `sslmode=require`
-// means, which is what every client in this stack already uses against Azure.
-// Named for what it is so that nobody reads InsecureSkipVerify in isolation and
-// assumes it was an accident.
-func tlsPreferred(host string) *tls.Config {
-	return &tls.Config{
-		ServerName: host,
-		// #nosec G402 -- see Target.Connect: no CA bundle is available to
-		// verify Azure's certificate against, and the alternative is plaintext.
-		InsecureSkipVerify: true,
-	}
 }

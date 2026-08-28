@@ -24,6 +24,12 @@ import (
 // ManifestName is the manifest's filename inside a snapshot directory.
 const ManifestName = "manifest.json"
 
+// SchemaVersion is the manifest format pgctl writes. Version 2 renamed
+// `environment` to `connection`, because a connection is what the config now
+// declares; Read still accepts version 1 so a snapshot taken last week is not
+// stranded.
+const SchemaVersion = 2
+
 // DumpDir and FilteredDir are the two producers' output, side by side inside a
 // snapshot: pg_dump's directory-format tree, and the COPY sidecars for tables
 // pg_dump cannot filter.
@@ -41,9 +47,10 @@ type Manifest struct {
 	// SchemaVersion guards against a future pgctl misreading this file.
 	SchemaVersion int `json:"schemaVersion"`
 
-	ID          string `json:"id"`
-	Environment string `json:"environment"`
-	Database    string `json:"database"`
+	ID string `json:"id"`
+	// Connection is the name of the connection the data came from.
+	Connection string `json:"connection"`
+	Database   string `json:"database"`
 
 	StartedAt  time.Time `json:"startedAt"`
 	FinishedAt time.Time `json:"finishedAt,omitzero"`
@@ -117,9 +124,9 @@ type TableEntry struct {
 	Rows int64 `json:"rows,omitempty"`
 }
 
-// NewID builds a snapshot id from its environment, database and instant.
-func NewID(env, database string, at time.Time) string {
-	return strings.Join([]string{env, database, at.UTC().Format(TimeLayout)}, "/")
+// NewID builds a snapshot id from its connection, database and instant.
+func NewID(connection, database string, at time.Time) string {
+	return strings.Join([]string{connection, database, at.UTC().Format(TimeLayout)}, "/")
 }
 
 func (m *Manifest) String() string { return m.ID }
@@ -133,7 +140,7 @@ func Path(root, id string) string {
 
 // Write saves the manifest into a snapshot directory.
 func Write(dir string, m *Manifest) error {
-	m.SchemaVersion = 1
+	m.SchemaVersion = SchemaVersion
 	sort.Slice(m.Tables, func(i, j int) bool { return m.Tables[i].Name < m.Tables[j].Name })
 
 	data, err := json.MarshalIndent(m, "", "  ")
@@ -162,7 +169,16 @@ func Read(dir string) (*Manifest, error) {
 	if err := json.Unmarshal(data, &m); err != nil {
 		return nil, fmt.Errorf("parse manifest in %s: %w", dir, err)
 	}
-	if m.SchemaVersion > 1 {
+	if m.Connection == "" {
+		// Version 1 called it `environment`.
+		var v1 struct {
+			Environment string `json:"environment"`
+		}
+		if err := json.Unmarshal(data, &v1); err == nil {
+			m.Connection = v1.Environment
+		}
+	}
+	if m.SchemaVersion > SchemaVersion {
 		return nil, fmt.Errorf("snapshot %s was written by a newer pgctl (manifest version %d)",
 			m.ID, m.SchemaVersion)
 	}

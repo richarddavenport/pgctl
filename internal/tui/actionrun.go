@@ -161,22 +161,22 @@ func (m *Model) submitAction() tea.Cmd {
 			a.err = fmt.Errorf("choose at least one database")
 			return nil
 		}
-		env := a.value("env")
+		connection := a.value("connection")
 		noPush := !a.enabled("push")
 		m.action = nil
 		e := m.engine
 		explain := fmt.Sprintf("Copying %s from %s into %s. Nothing is written to %s.",
-			strings.Join(databases, ", "), env, e.StorageDir(), env)
-		return m.start("snapshot "+env, explain, func(ctx context.Context, report engine.Reporter) (string, error) {
+			strings.Join(databases, ", "), connection, e.StorageDir(), connection)
+		return m.start("snapshot "+connection, explain, func(ctx context.Context, report engine.Reporter) (string, error) {
 			at := nowFunc()
 			for _, db := range databases {
 				if _, err := e.Dump(ctx, engine.DumpRequest{
-					Environment: env, Database: db, At: at, NoPush: noPush,
+					Connection: connection, Database: db, At: at, NoPush: noPush,
 				}, report); err != nil {
 					return "", err
 				}
 			}
-			return fmt.Sprintf("snapshotted %s from %s", strings.Join(databases, ", "), env), nil
+			return fmt.Sprintf("snapshotted %s from %s", strings.Join(databases, ", "), connection), nil
 		})
 
 	case actionApply:
@@ -211,9 +211,9 @@ func (m *Model) submitAction() tea.Cmd {
 			})
 
 	case actionPrune:
-		env := a.value("env")
-		if env == "all" {
-			env = ""
+		connection := a.value("connection")
+		if connection == "all" {
+			connection = ""
 		}
 		doIt := a.enabled("apply")
 		m.action = nil
@@ -223,7 +223,7 @@ func (m *Model) submitAction() tea.Cmd {
 			explain = "Reporting what the retention policy would remove. Nothing is deleted."
 		}
 		return m.start("prune", explain, func(ctx context.Context, report engine.Reporter) (string, error) {
-			return e.Prune(ctx, env, doIt, report)
+			return e.Prune(ctx, connection, doIt, report)
 		})
 
 	case actionDelete:
@@ -305,10 +305,10 @@ func (m *Model) planKey(key string, msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			p.typed = ""
 			return m, nil
 		case "enter":
-			if p.typed == p.plan.Target.Env.Name {
+			if p.typed == p.plan.Target.Conn.Name {
 				return m, m.executePlan(p.plan)
 			}
-			a.err = fmt.Errorf("that is not %q", p.plan.Target.Env.Name)
+			a.err = fmt.Errorf("that is not %q", p.plan.Target.Conn.Name)
 			p.typed = ""
 			return m, nil
 		case "backspace":
@@ -355,14 +355,14 @@ func (m *Model) executePlan(plan *engine.Plan) tea.Cmd {
 		what = "the whole " + plan.Snapshot.Database + " database"
 	}
 	explain := fmt.Sprintf("Replacing %s on %s with the contents of %s.",
-		what, plan.Target.Env.Name, plan.Snapshot.ID)
+		what, plan.Target.Conn.Name, plan.Snapshot.ID)
 
-	return m.start("apply → "+plan.Target.Env.Name, explain,
+	return m.start("apply → "+plan.Target.Conn.Name, explain,
 		func(ctx context.Context, report engine.Reporter) (string, error) {
 			if err := e.Execute(ctx, plan, report); err != nil {
 				return "", err
 			}
-			return fmt.Sprintf("applied %s to %s", plan.Snapshot.ID, plan.Target.Env.Name), nil
+			return fmt.Sprintf("applied %s to %s", plan.Snapshot.ID, plan.Target.Conn.Name), nil
 		})
 }
 

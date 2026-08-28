@@ -7,7 +7,7 @@ already exists rather than an hour of reading production.
 ## What it does
 
 ```sh
-pgctl snapshot --env prd     # every declared database, one timestamp for the set
+pgctl snapshot --from prd    # every database on the server, one timestamp for the set
 pgctl prune --apply          # enforce storage.retention
 ```
 
@@ -28,11 +28,11 @@ an Azure VM. Failing that, any Azure-hosted runner.
 
 - **PostgreSQL 16+ client tools** on the runner: `pg_dump` and `pg_restore`, at
   least as new as the server. Use 17 to match the cluster.
-- **`sops` and the age key**, if environments keep their credentials in
-  encrypted dotenv files. The same key CI already has for deploys.
+- **A `.pgpass` and, if the config names services, a `~/.pg_service.conf`**,
+  written from CI's secret store. Nothing pgctl-specific: it is what any
+  PostgreSQL client on that runner would need.
 - **The storage account and key** for the snapshots container, under
-  `AZURE_STORAGE_ACCOUNT` / `AZURE_STORAGE_KEY` — read from the environment
-  named by `storage.credentialsFrom`, or from the process environment.
+  `AZURE_STORAGE_ACCOUNT` / `AZURE_STORAGE_KEY`.
 - **Network reach to the database.** On Azure Database for PostgreSQL that means
   the runner's address is allowed by the server's firewall rules.
 
@@ -68,14 +68,17 @@ jobs:
         run: |
           # …distribution's postgresql-client-17, then the pinned pgctl release
 
-      - name: Snapshot production
+      - name: Write the connection credentials
         env:
-          SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
-        run: pgctl snapshot --env prd
+          PGPASS: ${{ secrets.PGPASS }}
+        run: |
+          install -m 600 /dev/null ~/.pgpass
+          printf '%s\n' "$PGPASS" > ~/.pgpass
+
+      - name: Snapshot production
+        run: pgctl snapshot --from prd
 
       - name: Enforce retention
-        env:
-          SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
         run: pgctl prune --apply
 ```
 

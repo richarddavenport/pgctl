@@ -15,7 +15,7 @@ import (
 // pane can answer.
 func (m *Model) paneTabs() []string {
 	switch m.focus {
-	case panelEnvironments:
+	case panelConnections:
 		return []string{"Overview", "Databases", "Config"}
 	case panelDatabases:
 		return []string{"Tables", "Rules", "Foreign keys"}
@@ -35,7 +35,7 @@ func (m *Model) paneTabs() []string {
 // cached: the alternative is a pane that shows nothing until the operator
 // works out which key fetches it.
 func (m *Model) paneLoad() tea.Cmd {
-	env, hasEnv := m.selectedEnv()
+	env, hasEnv := m.selectedConn()
 	db, hasDB := m.selectedDatabase()
 	if !hasEnv || !hasDB {
 		return nil
@@ -115,8 +115,8 @@ func (m *Model) paneRowCount() int {
 // paneBody dispatches to the renderer for the focused panel and tab.
 func (m *Model) paneBody(tab, width int) string {
 	switch m.focus {
-	case panelEnvironments:
-		return m.viewEnvironmentTab(tab, width)
+	case panelConnections:
+		return m.viewConnectionTab(tab, width)
 	case panelDatabases:
 		return m.viewDatabaseTab(tab, width)
 	case panelSnapshots:

@@ -19,50 +19,27 @@ import (
 // storage account key already lives. Which environment: the one named by
 // storage.credentialsFrom, defaulting to the environment being read or written,
 // so that a project with one snapshots account names it once.
-func (e *Engine) remote(ctx context.Context, envName string) (store.Store, error) {
-	var err error
+func (e *Engine) remote(_ context.Context, _ string) (store.Store, error) {
 	s := e.cfg.Storage
 	if s.Kind != config.StorageAzureBlob {
 		return nil, nil
 	}
 
-	// Which environment's secrets hold the storage key: the one named by
-	// storage.credentialsFrom, or the environment in play. Neither is fatal —
-	// a listing has no environment in play at all, and lookup falls back to
-	// the process environment, which is how a CI job handed the key directly
-	// works without inventing a second way to configure credentials.
-	from := s.CredentialsFrom
-	if from == "" {
-		from = envName
-	}
-	var secrets Secrets
-	source := "the environment"
-	if from != "" {
-		env, ok := e.cfg.LookupEnv(from)
-		if !ok {
-			if s.CredentialsFrom != "" {
-				return nil, fmt.Errorf("storage.credentialsFrom names unknown environment %q", from)
-			}
-		} else if env.Secrets.File != "" {
-			if secrets, err = LoadSecrets(ctx, e.root, env.Secrets.File); err != nil {
-				return nil, err
-			}
-			source = env.Secrets.File
-		}
-	}
-
-	account, _ := lookup(secrets, s.AccountKey)
-	key, _ := lookup(secrets, s.KeyKey)
+	// From the environment, for the same reason database passwords come from
+	// ~/.pgpass: a credential belongs where the tools that need it already look
+	// for it, not in a scheme pgctl invented. CI sets these from its secret
+	// store; a person exports them, or lets `az` put them there.
+	account, key := os.Getenv(s.AccountEnv), os.Getenv(s.KeyEnv)
 	if account == "" || key == "" {
-		return nil, fmt.Errorf("no %s/%s in %s, so pgctl cannot reach the snapshot container",
-			s.AccountKey, s.KeyKey, source)
+		return nil, fmt.Errorf("%s and %s must be set to reach the snapshot container",
+			s.AccountEnv, s.KeyEnv)
 	}
 	return store.NewBlob(account, key, s.Container, s.Endpoint)
 }
 
 // Push uploads a local snapshot to the remote store.
 func (e *Engine) Push(ctx context.Context, id string, report Reporter) error {
-	remote, err := e.remote(ctx, environmentOf(id))
+	remote, err := e.remote(ctx, connectionOf(id))
 	if err != nil {
 		return err
 	}
@@ -99,7 +76,7 @@ func (e *Engine) Push(ctx context.Context, id string, report Reporter) error {
 // 2 GB. A whole-database apply needs everything, and says so by passing no
 // selection.
 func (e *Engine) Fetch(ctx context.Context, id string, selection []string, report Reporter) error {
-	remote, err := e.remote(ctx, environmentOf(id))
+	remote, err := e.remote(ctx, connectionOf(id))
 	if err != nil {
 		return err
 	}
@@ -199,8 +176,8 @@ func compressionSuffix(compression string) string {
 	}
 }
 
-// environmentOf is the environment part of a snapshot id.
-func environmentOf(id string) string {
+// connectionOf is the connection part of a snapshot id.
+func connectionOf(id string) string {
 	env, _, _ := strings.Cut(id, "/")
 	return env
 }

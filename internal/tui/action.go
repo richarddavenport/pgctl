@@ -162,30 +162,27 @@ func newText(key, label, help string) formField {
 // openSnapshot builds the snapshot form: which environment, which databases,
 // and whether to upload.
 func (m *Model) openSnapshot() {
-	envs := make([]string, 0, len(m.cfg.Environments))
-	for _, e := range m.cfg.Environments {
-		envs = append(envs, e.Name)
-	}
-	if len(envs) == 0 {
-		m.err = fmt.Errorf("no environments declared in %s", m.cfg.Source)
+	names := connectionNames(m.cfg.All())
+	if len(names) == 0 {
+		m.err = fmt.Errorf("no connections declared in %s", m.cfg.Source)
 		return
 	}
 	current := 0
-	if env, ok := m.selectedEnv(); ok {
-		for i, name := range envs {
-			if name == env.Name {
+	if conn, ok := m.selectedConn(); ok {
+		for i, name := range names {
+			if name == conn.Name {
 				current = i
 			}
 		}
 	}
 
-	databases := m.declaredDatabaseNames()
+	databases := m.databaseNames()
 	dbField := newMulti("databases", "Databases", databases,
 		"space toggles · a all · n none")
 	// Default to the database in focus rather than all of them: the panel
 	// selection is a statement of intent, and six databases is rarely what
 	// someone means when they were looking at one.
-	if db, ok := m.selectedDatabase(); ok && db.Declared {
+	if db, ok := m.selectedDatabase(); ok {
 		for i := range dbField.selected {
 			dbField.selected[i] = false
 		}
@@ -196,8 +193,8 @@ func (m *Model) openSnapshot() {
 		}
 	}
 
-	envField := newChoice("env", "Environment", envs, m.environmentLabels(envs))
-	envField.choice = current
+	connField := newChoice("connection", "Connection", names, m.connectionLabels(names))
+	connField.choice = current
 
 	push := newToggle("push", "Upload to storage", m.cfg.Storage.Kind != config.StorageLocal,
 		"off keeps the snapshot on this machine only")
@@ -210,7 +207,7 @@ func (m *Model) openSnapshot() {
 		kind:    actionSnapshot,
 		title:   "Take a snapshot",
 		explain: "Reads the chosen databases and writes a compressed copy. Nothing is written to the source.",
-		fields:  []formField{envField, dbField, push},
+		fields:  []formField{connField, dbField, push},
 	}
 }
 
@@ -230,7 +227,7 @@ func (m *Model) openApply() {
 
 	targets, labels := m.applyTargets()
 	if len(targets) == 0 {
-		m.err = fmt.Errorf("every declared environment is protected — there is nowhere to apply to")
+		m.err = fmt.Errorf("every declared connection is protected — there is nowhere to apply to")
 		return
 	}
 
@@ -269,28 +266,25 @@ func (m *Model) openApply() {
 
 // openMove builds the move form.
 func (m *Model) openMove() {
-	envs := make([]string, 0, len(m.cfg.Environments))
-	for _, e := range m.cfg.Environments {
-		envs = append(envs, e.Name)
-	}
+	names := connectionNames(m.cfg.All())
 	targets, targetLabels := m.applyTargets()
-	if len(envs) == 0 || len(targets) == 0 {
+	if len(names) == 0 || len(targets) == 0 {
 		m.err = fmt.Errorf("move needs a source and an unprotected target")
 		return
 	}
 
-	source := newChoice("from", "From", envs, m.environmentLabels(envs))
-	if env, ok := m.selectedEnv(); ok {
-		for i, name := range envs {
-			if name == env.Name {
+	source := newChoice("from", "From", names, m.connectionLabels(names))
+	if conn, ok := m.selectedConn(); ok {
+		for i, name := range names {
+			if name == conn.Name {
 				source.choice = i
 			}
 		}
 	}
 
-	databases := m.declaredDatabaseNames()
+	databases := m.databaseNames()
 	dbField := newMulti("databases", "Databases", databases, "space toggles · a all · n none")
-	if db, ok := m.selectedDatabase(); ok && db.Declared {
+	if db, ok := m.selectedDatabase(); ok {
 		for i := range dbField.selected {
 			dbField.selected[i] = false
 		}
@@ -322,7 +316,7 @@ func (m *Model) openPrune() {
 		m.err = fmt.Errorf("no storage.retention configured in %s, so there is nothing to prune", m.cfg.Source)
 		return
 	}
-	envs := append([]string{"all"}, environmentNames(m.cfg.Environments)...)
+	names := append([]string{"all"}, connectionNames(m.cfg.All())...)
 	m.action = &actionModel{
 		kind:  actionPrune,
 		title: "Prune snapshots",
@@ -330,7 +324,7 @@ func (m *Model) openPrune() {
 			"An incomplete snapshot is never kept, and the newest always is.",
 			r.Daily, r.Weekly, r.Monthly),
 		fields: []formField{
-			newChoice("env", "Environment", envs, envs),
+			newChoice("connection", "Connection", names, names),
 			newToggle("apply", "Delete them", false,
 				"off reports what would go, which is the safe way to read a new policy"),
 		},
@@ -357,13 +351,13 @@ func (m *Model) openDelete() {
 // applyTargets is every environment that may be written to, with protected ones
 // left out rather than shown and refused.
 func (m *Model) applyTargets() (names, labels []string) {
-	for _, env := range m.cfg.Environments {
-		if env.Protected {
+	for _, conn := range m.cfg.All() {
+		if conn.Protected {
 			continue
 		}
-		names = append(names, env.Name)
-		label := env.Name
-		if env.Guarded {
+		names = append(names, conn.Name)
+		label := conn.Name
+		if conn.Guarded {
 			label += "  (guarded — needs its name typed)"
 		}
 		labels = append(labels, label)
@@ -371,7 +365,7 @@ func (m *Model) applyTargets() (names, labels []string) {
 	return names, labels
 }
 
-func (m *Model) environmentLabels(names []string) []string {
+func (m *Model) connectionLabels(names []string) []string {
 	labels := make([]string, 0, len(names))
 	for _, name := range names {
 		label := name
@@ -386,10 +380,10 @@ func (m *Model) environmentLabels(names []string) []string {
 	return labels
 }
 
-func environmentNames(envs []config.Environment) []string {
-	out := make([]string, 0, len(envs))
-	for _, e := range envs {
-		out = append(out, e.Name)
+func connectionNames(conns []config.Connection) []string {
+	out := make([]string, 0, len(conns))
+	for _, c := range conns {
+		out = append(out, c.Name)
 	}
 	return out
 }

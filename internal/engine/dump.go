@@ -19,8 +19,8 @@ import (
 
 // DumpRequest is one snapshot to take.
 type DumpRequest struct {
-	Environment string
-	Database    string
+	Connection string
+	Database   string
 
 	// Dir is where the snapshot is written. Empty means the configured storage
 	// directory, under the snapshot's own id.
@@ -40,12 +40,13 @@ type DumpRequest struct {
 // COPY. The manifest is written last — an unfinished manifest is what stops a
 // half-taken snapshot being restored.
 func (e *Engine) Dump(ctx context.Context, req DumpRequest, report Reporter) (*snapshot.Manifest, error) {
-	db, ok := e.database(req.Database)
-	if !ok {
-		return nil, fmt.Errorf("database %q is not declared in %s", req.Database, e.cfg.Source)
+	if !e.cfg.ManagesDatabase(req.Database) {
+		return nil, fmt.Errorf("database %q is excluded by databases.exclude in %s",
+			req.Database, e.cfg.Source)
 	}
+	excludeSchemas := e.cfg.Databases.ExcludeSchemas
 
-	target, err := Resolve(ctx, e.cfg, e.root, req.Environment, req.Database)
+	target, err := Resolve(ctx, e.cfg, e.root, req.Connection, req.Database)
 	if err != nil {
 		return nil, err
 	}
@@ -54,7 +55,7 @@ func (e *Engine) Dump(ctx context.Context, req DumpRequest, report Reporter) (*s
 	if at.IsZero() {
 		at = time.Now()
 	}
-	id := snapshot.NewID(target.Env.Name, req.Database, at)
+	id := snapshot.NewID(target.Conn.Name, req.Database, at)
 	dir := req.Dir
 	if dir == "" {
 		dir = snapshot.Path(e.storageRoot(), id)
@@ -68,13 +69,13 @@ func (e *Engine) Dump(ctx context.Context, req DumpRequest, report Reporter) (*s
 	}
 	defer conn.Close(ctx) //nolint:errcheck // nothing useful to do with a close failure
 
-	cat, err := pg.Introspect(ctx, conn, db.ExcludeSchemas)
+	cat, err := pg.Introspect(ctx, conn, excludeSchemas)
 	if err != nil {
 		return nil, err
 	}
 	if cat.ServerVersion < minServerVersion {
 		return nil, fmt.Errorf("%s runs PostgreSQL %s: pgctl needs 16 or newer for zstd compression",
-			target.Env.Name, formatVersion(cat.ServerVersion))
+			target.Conn.Name, formatVersion(cat.ServerVersion))
 	}
 
 	pgDumpVersion, err := binaryVersion(ctx, "pg_dump")
@@ -89,14 +90,14 @@ func (e *Engine) Dump(ctx context.Context, req DumpRequest, report Reporter) (*s
 
 	m := &snapshot.Manifest{
 		ID:              id,
-		Environment:     target.Env.Name,
+		Connection:      target.Conn.Name,
 		Database:        req.Database,
 		StartedAt:       at,
 		ServerVersion:   cat.ServerVersion,
 		PgDumpVersion:   pgDumpVersion,
 		Compression:     e.cfg.Defaults.Compression,
 		Jobs:            target.Jobs(e.cfg.Defaults),
-		ExcludedSchemas: db.ExcludeSchemas,
+		ExcludedSchemas: excludeSchemas,
 		Extensions:      extensions,
 		ForeignKeys:     cat.FKs,
 	}
@@ -105,7 +106,7 @@ func (e *Engine) Dump(ctx context.Context, req DumpRequest, report Reporter) (*s
 	// operator was shown is the plan that executes.
 	var excludeData []string
 	for _, t := range cat.Tables {
-		if !includedSchema(db, t.Name) {
+		if excludedSchema(excludeSchemas, t.Name) {
 			continue
 		}
 		rule := e.cfg.RuleFor(t.Name)
@@ -132,7 +133,7 @@ func (e *Engine) Dump(ctx context.Context, req DumpRequest, report Reporter) (*s
 	// Excluding a schema is not free: a trigger on a table that is staying may
 	// call a function in the schema that is going. Caught here rather than an
 	// hour into the restore that fails on it.
-	dangling, err := pg.DanglingTriggers(ctx, conn, db.ExcludeSchemas)
+	dangling, err := pg.DanglingTriggers(ctx, conn, excludeSchemas)
 	if err != nil {
 		return nil, err
 	}
@@ -154,7 +155,7 @@ func (e *Engine) Dump(ctx context.Context, req DumpRequest, report Reporter) (*s
 	report.step("dump", fmt.Sprintf("reading %d tables with %d parallel jobs, compressing with %s",
 		len(m.Tables), m.Jobs, m.Compression))
 	report.step("dump", "writing to "+dir)
-	if err := e.runPgDump(ctx, target, db, m, dir, excludeData, report); err != nil {
+	if err := e.runPgDump(ctx, target, excludeSchemas, m, dir, excludeData, report); err != nil {
 		return nil, err
 	}
 
@@ -190,10 +191,10 @@ func (e *Engine) Dump(ctx context.Context, req DumpRequest, report Reporter) (*s
 }
 
 // runPgDump invokes pg_dump in directory format.
-func (e *Engine) runPgDump(ctx context.Context, target *Target, db config.Database,
+func (e *Engine) runPgDump(ctx context.Context, target *Target, excludeSchemas []string,
 	m *snapshot.Manifest, dir string, excludeData []string, report Reporter) error {
 
-	args := make([]string, 0, 10+len(db.Schemas)+len(db.ExcludeSchemas)+len(excludeData))
+	args := make([]string, 0, 10+len(excludeSchemas)+len(excludeData))
 	args = append(args,
 		"--format=directory",
 		fmt.Sprintf("--jobs=%d", m.Jobs),
@@ -213,20 +214,17 @@ func (e *Engine) runPgDump(ctx context.Context, target *Target, db config.Databa
 		// than an error message.
 		"--no-password",
 		"--file="+filepath.Join(dir, snapshot.DumpDir),
-		"--host="+target.Host,
-		fmt.Sprintf("--port=%d", target.Port),
-		"--username="+target.User,
 	)
-	for _, s := range db.Schemas {
-		args = append(args, "--schema="+s)
-	}
-	for _, s := range db.ExcludeSchemas {
+	for _, s := range excludeSchemas {
 		args = append(args, "--exclude-schema="+s)
 	}
 	for _, t := range excludeData {
 		args = append(args, "--exclude-table-data="+t)
 	}
-	args = append(args, target.Database)
+	// The DSN goes where pg_dump expects a database name: it accepts a whole
+	// connection string there, and passing the same one pgx resolved means the
+	// two halves cannot disagree about which server this is.
+	args = append(args, target.DSN(target.Database))
 
 	cmd := exec.CommandContext(ctx, "pg_dump", args...)
 	cmd.Env = target.SubprocessEnv(os.Environ())
@@ -312,17 +310,10 @@ func (e *Engine) unmatchedRules(cat *pg.Catalog) []string {
 	return warnings
 }
 
-func includedSchema(db config.Database, table string) bool {
+// excludedSchema reports a table pgctl was told to leave out entirely.
+func excludedSchema(excludeSchemas []string, table string) bool {
 	schema, _, _ := strings.Cut(table, ".")
-	for _, s := range db.ExcludeSchemas {
-		if s == schema {
-			return false
-		}
-	}
-	if len(db.Schemas) == 0 {
-		return true
-	}
-	for _, s := range db.Schemas {
+	for _, s := range excludeSchemas {
 		if s == schema {
 			return true
 		}

@@ -37,15 +37,6 @@ func (e *Engine) storageRoot() string {
 	return dir
 }
 
-func (e *Engine) database(name string) (config.Database, bool) {
-	for _, d := range e.cfg.Databases {
-		if d.Name == name {
-			return d, true
-		}
-	}
-	return config.Database{}, false
-}
-
 // StorageDir is where snapshots are written, for a message that tells an
 // operator where their gigabytes went.
 func (e *Engine) StorageDir() string { return e.storageRoot() }

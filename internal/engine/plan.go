@@ -131,12 +131,12 @@ func (e *Engine) planWith(ctx context.Context, man *snapshot.Manifest, local boo
 	if err != nil {
 		return nil, err
 	}
-	if target.Env.Protected {
+	if target.Conn.Protected {
 		return nil, &RefusalError{fmt.Sprintf(
-			"%s is a protected environment and can never be an apply target", target.Env.Name)}
+			"%s is a protected environment and can never be an apply target", target.Conn.Name)}
 	}
-	if target.Env.Name == man.Environment {
-		report.warn(fmt.Sprintf("applying %s back to %s, the environment it came from", man.ID, man.Environment))
+	if target.Conn.Name == man.Connection {
+		report.warn(fmt.Sprintf("applying %s back to %s, the environment it came from", man.ID, man.Connection))
 	}
 
 	plan := &Plan{Snapshot: man, Target: target, Local: local, Dir: dir}
@@ -158,7 +158,7 @@ func (e *Engine) planWith(ctx context.Context, man *snapshot.Manifest, local boo
 		}
 		if !exists {
 			plan.Warnings = append(plan.Warnings, fmt.Sprintf(
-				"%s does not exist on %s yet and will be created", man.Database, target.Env.Name))
+				"%s does not exist on %s yet and will be created", man.Database, target.Conn.Name))
 		}
 		if err := e.checkExtensions(ctx, target, man); err != nil {
 			return nil, err
@@ -166,14 +166,13 @@ func (e *Engine) planWith(ctx context.Context, man *snapshot.Manifest, local boo
 		return plan, nil
 	}
 
-	db, _ := e.database(man.Database)
 	conn, err := target.Connect(ctx, man.Database)
 	if err != nil {
 		return nil, err
 	}
 	defer conn.Close(ctx) //nolint:errcheck // nothing useful to do with a close failure
 
-	cat, err := pg.Introspect(ctx, conn, db.ExcludeSchemas)
+	cat, err := pg.Introspect(ctx, conn, e.cfg.Databases.ExcludeSchemas)
 	if err != nil {
 		return nil, err
 	}
@@ -290,7 +289,7 @@ func (e *Engine) checkExtensions(ctx context.Context, target *Target, man *snaps
 		return &RefusalError{fmt.Sprintf(
 			"%s cannot install %s, which %s uses. Restoring would fail on every function "+
 				"written in it, and on everything depending on those.",
-			target.Env.Name, strings.Join(missing, ", "), man.Environment)}
+			target.Conn.Name, strings.Join(missing, ", "), man.Connection)}
 	}
 	return nil
 }
@@ -396,13 +395,13 @@ func (p *Plan) Describe() string {
 	var b strings.Builder
 
 	if p.WholeDatabase {
-		fmt.Fprintf(&b, "DROP AND RECREATE database %s on %s\n", p.Snapshot.Database, p.Target.Env.Name)
+		fmt.Fprintf(&b, "DROP AND RECREATE database %s on %s\n", p.Snapshot.Database, p.Target.Conn.Name)
 		fmt.Fprintf(&b, "  from snapshot %s taken %s\n", p.Snapshot.ID,
 			p.Snapshot.StartedAt.Format("2006-01-02 15:04 MST"))
 		fmt.Fprintf(&b, "  %d tables, %s\n", len(p.Selection), humanBytes(p.Bytes))
 	} else {
 		fmt.Fprintf(&b, "REPLACE %d tables in %s on %s\n",
-			len(p.Selection), p.Snapshot.Database, p.Target.Env.Name)
+			len(p.Selection), p.Snapshot.Database, p.Target.Conn.Name)
 		fmt.Fprintf(&b, "  from snapshot %s taken %s\n", p.Snapshot.ID,
 			p.Snapshot.StartedAt.Format("2006-01-02 15:04 MST"))
 		fmt.Fprintf(&b, "  %s of source data\n", humanBytes(p.Bytes))

@@ -14,39 +14,34 @@ import (
 // can never disagree about what is selected.
 
 // environments returns the environments, in config order.
-func (m *Model) environments() []config.Environment {
-	return filtered(m.cfg.Environments, m.focus == panelEnvironments, m.filter,
-		func(e config.Environment) string { return e.Name })
+func (m *Model) connections() []config.Connection {
+	return filtered(m.cfg.All(), m.focus == panelConnections, m.filter,
+		func(e config.Connection) string { return e.Name })
 }
 
-// selectedEnv is the focused environment.
-func (m *Model) selectedEnv() (config.Environment, bool) {
-	list := m.environments()
-	if i := m.cursors[panelEnvironments]; i >= 0 && i < len(list) {
+// selectedConn is the focused connection.
+func (m *Model) selectedConn() (config.Connection, bool) {
+	list := m.connections()
+	if i := m.cursors[panelConnections]; i >= 0 && i < len(list) {
 		return list[i], true
 	}
-	return config.Environment{}, false
+	return config.Connection{}, false
 }
 
-// databases returns the selected environment's databases.
-//
-// From the live probe when there is one, so the list is what is actually on the
-// server; from the config when there is not, so the panel is never empty just
-// because a network call has not come back.
+// databases returns the selected connection's databases, as the server reports
+// them. There is no fallback list: the config no longer claims to know what
+// databases exist, so an unreachable server has nothing to show rather than
+// something that might be wrong.
 func (m *Model) databases() []engine.DatabaseInfo {
-	env, ok := m.selectedEnv()
+	conn, ok := m.selectedConn()
 	if !ok {
 		return nil
 	}
-	if p := m.probes[env.Name]; p != nil && p.Reachable {
-		return filtered(p.Databases, m.focus == panelDatabases, m.filter,
-			func(d engine.DatabaseInfo) string { return d.Name })
+	p := m.probes[conn.Name]
+	if p == nil || !p.Reachable {
+		return nil
 	}
-	declared := make([]engine.DatabaseInfo, 0, len(m.cfg.Databases))
-	for _, d := range m.cfg.Databases {
-		declared = append(declared, engine.DatabaseInfo{Name: d.Name, Declared: true})
-	}
-	return filtered(declared, m.focus == panelDatabases, m.filter,
+	return filtered(p.Databases, m.focus == panelDatabases, m.filter,
 		func(d engine.DatabaseInfo) string { return d.Name })
 }
 
@@ -65,13 +60,13 @@ func (m *Model) selectedDatabase() (engine.DatabaseInfo, bool) {
 // says which environment you are looking at, and a list that ignored it would
 // make the hierarchy a lie.
 func (m *Model) snapshots() []*engine.Entry {
-	env, hasEnv := m.selectedEnv()
+	env, hasEnv := m.selectedConn()
 	db, hasDB := m.selectedDatabase()
 
 	var out []*engine.Entry
 	for i := len(m.entries) - 1; i >= 0; i-- {
 		entry := m.entries[i]
-		if hasEnv && entry.Manifest.Environment != env.Name {
+		if hasEnv && entry.Manifest.Connection != env.Name {
 			continue
 		}
 		if hasDB && entry.Manifest.Database != db.Name {
@@ -134,8 +129,8 @@ func (m *Model) selectedRun() (*runRecord, bool) {
 // panelLen is how many rows a panel has, which the cursor is clamped to.
 func (m *Model) panelLen(panel int) int {
 	switch panel {
-	case panelEnvironments:
-		return len(m.environments())
+	case panelConnections:
+		return len(m.connections())
 	case panelDatabases:
 		return len(m.databases())
 	case panelSnapshots:
@@ -168,19 +163,30 @@ func filtered[T any](items []T, focused bool, filter string, name func(T) string
 }
 
 // liveKey identifies a cached live table listing.
-func liveKey(env, database string) string { return env + "/" + database }
+func liveKey(connection, database string) string { return connection + "/" + database }
 
 // setKey identifies a cached set resolution.
-func setKey(env, database, set string) string { return env + "/" + database + "/" + set }
+func setKey(connection, database, set string) string {
+	return connection + "/" + database + "/" + set
+}
 
 // sortedRules returns the rules that match a table, for the detail views.
 func (m *Model) ruleFor(table string) config.Rule { return m.cfg.RuleFor(table) }
 
-// declaredDatabaseNames is the set of databases pgctl is configured to manage.
-func (m *Model) declaredDatabaseNames() []string {
-	out := make([]string, 0, len(m.cfg.Databases))
-	for _, d := range m.cfg.Databases {
-		out = append(out, d.Name)
+// databaseNames is what the selected connection actually has, which is what a
+// form offers as choices.
+func (m *Model) databaseNames() []string {
+	conn, ok := m.selectedConn()
+	if !ok {
+		return nil
+	}
+	p := m.probes[conn.Name]
+	if p == nil {
+		return nil
+	}
+	out := make([]string, 0, len(p.Databases))
+	for _, db := range p.Databases {
+		out = append(out, db.Name)
 	}
 	sort.Strings(out)
 	return out

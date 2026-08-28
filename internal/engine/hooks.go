@@ -63,10 +63,10 @@ func runShell(ctx context.Context, script string, env map[string]string) error {
 // hookEnv is what a hook is told about the operation around it. Nothing secret
 // goes in: a hook that needs credentials should decrypt them the same way pgctl
 // does, rather than receive them through an environment a `ps` can read.
-func hookEnv(envName, database, snapshotID string) map[string]string {
+func hookEnv(connection, database, snapshotID string) map[string]string {
 	return map[string]string{
-		"PGCTL_ENV":      envName,
-		"PGCTL_DATABASE": database,
-		"PGCTL_SNAPSHOT": snapshotID,
+		"PGCTL_CONNECTION": connection,
+		"PGCTL_DATABASE":   database,
+		"PGCTL_SNAPSHOT":   snapshotID,
 	}
 }

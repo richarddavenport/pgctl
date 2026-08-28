@@ -130,11 +130,11 @@ func writeFakeSnapshot(t *testing.T, dir, id string) {
 		}
 	}
 	man := &snapshot.Manifest{
-		ID:          id,
-		Environment: "prd",
-		Database:    "product-development",
-		StartedAt:   time.Date(2026, 8, 28, 3, 0, 0, 0, time.UTC),
-		FinishedAt:  time.Date(2026, 8, 28, 3, 12, 0, 0, time.UTC),
+		ID:         id,
+		Connection: "prd",
+		Database:   "product-development",
+		StartedAt:  time.Date(2026, 8, 28, 3, 0, 0, 0, time.UTC),
+		FinishedAt: time.Date(2026, 8, 28, 3, 12, 0, 0, time.UTC),
 		Tables: []snapshot.TableEntry{
 			{Name: "claims.policy_claim"},
 			{Name: "operations.policy_contract"},

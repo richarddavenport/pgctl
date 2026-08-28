@@ -1,38 +1,26 @@
-// Package config is pgctl's contract with a project: which environments exist,
-// which databases matter, which groups of tables move together, and what to do
-// about the tables that are too big to move whole.
+// Package config is pgctl's contract with a project: how to reach each
+// database server, which groups of tables move together, and what to do about
+// the tables that are too big to move whole.
 //
-// pgctl carries no MBPNetwork-specific values. Everything about your databases
-// lives in a pgctl.yaml the team commits next to the schema it describes.
+// It is deliberately small. PostgreSQL already has a complete, standard way to
+// describe a connection — connection strings, ~/.pg_service.conf, ~/.pgpass and
+// the PG* environment variables — which libpq reads and which pgx implements
+// identically. pgctl uses that rather than inventing a parallel scheme, so
+// there is nothing pgctl-specific to learn about credentials and no password
+// anywhere in this file.
 package config
 
 import "time"
 
-// Config is the project configuration.
+// Config is the project configuration. Every field is optional: with no config
+// at all, pgctl connects wherever psql with no arguments would.
 type Config struct {
-	// EnvironmentsFrom names a swarmctl config to read environments out of, so
-	// that "which host is prd" has one answer in a repository that already
-	// declares it. Defaults to swarmctl.yaml when that file exists beside the
-	// pgctl config. See design/decisions.md #8.
-	EnvironmentsFrom string `yaml:"environmentsFrom"`
+	// Connections are the servers pgctl can reach, by name.
+	Connections Connections `yaml:"connections"`
 
-	// Environments declared inline, for projects with no swarmctl. Merged with
-	// (and overriding) anything read from EnvironmentsFrom.
-	Environments []Environment `yaml:"environments"`
-
-	// Postgres overrides connection detail per environment, and declares
-	// environments that have none of their own — a name here matching no
-	// swarmctl environment becomes one, which is how `local` exists. For a
-	// real environment nothing needs to be said: host, port, user and password
-	// come out of its sops-encrypted secrets file (see Credentials).
-	Postgres map[string]Server `yaml:"postgres"`
-
-	Credentials Credentials `yaml:"credentials"`
-	Defaults    Defaults    `yaml:"defaults"`
-	Storage     Storage     `yaml:"storage"`
-
-	// Databases pgctl will snapshot, in the order a full refresh applies them.
-	Databases []Database `yaml:"databases"`
+	Defaults  Defaults  `yaml:"defaults"`
+	Storage   Storage   `yaml:"storage"`
+	Databases Databases `yaml:"databases"`
 
 	// Sets are named groups of tables that move together — the unit of a
 	// table-level migration.
@@ -41,12 +29,6 @@ type Config struct {
 	// Rules override how individual tables are dumped. Later rules win, so a
 	// project can state a schema-wide default and then except one table.
 	Rules []Rule `yaml:"rules"`
-
-	// Protect names environments that may never be an apply target. Defaults
-	// to every guarded environment, so a project that marks prd guarded for
-	// swarmctl gets it protected here without saying so twice. Write an empty
-	// list to mean none.
-	Protect *[]string `yaml:"protect"`
 
 	Hooks Hooks `yaml:"hooks"`
 
@@ -59,69 +41,59 @@ type Config struct {
 	Warnings []string `yaml:"-"`
 }
 
-// Environment is one deployment pgctl can read from or write to.
-type Environment struct {
-	Name   string `yaml:"name"`
-	Domain string `yaml:"domain"`
+// Connections is an ordered set of named connections. Order is kept because it
+// is the order they are listed in, and a UI that reordered them would be
+// harder to navigate than one that did not.
+type Connections struct {
+	Names  []string
+	ByName map[string]Connection
+}
 
-	// Guarded requires the environment's name typed in full before an apply
+// Connection is one server pgctl can reach.
+type Connection struct {
+	Name string `yaml:"-"`
+
+	// DSN is anything libpq accepts: a service name (`service=prd`), a URI
+	// (`postgres://host/db`), or keyword pairs (`host=… port=…`). It is
+	// resolved by pgx for pgctl's own queries and handed to pg_dump and
+	// pg_restore unchanged, so both halves of an operation connect the same
+	// way and a password lives only in ~/.pgpass.
+	DSN string `yaml:"dsn"`
+
+	// Guarded requires the connection's name typed in full before an apply
 	// touches it.
 	Guarded bool `yaml:"guarded"`
 
-	// Protected refuses the environment as an apply target at all. Production
+	// Protected refuses the connection as an apply target at all. Production
 	// sets this; nothing turns it off.
 	Protected bool `yaml:"protected"`
 
-	SSH     SSH     `yaml:"ssh"`
-	Secrets Secrets `yaml:"secrets"`
-
-	// Server is Postgres[Name], resolved at load time.
-	Server Server `yaml:"-"`
-}
-
-// SSH reaches the environment's swarm manager, for hooks that run there.
-type SSH struct {
-	Host string `yaml:"host"`
-	Port int    `yaml:"port"`
-}
-
-// Secrets locates the environment's sops-encrypted dotenv, which is where
-// database credentials and storage keys come from.
-type Secrets struct {
-	File string `yaml:"file"`
-}
-
-// Server is how to reach one environment's PostgreSQL.
-type Server struct {
-	// Host and Port override the environment's secrets file. Needed only for
-	// an environment that has no secrets file, such as a local cluster.
-	Host string `yaml:"host"`
-	Port int    `yaml:"port"`
+	// Jobs overrides Defaults.Jobs here. A dump and a restore are bounded by
+	// different machines, so the useful parallelism differs per server.
+	Jobs int `yaml:"jobs"`
 
 	// MaintenanceDB is the database pgctl connects to in order to create, drop
 	// or interrogate the others.
 	MaintenanceDB string `yaml:"maintenanceDatabase"`
-
-	// Jobs overrides Defaults.Jobs for this server. A dump and a restore are
-	// bounded by different machines, so the useful parallelism differs per
-	// environment — prd has more vCPUs than a laptop.
-	Jobs int `yaml:"jobs"`
 }
 
-// Credentials names the environment-file keys holding connection detail,
-// rather than the detail itself. pgctl never stores a password: it decrypts the
-// environment's secrets file at the moment it needs one, and holds the result
-// in memory for that operation only.
+// Databases decides which of a server's databases pgctl works with.
 //
-// The host is read from there too, rather than restated in pgctl.yaml. An
-// environment file that names one host while pgctl.yaml names another is a
-// restore pointed at the wrong server, and the only way to be sure that cannot
-// happen is for there to be one place to look.
-type Credentials struct {
-	HostKey     string `yaml:"hostKey"`
-	PortKey     string `yaml:"portKey"`
-	UserKey     string `yaml:"userKey"`
-	PasswordKey string `yaml:"passwordKey"`
+// Discovery, not declaration: a server knows what databases it has, and a list
+// in a config file can only ever disagree with it. Exclude trims the ones
+// nobody wants to think about.
+type Databases struct {
+	// Exclude names databases to ignore entirely. Patterns may end in `*`.
+	Exclude []string `yaml:"exclude"`
+
+	// ExcludeSchemas drops schemas from every snapshot.
+	//
+	// Rarely what you want: a trigger on a table you are keeping may call a
+	// function in the schema you are dropping, and pg_restore then fails on
+	// every CREATE TRIGGER after the data has already loaded. `pgctl snapshot`
+	// checks for that and says so. Excluding a table's *data* with a rule is
+	// almost always the right tool instead.
+	ExcludeSchemas []string `yaml:"excludeSchemas"`
 }
 
 // Defaults parameterize every snapshot and apply unless overridden.
@@ -156,21 +128,15 @@ type Storage struct {
 	Container string `yaml:"container"`
 
 	// Endpoint overrides the blob service URL. Azure needs nothing here; it
-	// exists for a storage emulator and for a private endpoint with its own
-	// hostname.
+	// exists for a storage emulator and for a private endpoint.
 	Endpoint string `yaml:"endpoint"`
 
-	// CredentialsFrom names the environment whose secrets file holds the
-	// storage account and key. Empty means each environment's own, which is
-	// right only when every environment has its own container; a project with
-	// one snapshots account names that environment here so prd's nightly and
-	// QAT's refresh reach the same place.
-	CredentialsFrom string `yaml:"credentialsFrom"`
-
-	// AccountKey and KeyKey name the environment-file keys holding the storage
-	// account and its key, following Credentials' reasoning.
-	AccountKey string `yaml:"accountKey"`
-	KeyKey     string `yaml:"keyKey"`
+	// AccountEnv and KeyEnv name the environment variables holding the storage
+	// account and its key, following the same principle as the database
+	// credentials: pgctl reads them from where they already are rather than
+	// storing them.
+	AccountEnv string `yaml:"accountEnv"`
+	KeyEnv     string `yaml:"keyEnv"`
 
 	Retention Retention `yaml:"retention"`
 }
@@ -183,21 +149,8 @@ type Retention struct {
 	Monthly int `yaml:"monthly"`
 }
 
-// Database is one database in the cluster.
-type Database struct {
-	Name string `yaml:"name"`
-
-	// Schemas restricts a snapshot to these schemas. Empty means all of them
-	// except those pgctl always excludes.
-	Schemas []string `yaml:"schemas"`
-
-	// ExcludeSchemas drops schemas from a snapshot entirely — Hasura's
-	// hdb_catalog and an audit schema being the usual candidates.
-	ExcludeSchemas []string `yaml:"excludeSchemas"`
-}
-
 // Set is a named group of tables that migrate together. Patterns are
-// schema-qualified and may end in `*`.
+// schema-qualified and may carry a `*` at either end of the table part.
 type Set struct {
 	Name        string   `yaml:"name"`
 	Database    string   `yaml:"database"`
@@ -221,7 +174,8 @@ const (
 
 // Rule overrides how one table, or one pattern of tables, is dumped.
 type Rule struct {
-	// Table is schema-qualified and may end in `*`.
+	// Table is schema-qualified and may carry a `*` at either end of the table
+	// part.
 	Table string `yaml:"table"`
 
 	// Data defaults to "all", or to "filtered" when Where is set.
@@ -233,7 +187,7 @@ type Rule struct {
 	Where string `yaml:"where"`
 
 	// Why records what the rule is for, so that a table missing its history in
-	// QAT is explicable without reading a commit log.
+	// a copied environment is explicable without reading a commit log.
 	Why string `yaml:"why"`
 }
 
@@ -253,24 +207,29 @@ type Hooks struct {
 	OnFailure []Hook `yaml:"onFailure"`
 }
 
-// Hook is one command. $PGCTL_ENV, $PGCTL_DATABASE and $PGCTL_SNAPSHOT are in
-// its environment.
+// Hook is one command. $PGCTL_CONNECTION, $PGCTL_DATABASE and $PGCTL_SNAPSHOT
+// are in its environment.
 type Hook struct {
 	Name string `yaml:"name"`
 	Run  string `yaml:"run"`
 
-	// Timeout bounds the hook. Zero means Defaults.StatementTimeout.
+	// Timeout bounds the hook. Zero means ten minutes.
 	Timeout time.Duration `yaml:"timeout"`
 }
 
-// LookupEnv returns the environment with the given name.
-func (c *Config) LookupEnv(name string) (Environment, bool) {
-	for _, e := range c.Environments {
-		if e.Name == name {
-			return e, true
-		}
+// Lookup returns the connection with the given name.
+func (c *Config) Lookup(name string) (Connection, bool) {
+	conn, ok := c.Connections.ByName[name]
+	return conn, ok
+}
+
+// All returns the connections in the order they were declared.
+func (c *Config) All() []Connection {
+	out := make([]Connection, 0, len(c.Connections.Names))
+	for _, name := range c.Connections.Names {
+		out = append(out, c.Connections.ByName[name])
 	}
-	return Environment{}, false
+	return out
 }
 
 // LookupSet returns the set with the given name.
@@ -281,4 +240,14 @@ func (c *Config) LookupSet(name string) (Set, bool) {
 		}
 	}
 	return Set{}, false
+}
+
+// ManagesDatabase reports whether a database is one pgctl works with.
+func (c *Config) ManagesDatabase(name string) bool {
+	for _, pattern := range c.Databases.Exclude {
+		if matchName(pattern, name) {
+			return false
+		}
+	}
+	return true
 }

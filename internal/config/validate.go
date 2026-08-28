@@ -14,9 +14,6 @@ const (
 // Validate reports the config problems that would make a run meaningless.
 // Problems that only make it worse are recorded in Warnings instead.
 func (c *Config) Validate() error {
-	if len(c.Databases) == 0 {
-		return fmt.Errorf("no databases declared")
-	}
 	switch c.Storage.Kind {
 	case StorageLocal:
 	case StorageAzureBlob:
@@ -28,17 +25,6 @@ func (c *Config) Validate() error {
 			c.Storage.Kind, StorageLocal, StorageAzureBlob)
 	}
 
-	seen := map[string]bool{}
-	for _, d := range c.Databases {
-		if d.Name == "" {
-			return fmt.Errorf("a database has no name")
-		}
-		if seen[d.Name] {
-			return fmt.Errorf("database %q declared twice", d.Name)
-		}
-		seen[d.Name] = true
-	}
-
 	setNames := map[string]bool{}
 	for _, s := range c.Sets {
 		switch {
@@ -48,8 +34,6 @@ func (c *Config) Validate() error {
 			return fmt.Errorf("set %q declared twice", s.Name)
 		case s.Database == "":
 			return fmt.Errorf("set %q names no database", s.Name)
-		case !seen[s.Database]:
-			return fmt.Errorf("set %q names undeclared database %q", s.Name, s.Database)
 		case len(s.Include) == 0:
 			return fmt.Errorf("set %q includes nothing", s.Name)
 		}
@@ -78,21 +62,15 @@ func (c *Config) Validate() error {
 		}
 	}
 
-	// An environment needs a host from somewhere: its secrets file, or an
-	// override here. Neither is not fatal — the other environments still work,
-	// and a config that fails to load helps nobody.
-	for _, e := range c.Environments {
-		if e.Server.Host == "" && e.Secrets.File == "" {
-			c.Warnings = append(c.Warnings, fmt.Sprintf(
-				"environment %q has neither a secrets file nor postgres.%s.host, so pgctl cannot reach it",
-				e.Name, e.Name))
-		}
-	}
 	for _, r := range c.Retentions() {
 		if r < 0 {
 			return fmt.Errorf("storage.retention values cannot be negative")
 		}
 	}
+
+	// A set naming a database nothing else mentions is not an error — the
+	// databases are discovered from the server, so the config cannot know
+	// whether it exists until something connects.
 	return nil
 }
 
@@ -119,4 +97,13 @@ func validPattern(pat string) error {
 		return fmt.Errorf("table pattern %q: `*` is only allowed at the start or the end", pat)
 	}
 	return nil
+}
+
+// matchName matches a bare name against a pattern that may end in `*`. Used for
+// database exclusions, which are not schema-qualified.
+func matchName(pattern, name string) bool {
+	if prefix, wild := strings.CutSuffix(pattern, "*"); wild {
+		return strings.HasPrefix(name, prefix)
+	}
+	return pattern == name
 }

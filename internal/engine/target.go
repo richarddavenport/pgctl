@@ -3,9 +3,7 @@ package engine
 import (
 	"context"
 	"fmt"
-	"net"
 	"os"
-	"strconv"
 
 	"github.com/jackc/pgx/v5"
 
@@ -13,130 +11,123 @@ import (
 )
 
 // Target is a resolved place to read from or write to: one database on one
-// environment's server, with the credentials to reach it.
+// connection.
+//
+// The connection is a libpq DSN and nothing more. pgx resolves it — including
+// ~/.pg_service.conf, ~/.pgpass and every PG* variable — and pg_dump and
+// pg_restore are handed the same string, so both halves of an operation connect
+// by exactly the same rules and pgctl never holds a password.
 type Target struct {
-	Env      config.Environment
+	Conn     config.Connection
 	Database string
-	Host     string
-	Port     int
-	User     string
-	Password string
 
-	// Secrets is the environment's whole decrypted set, kept because storage
-	// credentials come from the same file.
-	Secrets Secrets
+	// resolved is what the DSN turned out to mean, for display. Nothing here
+	// is used to connect; Connect re-resolves the DSN so that pgx and libpq
+	// cannot drift apart.
+	Host string
+	Port int
+	User string
 }
 
-// Resolve turns an environment and a database name into something connectable.
-// Config overrides win over the secrets file, since an override exists only to
-// contradict it.
-func Resolve(ctx context.Context, cfg *config.Config, root, envName, database string) (*Target, error) {
-	env, ok := cfg.LookupEnv(envName)
+// Resolve turns a connection name and a database into something connectable.
+func Resolve(_ context.Context, cfg *config.Config, _, name, database string) (*Target, error) {
+	conn, ok := cfg.Lookup(name)
 	if !ok {
-		return nil, fmt.Errorf("unknown environment %q", envName)
+		return nil, fmt.Errorf("unknown connection %q", name)
 	}
 
-	secrets, err := LoadSecrets(ctx, root, env.Secrets.File)
+	t := &Target{Conn: conn, Database: database}
+	// Resolving once up front turns "unknown host" and "no such service" into
+	// an error naming the connection, rather than one that surfaces from
+	// inside a subprocess minutes later.
+	parsed, err := pgx.ParseConfig(t.DSN(database))
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("connection %q: %w", name, err)
 	}
-
-	t := &Target{Env: env, Database: database, Secrets: secrets, Port: 5432}
-
-	if host, ok := lookup(secrets, cfg.Credentials.HostKey); ok {
-		t.Host = host
-	}
-	if port, ok := lookup(secrets, cfg.Credentials.PortKey); ok {
-		if n, err := strconv.Atoi(port); err == nil {
-			t.Port = n
-		}
-	}
-	if user, ok := lookup(secrets, cfg.Credentials.UserKey); ok {
-		t.User = user
-	}
-	if pw, ok := lookup(secrets, cfg.Credentials.PasswordKey); ok {
-		t.Password = pw
-	}
-
-	if env.Server.Host != "" {
-		t.Host = env.Server.Host
-	}
-	if env.Server.Port != 0 {
-		t.Port = env.Server.Port
-	}
-
-	if t.Host == "" {
-		return nil, fmt.Errorf("environment %q: no postgres host in %s or in the config",
-			env.Name, orNone(env.Secrets.File))
+	t.Host, t.Port, t.User = parsed.Host, int(parsed.Port), parsed.User
+	if t.Database == "" {
+		t.Database = parsed.Database
 	}
 	return t, nil
 }
 
-// lookup reads a credential from the environment's decrypted secrets, falling
-// back to pgctl's own process environment.
+// DSN is the connection string for one database on this connection.
 //
-// The fallback is what makes an environment with no secrets file usable — a
-// developer's local cluster, or a CI job handed credentials directly — without
-// a second way of declaring credentials in the config. A real environment has
-// a secrets file, so the fallback never fires for one.
-func lookup(secrets Secrets, key string) (string, bool) {
-	if v, ok := secrets.Get(key); ok {
-		return v, true
+// A database name is appended as a keyword rather than substituted, because the
+// DSN may be a service name or a URI and pgctl has no business rewriting
+// either. libpq resolves a later keyword over an earlier one, so this works for
+// every form.
+func (t *Target) DSN(database string) string {
+	dsn := t.Conn.DSN
+	if database == "" {
+		return dsn
 	}
-	if v := os.Getenv(key); v != "" {
-		return v, true
+	if dsn == "" {
+		return "dbname=" + quoteDSNValue(database)
 	}
-	return "", false
+	// A URI cannot take a trailing keyword, so its database goes in the query
+	// string, which libpq accepts for every connection parameter.
+	if isURI(dsn) {
+		sep := "?"
+		if containsRune(dsn, '?') {
+			sep = "&"
+		}
+		return dsn + sep + "dbname=" + database
+	}
+	return dsn + " dbname=" + quoteDSNValue(database)
 }
 
-func orNone(s string) string {
-	if s == "" {
-		return "(no secrets file)"
-	}
-	return s
+func isURI(dsn string) bool {
+	return hasPrefix(dsn, "postgres://") || hasPrefix(dsn, "postgresql://")
 }
 
-// SubprocessEnv is the environment pg_dump and pg_restore run with: the
-// password, and the same connection policy pgctl's own connections use.
-//
-// gssencmode=disable is not an optimisation. libpq is linked against krb5 and
-// attempts a GSSAPI-encrypted connection before anything else; where a
-// Kerberos lookup blackholes rather than refuses — a sandbox, a corporate
-// network, a VPN with no KDC route — that attempt blocks with no timeout, and
-// pg_dump hangs producing nothing. pgctl authenticates with a password out of
-// an encrypted secrets file and has no use for Kerberos, so the attempt buys
-// nothing and can cost everything. This bit is easy to miss because pgctl's own
-// connections go through pgx, which never tries GSSAPI: the tool looks healthy
-// right up to the moment it shells out.
-//
-// sslmode follows Target.Connect: Azure requires TLS, a loopback cluster
-// usually has none configured, and neither can verify a certificate without a
-// CA bundle pgctl does not ship.
-func (t *Target) SubprocessEnv(base []string) []string {
-	sslmode := "require"
-	if isLoopback(t.Host) {
-		sslmode = "prefer"
+func hasPrefix(s, prefix string) bool {
+	return len(s) >= len(prefix) && s[:len(prefix)] == prefix
+}
+
+func containsRune(s string, r rune) bool {
+	for _, c := range s {
+		if c == r {
+			return true
+		}
 	}
-	return append(base,
-		"PGPASSWORD="+t.Password,
-		"PGGSSENCMODE=disable",
-		"PGSSLMODE="+sslmode,
-	)
+	return false
+}
+
+// quoteDSNValue quotes a keyword/value DSN value if it needs it.
+func quoteDSNValue(v string) string {
+	needs := v == ""
+	for _, c := range v {
+		if c == ' ' || c == '\'' || c == '\\' {
+			needs = true
+		}
+	}
+	if !needs {
+		return v
+	}
+	out := []rune{'\''}
+	for _, c := range v {
+		if c == '\'' || c == '\\' {
+			out = append(out, '\\')
+		}
+		out = append(out, c)
+	}
+	return string(append(out, '\''))
 }
 
 // Jobs is the parallelism to use against this target.
 func (t *Target) Jobs(def config.Defaults) int {
-	if t.Env.Server.Jobs > 0 {
-		return t.Env.Server.Jobs
+	if t.Conn.Jobs > 0 {
+		return t.Conn.Jobs
 	}
 	return def.Jobs
 }
 
-// MaintenanceDB is the database to connect to for work that cannot be done
-// from inside the database being replaced.
+// MaintenanceDB is the database to connect to for work that cannot be done from
+// inside the database being replaced.
 func (t *Target) MaintenanceDB() string {
-	if t.Env.Server.MaintenanceDB != "" {
-		return t.Env.Server.MaintenanceDB
+	if t.Conn.MaintenanceDB != "" {
+		return t.Conn.MaintenanceDB
 	}
 	return "postgres"
 }
@@ -147,44 +138,47 @@ func (t *Target) Connect(ctx context.Context, database string) (*pgx.Conn, error
 	if database == "" {
 		database = t.MaintenanceDB()
 	}
-	cfg, err := pgx.ParseConfig("")
+	cfg, err := pgx.ParseConfig(t.DSN(database))
 	if err != nil {
-		return nil, err
-	}
-	cfg.Host = t.Host
-	cfg.Port = uint16(t.Port)
-	cfg.Database = database
-	cfg.User = t.User
-	cfg.Password = t.Password
-
-	// Azure Database for PostgreSQL requires TLS and presents a certificate
-	// pgx will not verify without a root store configured. Verifying the
-	// hostname without a CA is not a thing sslmode offers, so this matches
-	// what psql does by default: encrypt, do not verify. Worth revisiting if
-	// pgctl ever runs somewhere the DigiCert roots are present.
-	cfg.TLSConfig = nil
-	if !isLoopback(t.Host) {
-		cfg.TLSConfig = tlsPreferred(t.Host)
+		return nil, fmt.Errorf("connection %q: %w", t.Conn.Name, err)
 	}
 
 	conn, err := pgx.ConnectConfig(ctx, cfg)
 	if err != nil {
 		// pgx puts the whole connection string in its error, password
 		// included. Report where we were going and not how we got in.
-		return nil, fmt.Errorf("connect to %s/%s as %s: %w", t.Host, database, t.User, redact(err, t.Password))
+		return nil, fmt.Errorf("connect to %s as %s: %w",
+			describe(cfg.Host, int(cfg.Port), database), cfg.User, redact(err, cfg.Password))
 	}
 	return conn, nil
 }
 
-func isLoopback(host string) bool {
-	if host == "localhost" {
-		return true
+// SubprocessEnv is the environment pg_dump and pg_restore run with.
+//
+// gssencmode=disable is not an optimisation. libpq is linked against krb5 and
+// attempts a GSSAPI-encrypted connection before anything else; where a Kerberos
+// lookup blackholes rather than refuses — a sandbox, a corporate network, a VPN
+// with no KDC route — that attempt blocks with no timeout, and pg_dump hangs
+// producing nothing. pgctl authenticates the way libpq does and has no use for
+// Kerberos, so the attempt buys nothing and can cost everything.
+//
+// Nothing else is set: the DSN carries the connection, and ~/.pgpass carries
+// the password, so there is no PGPASSWORD to leak into a process listing.
+func (t *Target) SubprocessEnv(base []string) []string {
+	if os.Getenv("PGGSSENCMODE") != "" {
+		return base
 	}
-	ip := net.ParseIP(host)
-	return ip != nil && ip.IsLoopback()
+	return append(base, "PGGSSENCMODE=disable")
+}
+
+func describe(host string, port int, database string) string {
+	if host == "" {
+		return database
+	}
+	return fmt.Sprintf("%s:%d/%s", host, port, database)
 }
 
 // String describes the target for a log line or a confirmation prompt.
 func (t *Target) String() string {
-	return fmt.Sprintf("%s (%s@%s:%d/%s)", t.Env.Name, t.User, t.Host, t.Port, t.Database)
+	return fmt.Sprintf("%s (%s)", t.Conn.Name, describe(t.Host, t.Port, t.Database))
 }

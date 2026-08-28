@@ -14,17 +14,17 @@ func TestRenderProbe(t *testing.T) {
 	withSnapshot(t, m)
 	m.now = time.Now()
 	m.probes["prd"] = &engine.Probe{
-		Environment: "prd", Reachable: true, ServerVersion: 170004,
+		Connection: "prd", Reachable: true, ServerVersion: 170004,
 		Host: "prd.example", Port: 5432, User: "mbpiadmin", ProbedAt: time.Now(),
 		Databases: []engine.DatabaseInfo{
-			{Name: "product-development", Bytes: 11 << 30, Declared: true},
-			{Name: "claims", Bytes: 48 << 20, Declared: true},
-			{Name: "quote", Bytes: 20 << 30, Declared: false},
+			{Name: "product-development", Bytes: 11 << 30},
+			{Name: "claims", Bytes: 48 << 20},
+			{Name: "quote", Bytes: 20 << 30},
 		},
 	}
-	m.probes["qat"] = &engine.Probe{Environment: "qat", Reachable: true, ServerVersion: 170004,
-		Databases: []engine.DatabaseInfo{{Name: "product-development", Bytes: 9 << 30, Declared: true}}}
-	m.probes["scratch"] = &engine.Probe{Environment: "scratch", Err: errUnreachable}
+	m.probes["qat"] = &engine.Probe{Connection: "qat", Reachable: true, ServerVersion: 170004,
+		Databases: []engine.DatabaseInfo{{Name: "product-development", Bytes: 9 << 30}}}
+	m.probes["scratch"] = &engine.Probe{Connection: "scratch", Err: errUnreachable}
 	m.setInfo[setKey("prd", "product-development", "claims")] = &setSummary{
 		members: []string{"claims.policy_claim", "claims.claim_detail"},
 		added:   []string{"operations.policy_contract", "public.address"},

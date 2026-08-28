@@ -57,7 +57,7 @@ type (
 // and one unreachable environment must not delay the rest.
 func (m *Model) probeAll() tea.Cmd {
 	var cmds []tea.Cmd
-	for _, env := range m.cfg.Environments {
+	for _, env := range m.cfg.All() {
 		if cmd := m.probe(env.Name); cmd != nil {
 			cmds = append(cmds, cmd)
 		}
@@ -74,7 +74,7 @@ func (m *Model) probe(name string) tea.Cmd {
 	return func() tea.Msg {
 		ctx, cancel := context.WithTimeout(context.Background(), probeTimeout)
 		defer cancel()
-		p := e.ProbeEnvironment(ctx, name)
+		p := e.ProbeConnection(ctx, name)
 		return probeMsg{probe: &p}
 	}
 }

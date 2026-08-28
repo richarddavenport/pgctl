@@ -143,7 +143,7 @@ func (m *Model) viewPlanPreview() string {
 
 	if p.needsName {
 		b.WriteString("\n" + dangerStyle.Render(
-			fmt.Sprintf("%s is guarded. Type its name to continue: ", p.plan.Target.Env.Name)) +
+			fmt.Sprintf("%s is guarded. Type its name to continue: ", p.plan.Target.Conn.Name)) +
 			p.typed + "▌")
 	}
 	return b.String()

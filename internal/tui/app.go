@@ -23,7 +23,7 @@ import (
 
 // The left column's panels, in order.
 const (
-	panelEnvironments = iota
+	panelConnections = iota
 	panelDatabases
 	panelSnapshots
 	panelSets
@@ -31,7 +31,7 @@ const (
 	panelCount
 )
 
-var panelTitles = [panelCount]string{"Environments", "Databases", "Snapshots", "Sets", "Runs"}
+var panelTitles = [panelCount]string{"Connections", "Databases", "Snapshots", "Sets", "Runs"}
 
 // Model is the whole UI.
 type Model struct {
@@ -131,8 +131,8 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, tick()
 
 	case probeMsg:
-		delete(m.probing, msg.probe.Environment)
-		m.probes[msg.probe.Environment] = msg.probe
+		delete(m.probing, msg.probe.Connection)
+		m.probes[msg.probe.Connection] = msg.probe
 		return m, nil
 
 	case snapshotsMsg:
@@ -174,7 +174,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 		}
 		m.action.stage = stagePlan
-		m.action.plan = &planPreview{plan: msg.plan, needsName: msg.plan.Target.Env.Guarded}
+		m.action.plan = &planPreview{plan: msg.plan, needsName: msg.plan.Target.Conn.Guarded}
 		return m, nil
 
 	case runEventMsg:
