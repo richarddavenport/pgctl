@@ -42,6 +42,10 @@ type Plan struct {
 	// not, Execute downloads what it needs first.
 	Local bool
 
+	// Dir is where the snapshot's files are, or will be downloaded to. Normally
+	// under the storage root; a `move` stages one somewhere temporary.
+	Dir string
+
 	// WholeDatabase distinguishes the two mechanisms: a drop-and-recreate of
 	// the database, or a load of some tables into the one that is there.
 	WholeDatabase bool
@@ -102,6 +106,23 @@ func (e *Engine) Plan(ctx context.Context, req ApplyRequest, report Reporter) (*
 	if err != nil {
 		return nil, err
 	}
+	return e.planWith(ctx, man, local, snapshot.Path(e.storageRoot(), man.ID), req, report)
+}
+
+// planFrom plans an apply of a snapshot sitting in a particular directory,
+// rather than one resolved from storage. This is what a `move` plans against:
+// the snapshot it just staged, which is deliberately not catalogued.
+func (e *Engine) planFrom(ctx context.Context, dir string, req ApplyRequest, report Reporter) (*Plan, error) {
+	man, err := snapshot.Read(dir)
+	if err != nil {
+		return nil, err
+	}
+	return e.planWith(ctx, man, true, dir, req, report)
+}
+
+func (e *Engine) planWith(ctx context.Context, man *snapshot.Manifest, local bool, dir string,
+	req ApplyRequest, report Reporter) (*Plan, error) {
+
 	if !man.Complete() {
 		return nil, &RefusalError{fmt.Sprintf("snapshot %s did not finish and cannot be applied", man.ID)}
 	}
@@ -118,7 +139,7 @@ func (e *Engine) Plan(ctx context.Context, req ApplyRequest, report Reporter) (*
 		report.warn(fmt.Sprintf("applying %s back to %s, the environment it came from", man.ID, man.Environment))
 	}
 
-	plan := &Plan{Snapshot: man, Target: target, Local: local}
+	plan := &Plan{Snapshot: man, Target: target, Local: local, Dir: dir}
 	plan.WholeDatabase = req.Set == "" && len(req.Tables) == 0
 
 	// A whole-database apply drops and recreates the database, so the target's

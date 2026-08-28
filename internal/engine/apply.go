@@ -75,7 +75,10 @@ func (e *Engine) Execute(ctx context.Context, plan *Plan, report Reporter) (err 
 		}
 	}
 
-	dir := snapshot.Path(e.storageRoot(), plan.Snapshot.ID)
+	dir := plan.Dir
+	if dir == "" {
+		dir = snapshot.Path(e.storageRoot(), plan.Snapshot.ID)
+	}
 	if plan.WholeDatabase {
 		err = e.applyWholeDatabase(ctx, plan, dir, report)
 	} else {

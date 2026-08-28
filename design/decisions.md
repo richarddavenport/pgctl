@@ -201,3 +201,30 @@ itself, explicitly.
 
 Only triggers that are currently enabled are recorded, so re-enabling never
 switches on something an operator had deliberately turned off.
+
+## 14. "Direct" env-to-env keeps the artifact, and keeps parallelism
+
+The obvious shape for "refresh QAT from prd now" is a pipe:
+
+    pg_dump … | pg_restore …
+
+It is wrong for anything large, and the reason is decision #2. A pipe requires
+custom format, because a directory archive is a directory and cannot be written
+to stdout. Custom format cannot be dumped in parallel and, streamed, cannot be
+restored in parallel either — a pipe has no random access, so `pg_restore -j`
+has nothing to work with. So the pipe trades away the single biggest speed win
+in exchange for not touching a disk.
+
+`pgctl move --from prd --to qat` therefore does the same thing an operator would
+do by hand, and does it in one command: take a snapshot into a temporary
+directory with `-j`, apply it with `-j`, and delete it afterwards unless asked
+to keep it. No snapshot is catalogued, nothing is uploaded, and both ends run at
+full width.
+
+What that costs is disk on the machine in the middle, sized to the compressed
+snapshot. What it buys, on a 2 GB archive with four jobs, is most of a factor of
+two — and more on a server with more cores.
+
+The pipe remains the right answer in one case: a small selection of tables where
+the whole operation is over before parallelism would have paid for itself. That
+is not the case worth building first.

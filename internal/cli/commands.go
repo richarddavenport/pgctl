@@ -10,6 +10,7 @@ import (
 	"text/tabwriter"
 	"time"
 
+	"github.com/richarddavenport/pgctl/internal/config"
 	"github.com/richarddavenport/pgctl/internal/engine"
 	"github.com/richarddavenport/pgctl/internal/snapshot"
 )
@@ -193,20 +194,25 @@ func (a *applyFlags) validate() error {
 }
 
 // confirm gates a destructive apply.
+func confirm(plan *engine.Plan, f applyFlags) error {
+	return confirmEnv(plan.Target.Env, f.confirm, f.yes, "Apply?")
+}
+
+// confirmEnv is the gate itself.
 //
 // A guarded environment always needs its name typed, and --yes does not waive
 // it: --yes exists so a routine refresh of a scratch environment is not a
 // prompt, and a guarded environment is by definition not routine. In a
 // non-interactive run the name comes from --confirm, which a CI job has to
 // spell out in the workflow file where a reviewer can see it.
-func confirm(plan *engine.Plan, f applyFlags) error {
-	name := plan.Target.Env.Name
-	if plan.Target.Env.Guarded {
-		if f.confirm == name {
+func confirmEnv(env config.Environment, confirmFlag string, yes bool, question string) error {
+	name := env.Name
+	if env.Guarded {
+		if confirmFlag == name {
 			return nil
 		}
-		if f.confirm != "" {
-			return fmt.Errorf("--confirm %q does not name the target environment %q", f.confirm, name)
+		if confirmFlag != "" {
+			return fmt.Errorf("--confirm %q does not name the target environment %q", confirmFlag, name)
 		}
 		if !interactive() {
 			return fmt.Errorf("%s is guarded: pass --confirm %s", name, name)
@@ -219,10 +225,10 @@ func confirm(plan *engine.Plan, f applyFlags) error {
 		return nil
 	}
 
-	if f.yes || !interactive() {
+	if yes || !interactive() {
 		return nil
 	}
-	fmt.Print("\nApply? [y/N] ")
+	fmt.Printf("\n%s [y/N] ", question)
 	typed, _ := bufio.NewReader(os.Stdin).ReadString('\n')
 	if s := strings.ToLower(strings.TrimSpace(typed)); s != "y" && s != "yes" {
 		return fmt.Errorf("not confirmed")
@@ -290,6 +296,67 @@ func runPrune(ctx context.Context, args []string) error {
 		// policy is easy to get wrong, and the run that discovers it should not
 		// be the run that acts on it.
 		fmt.Printf("%d snapshot(s), %s — re-run with --apply to delete\n", deleted, engine.HumanBytes(freed))
+	}
+	return nil
+}
+
+func runMove(ctx context.Context, args []string) error {
+	fs := flag.NewFlagSet("move", flag.ExitOnError)
+	configPath := fs.String("config", "", "path to a pgctl config")
+	from := fs.String("from", "", "environment to read")
+	to := fs.String("to", "", "environment to write")
+	database := fs.String("db", "", "database to move (default: every declared database)")
+	set := fs.String("set", "", "move only this table set")
+	tables := fs.String("tables", "", "move only these tables (comma separated, schema-qualified)")
+	widen := fs.Bool("widen", false, "include tables the selection references but does not name")
+	keep := fs.Bool("keep", false, "keep the staged snapshot instead of deleting it")
+	verbose := fs.Bool("v", false, "report every table")
+	yes := fs.Bool("yes", false, "skip the confirmation prompt")
+	confirmName := fs.String("confirm", "",
+		"name of the environment being written to, required for a guarded one")
+	_ = fs.Parse(Permute(fs, args))
+
+	if *from == "" || *to == "" {
+		return fmt.Errorf("--from and --to are both required")
+	}
+	e, err := load(*configPath)
+	if err != nil {
+		return err
+	}
+
+	// A guarded target is confirmed once, before any work: a move takes a
+	// snapshot first, and asking after that has spent the time is asking too
+	// late to be a choice.
+	env, ok := e.Config().LookupEnv(*to)
+	if !ok {
+		return fmt.Errorf("unknown environment %q", *to)
+	}
+	if err := confirmEnv(env, *confirmName, *yes,
+		fmt.Sprintf("Refresh %s from %s?", *to, *from)); err != nil {
+		return err
+	}
+
+	databases := []string{*database}
+	if *database == "" {
+		databases = nil
+		for _, d := range e.Config().Databases {
+			databases = append(databases, d.Name)
+		}
+	}
+
+	report := printer(*verbose)
+	for _, db := range databases {
+		if err := e.Move(ctx, engine.MoveRequest{
+			From:     *from,
+			To:       *to,
+			Database: db,
+			Set:      *set,
+			Tables:   splitList(*tables),
+			Widen:    *widen,
+			Keep:     *keep,
+		}, report); err != nil {
+			return err
+		}
 	}
 	return nil
 }

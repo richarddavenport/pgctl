@@ -58,6 +58,9 @@ func usage() {
 A snapshot may be named in full (prd/product-development/20260828T030000Z), by
 its timestamp alone when that is unambiguous, or as <env>/latest.
 
+  pgctl move --from prd --to qat [--set claims]
+                              refresh one environment from another, keeping no snapshot
+
   pgctl prune                 report what a retention policy would delete (--apply to do it)
 
   pgctl version               print the version

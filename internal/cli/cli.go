@@ -27,6 +27,7 @@ var Commands = map[string]bool{
 	"plan":     true,
 	"apply":    true,
 	"prune":    true,
+	"move":     true,
 }
 
 // Run dispatches a headless command and returns a process exit code.
@@ -48,6 +49,8 @@ func Run(args []string) int {
 		err = runApply(ctx, args[1:])
 	case "prune":
 		err = runPrune(ctx, args[1:])
+	case "move":
+		err = runMove(ctx, args[1:])
 	default:
 		err = fmt.Errorf("unknown command %q", args[0])
 	}
