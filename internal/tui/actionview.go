@@ -1,0 +1,230 @@
+package tui
+
+import (
+	"fmt"
+	"strings"
+)
+
+// viewAction renders the open form, the plan it produced, or the wait between
+// them.
+func (m *Model) viewAction() string {
+	a := m.action
+
+	var b strings.Builder
+	b.WriteString(titleStyle.Render(a.title) + "\n")
+	if a.explain != "" {
+		b.WriteString(mutedStyle.Render(wrap(a.explain, 68)) + "\n")
+	}
+	b.WriteString("\n")
+
+	switch a.stage {
+	case stagePlanning:
+		b.WriteString(accentStyle.Render(spinner(m.now)) + " reading the target's foreign keys…\n")
+		b.WriteString(mutedStyle.Render("\nThe plan is computed against the target, because the target's\n" +
+			"constraints are the ones a load has to satisfy."))
+	case stagePlan:
+		b.WriteString(m.viewPlanPreview())
+	default:
+		b.WriteString(m.viewForm())
+	}
+
+	if a.err != nil {
+		b.WriteString("\n\n" + dangerStyle.Render(wrap(a.err.Error(), 68)))
+	}
+	return boxStyle.Render(b.String())
+}
+
+// viewForm renders every field at once, so the operator can see what they have
+// chosen rather than remembering it.
+func (m *Model) viewForm() string {
+	a := m.action
+	var b strings.Builder
+
+	for i, f := range a.fields {
+		focused := i == a.cursor
+		marker := "  "
+		if focused {
+			marker = accentStyle.Render("▸ ")
+		}
+
+		label := fmt.Sprintf("%-22s", f.label)
+		if f.disabled {
+			label = mutedStyle.Render(label)
+		} else if focused {
+			label = accentStyle.Render(label)
+		}
+		b.WriteString(marker + label)
+
+		switch f.kind {
+		case fieldChoice:
+			b.WriteString(m.renderChoice(f, focused))
+		case fieldMulti:
+			b.WriteString(m.renderMulti(f, focused))
+		case fieldToggle:
+			b.WriteString(renderToggle(f))
+		case fieldText:
+			text := f.text
+			if text == "" {
+				text = mutedStyle.Render("(none)")
+			}
+			if focused && !f.disabled {
+				text += "▌"
+			}
+			b.WriteString(text)
+		}
+		b.WriteString("\n")
+
+		switch {
+		case f.disabled && f.reason != "":
+			b.WriteString("    " + mutedStyle.Render(f.reason) + "\n")
+		case focused && f.help != "":
+			b.WriteString("    " + mutedStyle.Render(f.help) + "\n")
+		}
+	}
+	return b.String()
+}
+
+func (m *Model) renderChoice(f formField, focused bool) string {
+	label := ""
+	if f.choice < len(f.labels) {
+		label = f.labels[f.choice]
+	} else if f.choice < len(f.options) {
+		label = f.options[f.choice]
+	}
+
+	// The position is shown because a list of choices you can only step through
+	// is one you cannot tell the length of.
+	position := mutedStyle.Render(fmt.Sprintf("  (%d/%d)", f.choice+1, len(f.options)))
+	if focused && !f.disabled {
+		return accentStyle.Render("‹ ") + label + accentStyle.Render(" ›") + position
+	}
+	return "  " + label + position
+}
+
+func (m *Model) renderMulti(f formField, focused bool) string {
+	parts := make([]string, 0, len(f.options))
+	for i, opt := range f.options {
+		box := "☐"
+		if f.selected[i] {
+			box = okStyle.Render("☑")
+		}
+		item := box + " " + opt
+		if focused && i == f.choice {
+			item = selectedStyle.Render(" " + box + " " + opt + " ")
+		}
+		parts = append(parts, item)
+	}
+	chosen := 0
+	for _, on := range f.selected {
+		if on {
+			chosen++
+		}
+	}
+	return strings.Join(parts, "  ") + mutedStyle.Render(fmt.Sprintf("   %d of %d", chosen, len(f.options)))
+}
+
+func renderToggle(f formField) string {
+	if f.disabled {
+		return mutedStyle.Render("—")
+	}
+	if f.on {
+		return okStyle.Render("on")
+	}
+	return mutedStyle.Render("off")
+}
+
+// viewPlanPreview renders the plan. This is the last thing between an operator
+// and a destructive act, so it leads with what is destroyed and never with what
+// is convenient.
+func (m *Model) viewPlanPreview() string {
+	p := m.action.plan
+	var b strings.Builder
+	b.WriteString(p.plan.Describe())
+
+	if p.needsName {
+		b.WriteString("\n" + dangerStyle.Render(
+			fmt.Sprintf("%s is guarded. Type its name to continue: ", p.plan.Target.Env.Name)) +
+			p.typed + "▌")
+	}
+	return b.String()
+}
+
+// actionFooter is the key hint for whatever the form is showing.
+func (m *Model) actionFooter() string {
+	a := m.action
+	switch a.stage {
+	case stagePlanning:
+		return "esc cancel"
+	case stagePlan:
+		if a.plan != nil && a.plan.needsName {
+			return "type the environment's name  ·  enter confirm  ·  esc back"
+		}
+		hints := "enter apply  ·  esc back to the form"
+		if f := a.field("widen"); f != nil && !f.disabled && !f.on {
+			hints = "enter apply  ·  w widen the selection  ·  esc back"
+		}
+		return hints
+	default:
+		if a.cursor < len(a.fields) {
+			switch a.fields[a.cursor].kind {
+			case fieldMulti:
+				return "space toggle  ·  a all  ·  n none  ·  ↑↓ fields  ·  enter run  ·  esc cancel"
+			case fieldChoice:
+				return "← → change  ·  ↑↓ fields  ·  enter run  ·  esc cancel"
+			case fieldToggle:
+				return "space toggle  ·  ↑↓ fields  ·  enter run  ·  esc cancel"
+			}
+		}
+		return "↑↓ fields  ·  enter run  ·  esc cancel"
+	}
+}
+
+// viewHelp is the ? overlay: every key, grouped by what it acts on.
+func (m *Model) viewHelp() string {
+	groups := []struct {
+		title string
+		keys  [][2]string
+	}{
+		{"Moving", [][2]string{
+			{"1 – 5", "jump to a panel"},
+			{"↑ ↓ / j k", "move within a panel"},
+			{"J K", "next / previous panel"},
+			{"g G", "first / last row"},
+			{"tab", "focus the detail pane, then cycle its tabs"},
+			{"shift+tab", "previous tab"},
+			{"← / h", "leave the detail pane"},
+			{"/", "filter the focused panel"},
+			{"esc", "clear the filter, or leave the pane"},
+		}},
+		{"Doing", [][2]string{
+			{"n", "take a snapshot — choose environment and databases"},
+			{"a", "apply the selected snapshot — choose target and scope"},
+			{"m", "move one environment's data into another"},
+			{"p", "prune snapshots by the retention policy"},
+			{"x", "delete the selected snapshot"},
+			{"r", "reload snapshots and re-probe environments"},
+		}},
+		{"In a form", [][2]string{
+			{"↑ ↓", "move between fields"},
+			{"← →", "change a choice"},
+			{"space", "toggle"},
+			{"a / n", "select all / none in a multi-select"},
+			{"enter", "run it"},
+			{"esc", "cancel"},
+		}},
+		{"While something runs", [][2]string{
+			{"q", "cancel it — the engine's failure hooks still run"},
+		}},
+	}
+
+	var b strings.Builder
+	b.WriteString(titleStyle.Render("pgctl keys") + "\n")
+	for _, g := range groups {
+		b.WriteString(section(g.title))
+		for _, k := range g.keys {
+			fmt.Fprintf(&b, "  %s %s\n", accentStyle.Render(fmt.Sprintf("%-12s", k[0])), k[1])
+		}
+	}
+	b.WriteString("\n" + mutedStyle.Render("any key closes this"))
+	return boxStyle.Render(b.String())
+}

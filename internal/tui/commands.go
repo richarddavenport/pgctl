@@ -2,20 +2,18 @@ package tui
 
 import (
 	"context"
-	"fmt"
-	"strings"
+	"sync"
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
 
 	"github.com/richarddavenport/pgctl/internal/engine"
+	"github.com/richarddavenport/pgctl/internal/pg"
 )
 
-// eventMsg carries one engine event into the update loop.
-type eventMsg engine.Event
-
-// tickMsg drives the redraw of a running operation.
-type tickMsg time.Time
+// Everything that touches a database, a blob container or a subprocess happens
+// in a command. Nothing in Update may block: a slow environment must make one
+// panel say "probing" rather than freeze the whole UI.
 
 // tickInterval has to match the spinner's frame rate, not the rate at which
 // anything interesting happens. Redrawing once a second while the spinner
@@ -23,136 +21,241 @@ type tickMsg time.Time
 // as flicker rather than rotation.
 const tickInterval = 100 * time.Millisecond
 
+// probeTimeout bounds a reachability check. An environment behind a firewall
+// that drops packets rather than refusing them would otherwise leave a panel
+// saying "probing" for the rest of the session.
+const probeTimeout = 20 * time.Second
+
+// loadTimeout bounds a catalog read.
+const loadTimeout = 2 * time.Minute
+
+type tickMsg time.Time
+
 func tick() tea.Cmd {
 	return tea.Tick(tickInterval, func(t time.Time) tea.Msg { return tickMsg(t) })
 }
 
-// doneMsg ends a run.
-type doneMsg struct {
+type (
+	probeMsg     struct{ probe *engine.Probe }
+	snapshotsMsg struct {
+		entries []*engine.Entry
+		err     error
+	}
+	liveTablesMsg struct {
+		key    string
+		tables []pg.TableInfo
+		err    error
+	}
+	setMembersMsg struct {
+		key            string
+		members, added []string
+		err            error
+	}
+)
+
+// probeAll starts a probe of every environment at once. They are independent,
+// and one unreachable environment must not delay the rest.
+func (m *Model) probeAll() tea.Cmd {
+	var cmds []tea.Cmd
+	for _, env := range m.cfg.Environments {
+		if cmd := m.probe(env.Name); cmd != nil {
+			cmds = append(cmds, cmd)
+		}
+	}
+	return tea.Batch(cmds...)
+}
+
+func (m *Model) probe(name string) tea.Cmd {
+	if m.probing[name] {
+		return nil
+	}
+	m.probing[name] = true
+	e := m.engine
+	return func() tea.Msg {
+		ctx, cancel := context.WithTimeout(context.Background(), probeTimeout)
+		defer cancel()
+		p := e.ProbeEnvironment(ctx, name)
+		return probeMsg{probe: &p}
+	}
+}
+
+func (m *Model) loadSnapshots() tea.Cmd {
+	e := m.engine
+	return func() tea.Msg {
+		ctx, cancel := context.WithTimeout(context.Background(), loadTimeout)
+		defer cancel()
+		entries, err := e.Index(ctx, nil)
+		return snapshotsMsg{entries: entries, err: err}
+	}
+}
+
+func (m *Model) loadLiveTables(env, database string) tea.Cmd {
+	key := liveKey(env, database)
+	if m.loading[key] {
+		return nil
+	}
+	m.loading[key] = true
+	e := m.engine
+	return func() tea.Msg {
+		ctx, cancel := context.WithTimeout(context.Background(), loadTimeout)
+		defer cancel()
+		tables, err := e.LiveTables(ctx, env, database)
+		return liveTablesMsg{key: key, tables: tables, err: err}
+	}
+}
+
+func (m *Model) loadSetMembers(env, database, set string) tea.Cmd {
+	key := setKey(env, database, set)
+	if s := m.setInfo[key]; s != nil && (s.loading || s.members != nil || s.err != nil) {
+		return nil
+	}
+	m.setInfo[key] = &setSummary{loading: true}
+	e := m.engine
+	return func() tea.Msg {
+		ctx, cancel := context.WithTimeout(context.Background(), loadTimeout)
+		defer cancel()
+		members, added, err := e.SetMembers(ctx, env, database, set)
+		return setMembersMsg{key: key, members: members, added: added, err: err}
+	}
+}
+
+// runRecord is one operation, kept for the Runs panel so a failure can be read
+// after the screen that reported it has gone.
+type runRecord struct {
+	kind      string
+	explain   string
+	startedAt time.Time
+	endedAt   time.Time
+
+	mu     sync.Mutex
+	events []engine.Event
+
+	// progress is the newest progress event, redrawn in place rather than
+	// appended, so a byte counter counts instead of scrolling.
+	progress engine.Event
+
+	running bool
 	err     error
 	summary string
+
+	cancel func()
+	ch     chan engine.Event
+	done   chan runResult
 }
 
-// startSnapshot begins a dump of every declared database on an environment.
-func (m *Model) startSnapshot(env string) tea.Cmd {
-	databases := make([]string, 0, len(m.engine.Config().Databases))
-	for _, d := range m.engine.Config().Databases {
-		databases = append(databases, d.Name)
+type runResult struct {
+	summary string
+	err     error
+}
+
+type (
+	runEventMsg engine.Event
+	runDoneMsg  runResult
+)
+
+func (r *runRecord) add(ev engine.Event) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if ev.Kind == engine.EventProgress {
+		r.progress = ev
+		return
 	}
-
-	explain := fmt.Sprintf("Copying %s from %s into %s. Nothing is written to %s.",
-		strings.Join(databases, ", "), env, m.engine.StorageDir(), env)
-	return m.start("snapshot "+env, explain, func(ctx context.Context, report engine.Reporter) (string, error) {
-		for _, db := range databases {
-			if _, err := m.engine.Dump(ctx, engine.DumpRequest{
-				Environment: env,
-				Database:    db,
-			}, report); err != nil {
-				return "", err
-			}
-		}
-		return fmt.Sprintf("snapshotted %d database(s) from %s", len(databases), env), nil
-	})
+	r.events = append(r.events, ev)
 }
 
-// startApply executes the plan already on screen — the one that was confirmed,
-// not a fresh one that might differ from it.
-func (m *Model) startApply() tea.Cmd {
-	plan := m.plan
-	what := fmt.Sprintf("%d tables", len(plan.Selection))
-	if plan.WholeDatabase {
-		what = "the whole " + plan.Snapshot.Database + " database"
+// log returns a copy of the record's events, safe to render while the operation
+// is still writing to it.
+func (r *runRecord) log() []engine.Event {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	return append([]engine.Event{}, r.events...)
+}
+
+func (r *runRecord) latestProgress() engine.Event {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	return r.progress
+}
+
+func (r *runRecord) duration(now time.Time) time.Duration {
+	if r.running {
+		return now.Sub(r.startedAt)
 	}
-	explain := fmt.Sprintf("Replacing %s on %s with the contents of %s.",
-		what, plan.Target.Env.Name, plan.Snapshot.ID)
-	return m.start("apply "+plan.Snapshot.ID, explain, func(ctx context.Context, report engine.Reporter) (string, error) {
-		if err := m.engine.Execute(ctx, plan, report); err != nil {
-			return "", err
-		}
-		return fmt.Sprintf("applied %s to %s", plan.Snapshot.ID, plan.Target.Env.Name), nil
-	})
+	return r.endedAt.Sub(r.startedAt)
 }
 
-// buildPlan computes a plan without running it. Planning connects to the
-// target, so it is a command rather than done inline — a slow or unreachable
-// environment must not freeze the UI.
-func (m *Model) buildPlan(widen bool) tea.Cmd {
-	req := engine.ApplyRequest{
-		Snapshot: m.chosen.ID,
-		Target:   m.target,
-		Set:      m.set,
-		Widen:    widen,
-	}
-	return func() tea.Msg {
-		ctx, cancel := context.WithTimeout(context.Background(), planTimeout)
-		defer cancel()
-		plan, err := m.engine.Plan(ctx, req, nil)
-		return planMsg{plan: plan, err: err}
-	}
-}
-
-// planMsg delivers a computed plan.
-type planMsg struct {
-	plan *engine.Plan
-	err  error
-}
-
-// start runs an operation in the background, forwarding its events into the
-// update loop.
+// start runs an operation in the background, recording it.
 func (m *Model) start(kind, explain string, op func(context.Context, engine.Reporter) (string, error)) tea.Cmd {
 	ctx, cancel := context.WithCancel(context.Background())
-	r := &run{
-		kind:    kind,
-		explain: explain,
+	r := &runRecord{
+		kind:      kind,
+		explain:   explain,
+		startedAt: time.Now(),
+		running:   true,
+		cancel:    cancel,
 		// Buffered: the engine must not block on a UI that is mid-render, and
-		// an operation that outruns the buffer is one whose intermediate
-		// progress nobody could have read anyway.
-		events: make(chan engine.Event, 256),
-		done:   make(chan error, 1),
-		cancel: cancel,
+		// an operation outrunning the buffer is one whose intermediate progress
+		// nobody could have read anyway.
+		ch:   make(chan engine.Event, 256),
+		done: make(chan runResult, 1),
 	}
-	m.run = r
-	m.events = nil
-	m.stage = stageRunning
-	m.startedAt = nowFunc()
+	m.runs = append(m.runs, r)
+	m.active = r
+	m.focus = panelRuns
+	m.paneFocus = false
+	m.cursors[panelRuns] = 0
 	m.err = nil
 	m.status = ""
-	m.progress = engine.Event{}
-	m.progressStep = ""
 
-	summary := make(chan string, 1)
 	go func() {
-		defer close(r.events)
-		s, err := op(ctx, func(ev engine.Event) {
+		defer close(r.ch)
+		summary, err := op(ctx, func(ev engine.Event) {
 			select {
-			case r.events <- ev:
+			case r.ch <- ev:
 			default:
 			}
 		})
-		summary <- s
-		r.done <- err
+		r.done <- runResult{summary: summary, err: err}
 	}()
 
-	return tea.Batch(tick(), m.waitForEvent(), func() tea.Msg {
-		err := <-r.done
-		return doneMsg{err: err, summary: <-summary}
-	})
+	return tea.Batch(m.waitForEvent(), func() tea.Msg { return runDoneMsg(<-r.done) })
 }
 
 // waitForEvent blocks in a command until the next event arrives, which is how a
 // bubbletea program consumes a channel.
 func (m *Model) waitForEvent() tea.Cmd {
-	r := m.run
+	r := m.active
 	if r == nil {
 		return nil
 	}
 	return func() tea.Msg {
-		ev, ok := <-r.events
+		ev, ok := <-r.ch
 		if !ok {
-			// The channel closing is not the end of the run: doneMsg is,
-			// and it carries the error.
 			return nil
 		}
-		return eventMsg(ev)
+		return runEventMsg(ev)
 	}
+}
+
+// finishRun closes out the active operation and reloads whatever it changed.
+func (m *Model) finishRun(res runDoneMsg) tea.Cmd {
+	r := m.active
+	if r == nil {
+		return nil
+	}
+	r.running = false
+	r.endedAt = time.Now()
+	r.err = res.err
+	r.summary = res.summary
+	m.active = nil
+
+	if res.err != nil {
+		m.err = res.err
+	} else if res.summary != "" {
+		m.status = res.summary
+	}
+
+	// An operation changes what is on disk and what is in the target, so both
+	// the snapshot list and the probes are stale the moment it ends.
+	return tea.Batch(m.loadSnapshots(), m.probeAll())
 }

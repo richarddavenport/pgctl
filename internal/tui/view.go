@@ -3,197 +3,354 @@ package tui
 import (
 	"fmt"
 	"strings"
-	"time"
 
-	"github.com/richarddavenport/pgctl/internal/engine"
+	"github.com/charmbracelet/lipgloss"
 )
 
-// View renders the current stage.
+// Layout: a fixed-width left column of panels, the rest to the detail pane.
+// The column is wide enough for a snapshot timestamp and its location marker,
+// which is the widest thing that has to stay readable.
+const (
+	leftWidth   = 32
+	minPaneWide = 40
+
+	// panelBlock is what lipgloss is told the panel is: leftWidth less the two
+	// columns its rounded border takes.
+	panelBlock = leftWidth - 2
+
+	// panelInner is what a row actually gets. lipgloss's Width includes
+	// padding, so the row loses the two columns of it as well. Getting this
+	// wrong by two wraps every row, which is how the first version rendered a
+	// database list.
+	panelInner = panelBlock - 2
+)
+
+// View renders the whole screen.
 func (m *Model) View() string {
-	var b strings.Builder
-
-	b.WriteString(m.header())
-	b.WriteString("\n\n")
-
-	switch m.stage {
-	case stageSnapshots:
-		b.WriteString(m.viewSnapshots())
-	case stageSourceEnv:
-		b.WriteString(m.viewEnvs("Take a snapshot of which environment?"))
-	case stageTargetEnv:
-		b.WriteString(m.viewEnvs("Apply " + m.chosen.ID + " to which environment?"))
-	case stageScope:
-		b.WriteString(m.viewScope())
-	case stagePlan:
-		b.WriteString(m.viewPlan())
-	case stageRunning:
-		b.WriteString(m.viewRunning())
+	// A size of zero means no WindowSizeMsg has arrived. A real terminal sends
+	// one immediately, but a pty with no size attached never does, and a UI
+	// that waits forever for it is a UI that renders nothing at all under
+	// `script`, in CI, or over a connection that lost its window size.
+	width, height := m.width, m.height
+	if width <= 0 {
+		width = 80
+	}
+	if height <= 0 {
+		height = 24
+	}
+	if m.showHelp {
+		return m.viewHelp()
 	}
 
-	if m.err != nil {
-		b.WriteString("\n" + dangerStyle.Render("✗ "+m.err.Error()) + "\n")
-	} else if m.status != "" {
-		b.WriteString("\n" + okStyle.Render("✓ "+m.status) + "\n")
+	header := m.header()
+	footer := m.footer()
+	bodyHeight := height - lipgloss.Height(header) - lipgloss.Height(footer)
+	if bodyHeight < 3 {
+		bodyHeight = 3
 	}
 
-	b.WriteString("\n" + footerStyle.Render(m.footer()))
-	return b.String()
+	left := m.leftColumn(bodyHeight)
+	paneWidth := width - leftWidth - 1
+	if paneWidth < minPaneWide {
+		// A narrow terminal gets the pane alone: two half-width columns are
+		// worse than one usable one.
+		body := m.pane(width, bodyHeight)
+		return strings.Join([]string{header, body, footer}, "\n")
+	}
+	right := m.pane(paneWidth, bodyHeight)
+	body := lipgloss.JoinHorizontal(lipgloss.Top, left, " ", right)
+
+	screen := strings.Join([]string{header, body, footer}, "\n")
+	if m.action != nil {
+		return m.overlay(screen, m.viewAction())
+	}
+	return screen
+}
+
+// screenWidth is the width to lay out against, defaulting when no size has
+// arrived. See View.
+func (m *Model) screenWidth() int {
+	if m.width <= 0 {
+		return 80
+	}
+	return m.width
 }
 
 func (m *Model) header() string {
-	source := m.engine.Config().Source
+	source := m.cfg.Source
 	if source == "" {
 		source = "no config"
 	}
-	return titleStyle.Render("pgctl") + mutedStyle.Render("  "+source)
-}
+	line := titleStyle.Render("pgctl") + mutedStyle.Render("  "+source)
 
-func (m *Model) viewSnapshots() string {
-	if len(m.snapshots) == 0 {
-		return mutedStyle.Render("No snapshots yet. Press n to take one.")
-	}
-
-	var b strings.Builder
-	b.WriteString(headerStyle.Render(fmt.Sprintf("  %-46s %-17s %7s %6s", "SNAPSHOT", "TAKEN", "TABLES", "SIZE")))
-	b.WriteString("\n")
-
-	for i, s := range m.snapshots {
-		state := ""
-		if !s.Complete() {
-			state = dangerStyle.Render("  INCOMPLETE")
-		}
-		line := fmt.Sprintf("  %-46s %-17s %7d %6s", s.ID,
-			s.StartedAt.Local().Format("2006-01-02 15:04"), len(s.Tables), engine.HumanBytes(s.Bytes))
-		b.WriteString(m.row(i, line) + state + "\n")
-	}
-	return b.String()
-}
-
-func (m *Model) viewEnvs(prompt string) string {
-	var b strings.Builder
-	b.WriteString(prompt + "\n\n")
-	for i, env := range m.envs {
-		note := ""
-		switch {
-		case env.Protected:
-			note = dangerStyle.Render("  protected — never a target")
-		case env.Guarded:
-			note = warnStyle.Render("  guarded")
-		}
-		host := env.Server.Host
-		if host == "" {
-			host = "from " + env.Secrets.File
-		}
-		line := fmt.Sprintf("  %-10s %s", env.Name, mutedStyle.Render(host))
-		b.WriteString(m.row(i, line) + note + "\n")
-	}
-	return b.String()
-}
-
-func (m *Model) viewScope() string {
-	var b strings.Builder
-	fmt.Fprintf(&b, "How much of %s?\n\n", m.chosen.Database)
-
-	b.WriteString(m.row(0, "  "+dangerStyle.Render("the whole database")+
-		mutedStyle.Render("  drop and recreate it")) + "\n")
-
-	for i, set := range m.scopeSets() {
-		desc := set.Description
-		if desc == "" {
-			desc = strings.Join(set.Include, ", ")
-		}
-		line := fmt.Sprintf("  %-16s %s", set.Name, mutedStyle.Render(desc))
-		b.WriteString(m.row(i+1, line) + "\n")
-	}
-
-	if len(m.scopeSets()) == 0 {
-		b.WriteString("\n" + mutedStyle.Render("No sets declared for this database — declare some in pgctl.yaml."))
-	}
-	return b.String()
-}
-
-func (m *Model) viewPlan() string {
-	if m.plan == nil {
-		return mutedStyle.Render("planning…")
-	}
-	body := boxStyle.Render(strings.TrimRight(m.plan.Describe(), "\n"))
-	if m.confirming {
-		return body + "\n\n" + dangerStyle.Render(
-			fmt.Sprintf("Type %q to confirm: ", m.plan.Target.Env.Name)) + m.confirmation + "▌"
-	}
-	return body
-}
-
-func (m *Model) viewRunning() string {
-	var b strings.Builder
-
-	// A running operation must answer three questions without being asked:
-	// what is happening, how long it has been happening, and whether it is
-	// still alive. The elapsed time redraws every second, so a screen that has
-	// stopped moving means something is genuinely wrong rather than merely
-	// quiet.
-	fmt.Fprintf(&b, "%s  %s\n", titleStyle.Render(m.run.kind), mutedStyle.Render(elapsed(m.startedAt)))
-	fmt.Fprintf(&b, "%s\n\n", mutedStyle.Render(m.run.explain))
-
-	for _, ev := range m.summariseEvents(10) {
-		switch ev.Kind {
-		case engine.EventStep:
-			fmt.Fprintf(&b, "  %s %s\n", mutedStyle.Render("·"), ev.Message)
-		case engine.EventTable:
-			fmt.Fprintf(&b, "    %s %s\n", ev.Table, mutedStyle.Render(ev.Message))
-		case engine.EventWarning:
-			b.WriteString("  " + warnStyle.Render("! "+ev.Message) + "\n")
-		case engine.EventDone:
-			b.WriteString("  " + okStyle.Render("✓ "+ev.Message) + "\n")
-		case engine.EventFailed:
-			b.WriteString("  " + dangerStyle.Render("✗ "+ev.Message) + "\n")
-		}
-	}
-
-	// The progress line redraws in place, so a byte counter counts rather than
-	// scrolling a hundred near-identical lines past.
-	if m.progress.Message != "" {
-		fmt.Fprintf(&b, "\n  %s %s\n", accentStyle.Render(spinner(m.startedAt)), m.progress.Message)
-	}
-	return b.String()
-}
-
-// spinnerFrames turn in one direction at one dot per frame, so a dropped
-// redraw looks like a pause rather than a reversal.
-var spinnerFrames = []string{"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"}
-
-// spinner picks its frame from the clock rather than from a counter, so it
-// turns at a steady rate however often the view happens to be rebuilt.
-func spinner(since time.Time) string {
-	return spinnerFrames[int(time.Since(since)/tickInterval)%len(spinnerFrames)]
-}
-
-// row renders one list line, highlighted when the cursor is on it.
-func (m *Model) row(i int, line string) string {
-	if i == m.cursor {
-		return selectedStyle.Render(strings.TrimRight(line, " "))
+	switch {
+	case m.err != nil:
+		line += "   " + dangerStyle.Render("✗ "+truncate(m.err.Error(), m.screenWidth()-40))
+	case m.status != "":
+		line += "   " + okStyle.Render("✓ "+truncate(m.status, m.screenWidth()-40))
 	}
 	return line
 }
 
-func (m *Model) footer() string {
-	switch m.stage {
-	case stageSnapshots:
-		return "↑/↓ move · enter apply · n new snapshot · r reload · q quit"
-	case stageSourceEnv, stageTargetEnv:
-		return "↑/↓ move · enter choose · esc back · q quit"
-	case stageScope:
-		return "↑/↓ move · enter plan · esc back · q quit"
-	case stagePlan:
-		if m.confirming {
-			return "type the environment's name · enter confirm · esc cancel"
-		}
-		if len(m.plan.Added) == 0 && m.plan.Snapshot != nil {
-			return "enter apply · w widen the selection · esc back · q quit"
-		}
-		return "enter apply · esc back · q quit"
-	case stageRunning:
-		return "q cancel (failure hooks still run)"
+// leftColumn stacks the panels, giving each a share of the height weighted by
+// how much it has to show.
+func (m *Model) leftColumn(height int) string {
+	// Two lines of chrome per panel (border top and bottom), so the rows
+	// available are what is left after that.
+	rows := height - 2*panelCount
+	if rows < panelCount {
+		rows = panelCount
 	}
-	return "q quit"
+
+	heights := m.panelHeights(rows)
+	blocks := make([]string, 0, panelCount)
+	for panel := 0; panel < panelCount; panel++ {
+		blocks = append(blocks, m.panel(panel, heights[panel]))
+	}
+	return lipgloss.JoinVertical(lipgloss.Left, blocks...)
+}
+
+// panelHeights divides the available rows between the panels.
+//
+// A panel asks for exactly what it has to show and is never stretched beyond
+// it: a list of three environments given twenty-six rows wastes the space the
+// snapshot list needed, and the empty rows read as a panel that failed to load.
+// When the panels want more than there is, everyone keeps a minimum and the
+// rest is shared out in proportion to what they asked for, with the focused
+// panel — the one being read — taking any rounding.
+func (m *Model) panelHeights(rows int) [panelCount]int {
+	const minRows = 2 // a title and one row
+
+	var need [panelCount]int
+	total := 0
+	for panel := 0; panel < panelCount; panel++ {
+		need[panel] = max(m.panelLen(panel)+1, minRows)
+		total += need[panel]
+	}
+
+	if total <= rows {
+		// Everything fits. Any slack is left at the bottom of the column
+		// rather than inflating a panel that has nothing to put in it.
+		return need
+	}
+
+	var out [panelCount]int
+	spare := rows
+	for panel := 0; panel < panelCount; panel++ {
+		out[panel] = minRows
+		spare -= minRows
+	}
+	if spare <= 0 {
+		return out
+	}
+
+	// Proportional share of what each panel still wants.
+	wanted := 0
+	for panel := 0; panel < panelCount; panel++ {
+		wanted += need[panel] - minRows
+	}
+	used := 0
+	for panel := 0; panel < panelCount && wanted > 0; panel++ {
+		extra := (need[panel] - minRows) * spare / wanted
+		out[panel] += extra
+		used += extra
+	}
+	if left := spare - used; left > 0 {
+		out[m.focus] += left
+	}
+	return out
+}
+
+// panel renders one left-column panel.
+func (m *Model) panel(panel, height int) string {
+	focused := m.focus == panel && !m.paneFocus && m.action == nil
+
+	title := fmt.Sprintf("%d %s", panel+1, panelTitles[panel])
+	if n := m.panelLen(panel); n > 0 {
+		title += mutedStyle.Render(fmt.Sprintf(" (%d)", n))
+	}
+	if focused && m.filtering {
+		title = fmt.Sprintf("%d /%s", panel+1, m.filter)
+	} else if focused && m.filter != "" {
+		title += mutedStyle.Render(" /" + m.filter)
+	}
+
+	rows := m.panelRows(panel)
+	inner := panelInner
+	visible, offset := window(len(rows), height, m.cursors[panel], m.offsets[panel])
+	m.offsets[panel] = offset
+
+	var b strings.Builder
+	for i := 0; i < visible; i++ {
+		idx := offset + i
+		if idx >= len(rows) {
+			break
+		}
+		line := truncate(rows[idx], inner)
+		if idx == m.cursors[panel] && focused {
+			line = selectedStyle.Width(inner).Render(line)
+		} else if idx == m.cursors[panel] {
+			line = currentStyle.Render(line)
+		}
+		b.WriteString(line)
+		if i < visible-1 {
+			b.WriteString("\n")
+		}
+	}
+	if len(rows) == 0 {
+		b.WriteString(mutedStyle.Render(m.emptyPanel(panel)))
+	}
+
+	style := panelStyle
+	if focused {
+		style = focusedPanelStyle
+	}
+	return style.Width(panelBlock).Height(height).Render(
+		headerStyle.Render(title) + "\n" + b.String())
+}
+
+// window works out which slice of a list is visible and keeps the cursor in it.
+func window(count, height, cursor, offset int) (visible, newOffset int) {
+	// One row of the panel is its title.
+	visible = height - 1
+	if visible < 1 {
+		visible = 1
+	}
+	if count <= visible {
+		return count, 0
+	}
+	if cursor < offset {
+		offset = cursor
+	}
+	if cursor >= offset+visible {
+		offset = cursor - visible + 1
+	}
+	if offset > count-visible {
+		offset = count - visible
+	}
+	if offset < 0 {
+		offset = 0
+	}
+	return visible, offset
+}
+
+func (m *Model) emptyPanel(panel int) string {
+	switch panel {
+	case panelEnvironments:
+		return "none declared"
+	case panelDatabases:
+		if env, ok := m.selectedEnv(); ok {
+			if p := m.probes[env.Name]; p != nil && !p.Reachable {
+				return "unreachable"
+			}
+			if m.probing[env.Name] {
+				return "probing…"
+			}
+		}
+		return "none"
+	case panelSnapshots:
+		return "none — press n"
+	case panelSets:
+		return "none declared"
+	case panelRuns:
+		return "nothing run yet"
+	}
+	return ""
+}
+
+func (m *Model) footer() string {
+	if m.filtering {
+		return footerStyle.Render("filter: " + m.filter + "▌   enter accept · esc clear")
+	}
+	if m.action != nil {
+		return footerStyle.Render(m.actionFooter())
+	}
+
+	keys := []string{"n snapshot", "a apply", "m move", "p prune"}
+	if m.focus == panelSnapshots {
+		keys = append(keys, "x delete")
+	}
+	if m.active != nil {
+		keys = []string{"q cancel the run"}
+	}
+	keys = append(keys, "/ filter", "tab pane", "? keys")
+	return footerStyle.Render(strings.Join(keys, "  ·  "))
+}
+
+// overlay centres a box over the screen, which is how a modal appears without
+// the panels behind it being torn down and rebuilt.
+func (m *Model) overlay(screen, box string) string {
+	lines := strings.Split(screen, "\n")
+	boxLines := strings.Split(box, "\n")
+
+	top := (len(lines) - len(boxLines)) / 2
+	if top < 0 {
+		top = 0
+	}
+	boxWidth := 0
+	for _, l := range boxLines {
+		boxWidth = max(boxWidth, lipgloss.Width(l))
+	}
+	left := (m.screenWidth() - boxWidth) / 2
+	if left < 0 {
+		left = 0
+	}
+
+	for i, bl := range boxLines {
+		row := top + i
+		if row >= len(lines) {
+			break
+		}
+		lines[row] = padTo(clip(lines[row], left), left) + bl
+	}
+	return strings.Join(lines, "\n")
+}
+
+func truncate(s string, width int) string {
+	if width <= 0 {
+		return ""
+	}
+	if lipgloss.Width(s) <= width {
+		return s
+	}
+	// Cut by runes, leaving room for the ellipsis.
+	runes := []rune(s)
+	if width == 1 {
+		return "…"
+	}
+	for len(runes) > 0 && lipgloss.Width(string(runes))+1 > width {
+		runes = runes[:len(runes)-1]
+	}
+	return string(runes) + "…"
+}
+
+// clip returns the first width columns of a rendered line, ANSI intact enough
+// for an overlay's purposes.
+func clip(s string, width int) string {
+	if width <= 0 {
+		return ""
+	}
+	return truncateHard(s, width)
+}
+
+func truncateHard(s string, width int) string {
+	runes := []rune(s)
+	for len(runes) > 0 && lipgloss.Width(string(runes)) > width {
+		runes = runes[:len(runes)-1]
+	}
+	return string(runes)
+}
+
+func padTo(s string, width int) string {
+	if w := lipgloss.Width(s); w < width {
+		return s + strings.Repeat(" ", width-w)
+	}
+	return s
+}
+
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
 }

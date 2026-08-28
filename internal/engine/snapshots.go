@@ -165,3 +165,57 @@ func (e *Engine) DeleteSnapshot(id string) error {
 	}
 	return nil
 }
+
+// Prune applies the retention policy, reporting what it would remove and
+// removing it only when apply is set.
+//
+// Shared by the CLI and the TUI so that "what would go" is computed once: a
+// retention policy that behaves differently depending on which front end ran
+// it would be worse than none.
+func (e *Engine) Prune(ctx context.Context, env string, apply bool, report Reporter) (string, error) {
+	policy := snapshot.Policy{
+		Daily:   e.cfg.Storage.Retention.Daily,
+		Weekly:  e.cfg.Storage.Retention.Weekly,
+		Monthly: e.cfg.Storage.Retention.Monthly,
+	}
+	if policy.Unset() {
+		return "", fmt.Errorf("no storage.retention configured, so there is nothing to prune")
+	}
+
+	groups, err := e.SnapshotGroups(ctx, env, report)
+	if err != nil {
+		return "", err
+	}
+
+	var removed int
+	var freed int64
+	for _, group := range groups {
+		keep, remove := snapshot.Keep(group.Snapshots, policy)
+		if len(remove) == 0 {
+			continue
+		}
+		report.step("prune", fmt.Sprintf("%s/%s: keeping %d, removing %d",
+			group.Environment, group.Database, len(keep), len(remove)))
+		for _, m := range remove {
+			report.table("prune", m.ID, fmt.Sprintf("%s, taken %s",
+				humanBytes(m.Bytes), m.StartedAt.Local().Format("2006-01-02 15:04")))
+			removed++
+			freed += m.Bytes
+			if apply {
+				if err := e.DeleteSnapshotEverywhere(ctx, m.ID); err != nil {
+					return "", err
+				}
+			}
+		}
+	}
+
+	switch {
+	case removed == 0:
+		return "nothing to prune", nil
+	case apply:
+		return fmt.Sprintf("removed %d snapshots, %s freed", removed, humanBytes(freed)), nil
+	default:
+		return fmt.Sprintf("%d snapshots, %s would be freed — turn on `Delete them` to do it",
+			removed, humanBytes(freed)), nil
+	}
+}
