@@ -66,6 +66,11 @@ type Plan struct {
 	// DropIndexes are secondary indexes rebuilt after the load.
 	DropIndexes []pg.Index
 
+	// TriggerTables are the selected tables carrying user triggers, which are
+	// disabled for the load and re-enabled afterwards. Not an optimisation:
+	// see applyTables.
+	TriggerTables []pg.TriggerTable
+
 	// Bytes is the selection's size on the source, the best estimate of how
 	// much work this is.
 	Bytes int64
@@ -179,6 +184,12 @@ func (e *Engine) Plan(ctx context.Context, req ApplyRequest, report Reporter) (*
 		return nil, err
 	}
 	plan.DropIndexes = indexes
+
+	triggers, err := pg.TriggerTables(ctx, conn, selection)
+	if err != nil {
+		return nil, err
+	}
+	plan.TriggerTables = triggers
 
 	for _, name := range selection {
 		entry, ok := man.Table(name)
@@ -375,6 +386,10 @@ func (p *Plan) Describe() string {
 		}
 		fmt.Fprintf(&b, "  %d foreign keys dropped and rebuilt, %d indexes rebuilt\n",
 			len(p.DropFKs)+len(p.BlockingFKs), len(p.DropIndexes))
+		if n := len(p.TriggerTables); n > 0 {
+			fmt.Fprintf(&b, "  %s disabled for the load (%d tables)\n",
+				plural(p.triggerCount(), "user trigger"), n)
+		}
 		b.WriteString("\nload order:\n")
 		b.WriteString(indent(p.Order.String()))
 	}
@@ -386,6 +401,14 @@ func (p *Plan) Describe() string {
 		b.WriteString("\n")
 	}
 	return b.String()
+}
+
+func (p *Plan) triggerCount() int {
+	n := 0
+	for _, t := range p.TriggerTables {
+		n += len(t.Triggers)
+	}
+	return n
 }
 
 func indent(s string) string {

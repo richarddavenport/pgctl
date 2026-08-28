@@ -165,6 +165,34 @@ func (e *Engine) applyTables(ctx context.Context, plan *Plan, dir string, report
 		}
 	}
 
+	// Disabling the tables' user triggers is not a speed optimisation, though
+	// it is dramatic — 33 rows a second became the measured cost of loading
+	// claims.policy_claim with its twelve triggers live, because COPY fires row
+	// triggers and two of this project's are written in plv8.
+	//
+	// It is a correctness requirement. A whole-database restore never meets
+	// this problem: pg_dump puts triggers in the post-data section, so data
+	// lands before they exist. A set-level load goes into tables that are
+	// staying, with their triggers already in place — so a refresh would write
+	// millions of rows into the audit table the rules deliberately excluded,
+	// and enqueue a Hasura event for every restored row.
+	//
+	// DISABLE TRIGGER USER rather than session_replication_role or
+	// pg_restore --disable-triggers: those need superuser, which Azure does not
+	// grant, while this needs only ownership of the table. It also leaves the
+	// internal constraint triggers alone, which is the right scope — pgctl
+	// manages the foreign keys itself.
+	if len(plan.TriggerTables) > 0 {
+		report.step("prepare", fmt.Sprintf("disabling user triggers on %d tables", len(plan.TriggerTables)))
+		for _, t := range plan.TriggerTables {
+			stmt := fmt.Sprintf("ALTER TABLE %s DISABLE TRIGGER USER", quoteTable(t.Table))
+			if _, err := tx.Exec(ctx, stmt); err != nil {
+				_ = tx.Rollback(ctx)
+				return fmt.Errorf("disable triggers on %s (pgctl must own the table): %w", t.Table, err)
+			}
+		}
+	}
+
 	// Truncating children before parents inside the same transaction: the
 	// foreign keys between selected tables are already gone, but the ones
 	// pointing in from outside are only gone if they were blocking, and order
@@ -302,6 +330,19 @@ func (e *Engine) rebuild(ctx context.Context, conn *pgx.Conn, plan *Plan,
 			// A validation failure is a finding, not a glitch: the data that
 			// just landed does not support rows that were already there.
 			failures = append(failures, fmt.Sprintf("validate %s on %s: %v", fk.Name, fk.Table, err))
+		}
+	}
+
+	// Re-enabled before the constraints are validated, so that a failure to
+	// turn a trigger back on is reported alongside everything else rather than
+	// left for the application to discover.
+	if len(plan.TriggerTables) > 0 {
+		report.step("rebuild", fmt.Sprintf("re-enabling user triggers on %d tables", len(plan.TriggerTables)))
+		for _, t := range plan.TriggerTables {
+			stmt := fmt.Sprintf("ALTER TABLE %s ENABLE TRIGGER USER", quoteTable(t.Table))
+			if _, err := conn.Exec(ctx, stmt); err != nil {
+				failures = append(failures, fmt.Sprintf("re-enable triggers on %s: %v", t.Table, err))
+			}
 		}
 	}
 

@@ -151,6 +151,50 @@ func readFKs(ctx context.Context, conn *pgx.Conn, excluded []string) ([]FK, erro
 	return out, rows.Err()
 }
 
+// TriggerTables returns the given tables that carry user triggers, with the
+// trigger names, so a caller can disable and re-enable them around a bulk load.
+//
+// Internal triggers — the ones implementing foreign keys and deferred
+// constraints — are excluded deliberately. They are not disabled and could not
+// be without superuser.
+func TriggerTables(ctx context.Context, conn *pgx.Conn, tables []string) ([]TriggerTable, error) {
+	const q = `
+SELECT n.nspname || '.' || c.relname,
+       array_agg(t.tgname ORDER BY t.tgname)
+  FROM pg_trigger t
+  JOIN pg_class c ON c.oid = t.tgrelid
+  JOIN pg_namespace n ON n.oid = c.relnamespace
+ WHERE NOT t.tgisinternal
+   AND t.tgenabled <> 'D'
+   AND n.nspname || '.' || c.relname = ANY($1::text[])
+ GROUP BY 1
+ ORDER BY 1`
+
+	rows, err := conn.Query(ctx, q, tables)
+	if err != nil {
+		return nil, fmt.Errorf("list triggers: %w", err)
+	}
+	defer rows.Close()
+
+	var out []TriggerTable
+	for rows.Next() {
+		var t TriggerTable
+		if err := rows.Scan(&t.Table, &t.Triggers); err != nil {
+			return nil, err
+		}
+		out = append(out, t)
+	}
+	return out, rows.Err()
+}
+
+// TriggerTable is one table's user triggers. Only triggers that are currently
+// enabled are listed, so re-enabling never turns on something an operator had
+// deliberately switched off.
+type TriggerTable struct {
+	Table    string
+	Triggers []string
+}
+
 // Extensions returns the extensions installed in the connected database, with
 // their versions.
 func Extensions(ctx context.Context, conn *pgx.Conn) ([]Extension, error) {

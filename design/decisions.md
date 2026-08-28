@@ -172,3 +172,32 @@ a 2 GB nightly costs the claims tables. Tarred, it costs 2 GB every time.
 
 The price is many small blobs per snapshot and a listing that has to be
 prefix-based. Both are what object storage is good at.
+
+## 13. A set-level load disables the tables' user triggers
+
+Measured, not theorised: loading `claims.policy_claim` into a live table ran at
+**33 rows a second**. The table carries twelve user triggers, `COPY` fires row
+triggers, and two of this project's are written in plv8 — a JavaScript
+interpreter invoked per row.
+
+Speed is the smaller half of it. A whole-database restore never meets this
+problem, because `pg_dump` puts triggers in the post-data section and the data
+lands before they exist. A set-level load goes into tables that are staying,
+with their triggers already in place, so a refresh would:
+
+- write a row into `audit.logged_actions` for every restored row — the table the
+  rules deliberately excluded from the snapshot for being useless in another
+  environment;
+- enqueue a Hasura event for every restored row, through the `notify_hasura_*`
+  triggers, turning a data refresh into millions of outbound events.
+
+So pgctl runs `ALTER TABLE … DISABLE TRIGGER USER` in the teardown transaction
+and re-enables it during the rebuild. `DISABLE TRIGGER USER` rather than
+`session_replication_role = replica` or `pg_restore --disable-triggers`: those
+need superuser, which Azure Database for PostgreSQL does not grant, while this
+needs only ownership of the table. It also leaves the internal constraint
+triggers alone, which is the right scope — pgctl manages the foreign keys
+itself, explicitly.
+
+Only triggers that are currently enabled are recorded, so re-enabling never
+switches on something an operator had deliberately turned off.
