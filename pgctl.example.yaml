@@ -1,0 +1,135 @@
+# pgctl configuration. Commit this next to the schema it describes.
+#
+# Install/refresh the tool with: pgctl update
+# Everything here is read from the repository root, which is where pgctl runs.
+
+# Environments — name, ssh, guarded, and the sops-encrypted secrets file — come
+# from swarmctl's config when there is one, so that "which host is prd" has a
+# single answer. Host, port, user and password are read from each environment's
+# secrets file under the keys named in `credentials:`.
+environmentsFrom: swarmctl.yaml
+
+# Environments that may never be an apply target. Defaults to every guarded
+# environment, so a project that marks prd guarded for swarmctl gets it
+# protected here without saying so twice. Write `protect: []` to mean none.
+protect: [prd]
+
+# Connection detail for environments swarmctl does not describe, and overrides
+# for ones it does. A local cluster has no secrets file, so its credentials fall
+# back to the process environment under the same keys.
+postgres:
+  local:
+    host: 127.0.0.1
+    port: 5432
+  prd:
+    # More vCPUs than a laptop, so more of them are worth using.
+    jobs: 8
+
+credentials:
+  hostKey: POSTGRES_HOST
+  portKey: POSTGRES_PORT
+  userKey: POSTGRES_USERNAME
+  passwordKey: POSTGRES_PASSWORD
+
+defaults:
+  jobs: 4
+  # zstd:3 rather than the gzip-6 default: faster and smaller both. Requires
+  # PostgreSQL 16 or newer, which pgctl requires anyway.
+  compression: zstd:3
+  # Short, because what this catches is an application still holding a table
+  # pgctl is about to truncate — not slow work.
+  lockTimeout: 30s
+
+storage:
+  kind: azureblob
+  container: pg-snapshots
+  dir: .pgctl/snapshots
+  accountKey: AZURE_STORAGE_ACCOUNT
+  keyKey: AZURE_STORAGE_KEY
+  retention:
+    daily: 7
+    weekly: 4
+    monthly: 3
+
+databases:
+  - name: product-development
+  - name: claims
+  - name: quote
+  - name: vehicle
+  - name: hasura
+  - name: ory
+
+# No schema is excluded anywhere, and that is deliberate rather than an
+# oversight. Both obvious candidates own functions that triggers on retained
+# tables call — audit.if_modified_func, and Hasura's notify_hasura_* in
+# hdb_catalog — so excluding either schema produces an archive whose every
+# CREATE TRIGGER fails at restore time, after the data has already loaded.
+# Their bulk is removed by rule instead. `pgctl snapshot` checks for this and
+# warns if a future exclusion reintroduces it.
+
+sets:
+  - name: contracts
+    database: product-development
+    description: contracts and everything hanging off them
+    include: ["operations.*"]
+
+  - name: claims
+    database: product-development
+    description: claims and claim detail
+    include: ["claims.*"]
+
+  - name: reference
+    database: product-development
+    description: class guides and rating reference data
+    include: ["classes.*", "compliance.*"]
+
+rules:
+  # 20 GB across ~146,000 rows: a jsonb payload per quote, and two thirds of the
+  # database by volume. pg_dump cannot take part of a table, so this one is
+  # produced by binary COPY alongside the archive.
+  - table: quotes.quote
+    where: "created_at > now() - interval '30 days'"
+    why: "20 GB of jsonb payloads; recent quotes are enough to work with"
+
+  - table: audit.logged_actions
+    data: none
+    why: "audit history of another environment is not useful in this one"
+
+  # Hasura rebuilds its own delivery history; carrying it costs size and buys
+  # nothing. The underscore in `*_log*` matters: a bare `*log*` also matches
+  # hdb_source_catalog_version — "cata-log" — and blanking that leaves Hasura
+  # unable to find its metadata.
+  - table: hdb_catalog.*_log*
+    data: none
+    why: "Hasura event delivery history"
+  - table: hdb_catalog.*event*
+    data: none
+    why: "as above"
+
+# Quiescing a target is project-specific, so it is a hook rather than a built-in
+# step. Terminating the database's own connections is built in — that is about
+# the database, not about what is connected to it.
+hooks:
+  preApply:
+    - name: scale the applications down
+      run: |
+        swarmctl set api_api --replicas 0 --env "$PGCTL_ENV"
+        swarmctl set hasura_graphql-engine --replicas 0 --env "$PGCTL_ENV"
+        swarmctl set kratos_kratos --replicas 0 --env "$PGCTL_ENV"
+      timeout: 5m
+
+  postApply:
+    - name: scale the applications up
+      run: |
+        swarmctl set api_api --replicas 2 --env "$PGCTL_ENV"
+        swarmctl set hasura_graphql-engine --replicas 2 --env "$PGCTL_ENV"
+        swarmctl set kratos_kratos --replicas 2 --env "$PGCTL_ENV"
+      timeout: 5m
+
+  onFailure:
+    - name: bring the applications back up
+      run: |
+        swarmctl set api_api --replicas 2 --env "$PGCTL_ENV"
+        swarmctl set hasura_graphql-engine --replicas 2 --env "$PGCTL_ENV"
+        swarmctl set kratos_kratos --replicas 2 --env "$PGCTL_ENV"
+      timeout: 5m

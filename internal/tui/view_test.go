@@ -1,0 +1,222 @@
+package tui
+
+import (
+	"os"
+	"strings"
+	"testing"
+	"time"
+
+	tea "github.com/charmbracelet/bubbletea"
+
+	"github.com/richarddavenport/pgctl/internal/config"
+	"github.com/richarddavenport/pgctl/internal/engine"
+	"github.com/richarddavenport/pgctl/internal/snapshot"
+)
+
+const uiConfig = `
+protect: [prd]
+
+environments:
+  - name: qat
+    guarded: true
+  - name: prd
+  - name: scratch
+
+postgres:
+  qat: { host: qat.example }
+  prd: { host: prd.example }
+  scratch: { host: 127.0.0.1 }
+
+databases:
+  - name: product-development
+
+sets:
+  - name: claims
+    database: product-development
+    description: claims and everything a claim points at
+    include: ["claims.*"]
+`
+
+func model(t *testing.T) *Model {
+	t.Helper()
+	cfg, err := config.Parse([]byte(uiConfig), t.TempDir())
+	if err != nil {
+		t.Fatalf("parse config: %v", err)
+	}
+	cfg.Storage.Dir = t.TempDir()
+	m := New(engine.New(cfg))
+	m.width, m.height = 120, 40
+	return m
+}
+
+func press(t *testing.T, m *Model, keys ...string) {
+	t.Helper()
+	for _, k := range keys {
+		var msg tea.KeyMsg
+		switch k {
+		case "enter":
+			msg = tea.KeyMsg{Type: tea.KeyEnter}
+		case "esc":
+			msg = tea.KeyMsg{Type: tea.KeyEsc}
+		case "down":
+			msg = tea.KeyMsg{Type: tea.KeyDown}
+		case "up":
+			msg = tea.KeyMsg{Type: tea.KeyUp}
+		default:
+			msg = tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune(k)}
+		}
+		m.Update(msg)
+	}
+}
+
+func TestEmptyStateTellsYouWhatToDo(t *testing.T) {
+	m := model(t)
+	view := m.View()
+	if !strings.Contains(view, "No snapshots yet") {
+		t.Errorf("empty state does not explain itself:\n%s", view)
+	}
+	// Pressing apply with nothing to apply is a mistake the UI should absorb.
+	press(t, m, "enter")
+	if m.err == nil {
+		t.Error("applying with no snapshots did not report anything")
+	}
+}
+
+func TestProtectedEnvironmentIsRefusedAsATarget(t *testing.T) {
+	m := withSnapshot(t)
+	press(t, m, "enter") // choose the snapshot
+	if m.stage != stageTargetEnv {
+		t.Fatalf("stage = %v, want the target picker", m.stage)
+	}
+
+	view := m.View()
+	if !strings.Contains(view, "protected") {
+		t.Errorf("the target list does not mark prd protected:\n%s", view)
+	}
+
+	// prd is second in the list.
+	press(t, m, "down", "enter")
+	if m.stage != stageTargetEnv {
+		t.Error("a protected environment was accepted as a target")
+	}
+	if m.err == nil || !strings.Contains(m.err.Error(), "protected") {
+		t.Errorf("err = %v, want a refusal naming protection", m.err)
+	}
+}
+
+func TestGuardedEnvironmentDemandsItsNameTyped(t *testing.T) {
+	m := withSnapshot(t)
+	m.chosen = m.snapshots[0]
+	m.target = "qat"
+	m.plan = &engine.Plan{
+		Snapshot:      m.snapshots[0],
+		Target:        &engine.Target{Env: mustEnv(t, m, "qat"), Database: "product-development"},
+		WholeDatabase: true,
+		Selection:     []string{"claims.policy_claim"},
+	}
+	m.stage = stagePlan
+
+	press(t, m, "enter")
+	if !m.confirming {
+		t.Fatal("a guarded target did not ask for confirmation")
+	}
+	if !strings.Contains(m.View(), `Type "qat" to confirm`) {
+		t.Errorf("the prompt does not say what to type:\n%s", m.View())
+	}
+
+	// The wrong name is rejected, and the typing does not trigger shortcuts:
+	// `q` would otherwise quit.
+	press(t, m, "q", "a", "t", "x", "enter")
+	if m.err == nil {
+		t.Error("a mistyped name was accepted")
+	}
+	if m.confirmation != "" {
+		t.Errorf("confirmation = %q, want it cleared after a failure", m.confirmation)
+	}
+
+	press(t, m, "esc")
+	if m.confirming {
+		t.Error("esc did not cancel the confirmation")
+	}
+}
+
+func TestScopeOffersWholeDatabaseAndEachSet(t *testing.T) {
+	m := withSnapshot(t)
+	press(t, m, "enter")        // snapshot
+	press(t, m, "down", "down") // scratch
+	press(t, m, "enter")        // target
+	if m.stage != stageScope {
+		t.Fatalf("stage = %v, want the scope picker", m.stage)
+	}
+
+	view := m.View()
+	for _, want := range []string{"the whole database", "claims", "claims and everything a claim points at"} {
+		if !strings.Contains(view, want) {
+			t.Errorf("scope view missing %q:\n%s", want, view)
+		}
+	}
+}
+
+func TestRunViewShowsTheLastEventsAndCancelHint(t *testing.T) {
+	m := model(t)
+	m.stage = stageRunning
+	m.startedAt = time.Now()
+	m.run = &run{kind: "snapshot prd"}
+	for i := 0; i < 30; i++ {
+		m.events = append(m.events, engine.Event{Kind: engine.EventStep, Step: "dump",
+			Message: "step " + string(rune('a'+i%26))})
+	}
+	m.events = append(m.events, engine.Event{Kind: engine.EventWarning, Message: "rule matches no table"})
+
+	view := m.View()
+	if !strings.Contains(view, "rule matches no table") {
+		t.Errorf("the newest event is not shown:\n%s", view)
+	}
+	if strings.Count(view, "→ dump:") > 12 {
+		t.Error("the run view is not bounded to the last few events")
+	}
+	if !strings.Contains(view, "failure hooks still run") {
+		t.Error("the footer does not explain what cancelling does")
+	}
+}
+
+// withSnapshot gives the model one complete snapshot to work with.
+func withSnapshot(t *testing.T) *Model {
+	t.Helper()
+	m := model(t)
+	dir := snapshot.Path(m.engine.Config().Storage.Dir, "prd/product-development/20260828T030000Z")
+	mkdir(t, dir)
+	man := &snapshot.Manifest{
+		ID:          "prd/product-development/20260828T030000Z",
+		Environment: "prd",
+		Database:    "product-development",
+		StartedAt:   time.Date(2026, 8, 28, 3, 0, 0, 0, time.UTC),
+		FinishedAt:  time.Date(2026, 8, 28, 3, 12, 0, 0, time.UTC),
+		Bytes:       2_040_893_635,
+		Tables:      []snapshot.TableEntry{{Name: "claims.policy_claim", Data: config.DataAll}},
+	}
+	if err := snapshot.Write(dir, man); err != nil {
+		t.Fatalf("write manifest: %v", err)
+	}
+	m.reload()
+	if len(m.snapshots) != 1 {
+		t.Fatalf("reload found %d snapshots, want 1", len(m.snapshots))
+	}
+	return m
+}
+
+func mustEnv(t *testing.T, m *Model, name string) config.Environment {
+	t.Helper()
+	env, ok := m.engine.Config().LookupEnv(name)
+	if !ok {
+		t.Fatalf("no environment %q", name)
+	}
+	return env
+}
+
+func mkdir(t *testing.T, dir string) {
+	t.Helper()
+	if err := os.MkdirAll(dir, 0o700); err != nil {
+		t.Fatalf("mkdir: %v", err)
+	}
+}

@@ -24,7 +24,13 @@ func TestMatchPattern(t *testing.T) {
 		{"hdb_catalog.*event*", "hdb_catalog.event_invocation_logs", true},
 		{"hdb_catalog.*event*", "hdb_catalog.hdb_event_log_cleanups", true},
 		{"hdb_catalog.*event*", "hdb_catalog.hdb_source_catalog_version", false},
-		{"hdb_catalog.*log*", "hdb_catalog.event_invocation_logs", true},
+		{"hdb_catalog.*_log*", "hdb_catalog.event_invocation_logs", true},
+		{"hdb_catalog.*_log*", "hdb_catalog.event_log", true},
+		{"hdb_catalog.*_log*", "hdb_catalog.hdb_event_log_cleanups", true},
+		// The underscore is load-bearing: hdb_source_catalog_version contains
+		// "log" but not "_log", and blanking it breaks Hasura.
+		{"hdb_catalog.*_log*", "hdb_catalog.hdb_source_catalog_version", false},
+		{"hdb_catalog.*log*", "hdb_catalog.hdb_source_catalog_version", true},
 		{"operations.policy", "policy", false},
 	}
 	for _, c := range cases {

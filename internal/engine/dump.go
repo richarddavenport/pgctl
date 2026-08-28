@@ -119,6 +119,21 @@ func (e *Engine) Dump(ctx context.Context, req DumpRequest, report Reporter) (*s
 		m.Tables = append(m.Tables, entry)
 	}
 	m.Warnings = append(m.Warnings, e.unmatchedRules(cat)...)
+
+	// Excluding a schema is not free: a trigger on a table that is staying may
+	// call a function in the schema that is going. Caught here rather than an
+	// hour into the restore that fails on it.
+	dangling, err := pg.DanglingTriggers(ctx, conn, db.ExcludeSchemas)
+	if err != nil {
+		return nil, err
+	}
+	if len(dangling) > 0 {
+		m.Warnings = append(m.Warnings, fmt.Sprintf(
+			"%d trigger(s) on retained tables call functions in excluded schema(s) — "+
+				"restoring this snapshot will fail on every CREATE TRIGGER. "+
+				"First: %s on %s calls %s. Keep the schema and exclude its data with a rule instead.",
+			len(dangling), dangling[0].Trigger, dangling[0].Table, dangling[0].Function))
+	}
 	for _, w := range m.Warnings {
 		report.warn(w)
 	}

@@ -195,3 +195,53 @@ type Index struct {
 	Table string
 	Def   string
 }
+
+// DanglingTriggers reports triggers on tables that pgctl is keeping whose
+// functions live in a schema it is excluding.
+//
+// This is a restore failure caught at dump time. Excluding a schema excludes
+// its functions, but a trigger on a retained table still references one, and
+// pg_restore fails on every CREATE TRIGGER — after it has spent an hour loading
+// the data. MBPNetwork's audit schema is exactly this shape: every audited
+// table in claims and operations calls audit.if_modified_func.
+func DanglingTriggers(ctx context.Context, conn *pgx.Conn, excludeSchemas []string) ([]DanglingTrigger, error) {
+	if len(excludeSchemas) == 0 {
+		return nil, nil
+	}
+	const q = `
+SELECT n.nspname || '.' || c.relname,
+       t.tgname,
+       pn.nspname || '.' || p.proname
+  FROM pg_trigger t
+  JOIN pg_class c ON c.oid = t.tgrelid
+  JOIN pg_namespace n ON n.oid = c.relnamespace
+  JOIN pg_proc p ON p.oid = t.tgfoid
+  JOIN pg_namespace pn ON pn.oid = p.pronamespace
+ WHERE NOT t.tgisinternal
+   AND pn.nspname = ANY($1::text[])
+   AND NOT (n.nspname = ANY($1::text[]))
+ ORDER BY 1, 2`
+
+	rows, err := conn.Query(ctx, q, excludeSchemas)
+	if err != nil {
+		return nil, fmt.Errorf("check triggers against excluded schemas: %w", err)
+	}
+	defer rows.Close()
+
+	var out []DanglingTrigger
+	for rows.Next() {
+		var d DanglingTrigger
+		if err := rows.Scan(&d.Table, &d.Trigger, &d.Function); err != nil {
+			return nil, err
+		}
+		out = append(out, d)
+	}
+	return out, rows.Err()
+}
+
+// DanglingTrigger is one trigger whose function is about to be left behind.
+type DanglingTrigger struct {
+	Table    string
+	Trigger  string
+	Function string
+}
