@@ -15,7 +15,6 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
-	"strings"
 
 	"github.com/richarddavenport/pgctl/internal/snapshot"
 )
@@ -100,13 +99,6 @@ func copyToFile(path string, r io.Reader) (int64, error) {
 
 // blobName is a file's full name in a flat namespace.
 func blobName(id, rel string) string { return id + "/" + rel }
-
-// idFromManifestBlob turns "prd/db/20260828T030000Z/manifest.json" back into
-// its snapshot id.
-func idFromManifestBlob(name string) (string, bool) {
-	id, ok := strings.CutSuffix(name, "/"+snapshot.ManifestName)
-	return id, ok
-}
 
 // ErrNotFound is returned when a snapshot or file is not in the store.
 var ErrNotFound = fmt.Errorf("not found in store")

@@ -17,6 +17,10 @@ type TOCEntry struct {
 	// Line is the entry exactly as pg_restore printed it, which is what
 	// pg_restore -L reads back.
 	Line string
+	// DumpID is the entry's archive id, and also the base name of the file
+	// holding its data in a directory-format archive. It is how a selective
+	// download knows which files to fetch.
+	DumpID string
 	// Desc is the entry's kind: "TABLE DATA", "SEQUENCE SET", "INDEX", …
 	Desc string
 	// Schema and Name identify what the entry is about.
@@ -57,7 +61,7 @@ func ReadTOC(ctx context.Context, archive string) ([]TOCEntry, error) {
 		if m == nil {
 			continue
 		}
-		entries = append(entries, TOCEntry{Line: line, Desc: m[2], Schema: m[3], Name: m[4]})
+		entries = append(entries, TOCEntry{Line: line, DumpID: m[1], Desc: m[2], Schema: m[3], Name: m[4]})
 	}
 	return entries, scan.Err()
 }

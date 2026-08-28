@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io/fs"
@@ -12,51 +13,47 @@ import (
 	"github.com/richarddavenport/pgctl/internal/snapshot"
 )
 
-// openSnapshot resolves a snapshot id to its manifest and directory.
-//
-// An id may be abbreviated to its last component when it is unambiguous —
-// `20260828T030000Z` rather than `prd/product-development/20260828T030000Z` —
-// and to `<env>/latest` for the newest complete snapshot of an environment,
-// which is what a nightly-plus-refresh workflow actually asks for.
-func (e *Engine) openSnapshot(id string) (*snapshot.Manifest, string, error) {
+// openSnapshotIn resolves a snapshot id against everything reachable, local or
+// remote, so that a laptop with no snapshots on it can still plan and run
+// `pgctl apply prd/latest --to qat`.
+func (e *Engine) openSnapshotIn(ctx context.Context, id string, report Reporter) (*snapshot.Manifest, bool, error) {
 	if id == "" {
-		return nil, "", errors.New("no snapshot named")
+		return nil, false, errors.New("no snapshot named")
 	}
-
-	all, err := e.Snapshots()
+	entries, err := e.Index(ctx, report)
 	if err != nil {
-		return nil, "", err
+		return nil, false, err
 	}
-	if len(all) == 0 {
-		return nil, "", fmt.Errorf("no snapshots under %s", e.storageRoot())
+	if len(entries) == 0 {
+		return nil, false, fmt.Errorf("no snapshots in %s or in remote storage", e.storageRoot())
 	}
 
 	if env, ok := strings.CutSuffix(id, "/latest"); ok {
-		for i := len(all) - 1; i >= 0; i-- {
-			if all[i].Environment == env && all[i].Complete() {
-				return all[i], snapshot.Path(e.storageRoot(), all[i].ID), nil
+		for i := len(entries) - 1; i >= 0; i-- {
+			if entries[i].Manifest.Environment == env && entries[i].Manifest.Complete() {
+				return entries[i].Manifest, entries[i].Local, nil
 			}
 		}
-		return nil, "", fmt.Errorf("no complete snapshot of %q", env)
+		return nil, false, fmt.Errorf("no complete snapshot of %q", env)
 	}
 
-	var matches []*snapshot.Manifest
-	for _, m := range all {
-		if m.ID == id || strings.HasSuffix(m.ID, "/"+id) {
-			matches = append(matches, m)
+	var matches []*Entry
+	for _, entry := range entries {
+		if entry.Manifest.ID == id || strings.HasSuffix(entry.Manifest.ID, "/"+id) {
+			matches = append(matches, entry)
 		}
 	}
 	switch len(matches) {
 	case 0:
-		return nil, "", fmt.Errorf("no snapshot %q", id)
+		return nil, false, fmt.Errorf("no snapshot %q", id)
 	case 1:
-		return matches[0], snapshot.Path(e.storageRoot(), matches[0].ID), nil
+		return matches[0].Manifest, matches[0].Local, nil
 	default:
-		var ids []string
+		ids := make([]string, 0, len(matches))
 		for _, m := range matches {
-			ids = append(ids, m.ID)
+			ids = append(ids, m.Manifest.ID)
 		}
-		return nil, "", fmt.Errorf("%q is ambiguous: %s", id, strings.Join(ids, ", "))
+		return nil, false, fmt.Errorf("%q is ambiguous: %s", id, strings.Join(ids, ", "))
 	}
 }
 
@@ -110,15 +107,16 @@ type Group struct {
 
 // SnapshotGroups returns the snapshots grouped by environment and database,
 // optionally restricted to one environment.
-func (e *Engine) SnapshotGroups(env string) ([]Group, error) {
-	all, err := e.Snapshots()
+func (e *Engine) SnapshotGroups(ctx context.Context, env string, report Reporter) ([]Group, error) {
+	entries, err := e.Index(ctx, report)
 	if err != nil {
 		return nil, err
 	}
 
 	index := map[string]*Group{}
 	var order []string
-	for _, m := range all {
+	for _, entry := range entries {
+		m := entry.Manifest
 		if env != "" && m.Environment != env {
 			continue
 		}
@@ -136,6 +134,20 @@ func (e *Engine) SnapshotGroups(env string) ([]Group, error) {
 		out = append(out, *index[key])
 	}
 	return out, nil
+}
+
+// DeleteSnapshotEverywhere removes a snapshot from local storage and from the
+// remote store. A prune that only cleaned one of them would leave a retention
+// policy that never actually bounds the bill.
+func (e *Engine) DeleteSnapshotEverywhere(ctx context.Context, id string) error {
+	if err := e.DeleteSnapshot(id); err != nil {
+		return err
+	}
+	remote, err := e.remote(ctx, environmentOf(id))
+	if err != nil || remote == nil {
+		return err
+	}
+	return remote.Delete(ctx, id)
 }
 
 // DeleteSnapshot removes a snapshot from local storage.

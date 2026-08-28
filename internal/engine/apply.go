@@ -63,6 +63,18 @@ func (e *Engine) Execute(ctx context.Context, plan *Plan, report Reporter) (err 
 		_ = e.runHooks(hookCtx, phase, hooks, env, fatal, report)
 	}()
 
+	if !plan.Local {
+		// A set-level apply downloads only the archive files holding its
+		// tables; a whole-database apply needs all of them.
+		var selection []string
+		if !plan.WholeDatabase {
+			selection = plan.Selection
+		}
+		if err = e.Fetch(ctx, plan.Snapshot.ID, selection, report); err != nil {
+			return err
+		}
+	}
+
 	dir := snapshot.Path(e.storageRoot(), plan.Snapshot.ID)
 	if plan.WholeDatabase {
 		err = e.applyWholeDatabase(ctx, plan, dir, report)

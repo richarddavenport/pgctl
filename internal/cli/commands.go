@@ -20,6 +20,7 @@ func runSnapshot(ctx context.Context, args []string) error {
 	env := fs.String("env", "", "environment to snapshot")
 	database := fs.String("db", "", "database to snapshot (default: every declared database)")
 	verbose := fs.Bool("v", false, "report every table")
+	noPush := fs.Bool("no-push", false, "keep the snapshot local even when remote storage is configured")
 	_ = fs.Parse(Permute(fs, args))
 
 	if *env == "" {
@@ -47,6 +48,7 @@ func runSnapshot(ctx context.Context, args []string) error {
 			Environment: *env,
 			Database:    db,
 			At:          at,
+			NoPush:      *noPush,
 		}, report); err != nil {
 			return err
 		}
@@ -54,7 +56,7 @@ func runSnapshot(ctx context.Context, args []string) error {
 	return nil
 }
 
-func runList(_ context.Context, args []string) error {
+func runList(ctx context.Context, args []string) error {
 	fs := flag.NewFlagSet("ls", flag.ExitOnError)
 	configPath := fs.String("config", "", "path to a pgctl config")
 	env := fs.String("env", "", "only this environment")
@@ -64,15 +66,16 @@ func runList(_ context.Context, args []string) error {
 	if err != nil {
 		return err
 	}
-	all, err := e.Snapshots()
+	entries, err := e.Index(ctx, printer(false))
 	if err != nil {
 		return err
 	}
 
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-	fmt.Fprintln(w, "SNAPSHOT\tTAKEN\tTABLES\tSIZE\tSTATE") //nolint:errcheck // a tabwriter error surfaces on Flush
-	for i := len(all) - 1; i >= 0; i-- {
-		m := all[i]
+	fmt.Fprintln(w, "SNAPSHOT\tTAKEN\tTABLES\tSIZE\tWHERE\tSTATE") //nolint:errcheck // a tabwriter error surfaces on Flush
+	for i := len(entries) - 1; i >= 0; i-- {
+		entry := entries[i]
+		m := entry.Manifest
 		if *env != "" && m.Environment != *env {
 			continue
 		}
@@ -80,8 +83,9 @@ func runList(_ context.Context, args []string) error {
 		if !m.Complete() {
 			state = "INCOMPLETE"
 		}
-		fmt.Fprintf(w, "%s\t%s\t%d\t%s\t%s\n", m.ID, //nolint:errcheck // as above
-			m.StartedAt.Local().Format("2006-01-02 15:04"), len(m.Tables), engine.HumanBytes(m.Bytes), state)
+		fmt.Fprintf(w, "%s\t%s\t%d\t%s\t%s\t%s\n", m.ID, //nolint:errcheck // as above
+			m.StartedAt.Local().Format("2006-01-02 15:04"), len(m.Tables),
+			engine.HumanBytes(m.Bytes), entry.Location(), state)
 	}
 	return w.Flush()
 }
@@ -231,7 +235,7 @@ func interactive() bool {
 	return err == nil && info.Mode()&os.ModeCharDevice != 0
 }
 
-func runPrune(_ context.Context, args []string) error {
+func runPrune(ctx context.Context, args []string) error {
 	fs := flag.NewFlagSet("prune", flag.ExitOnError)
 	configPath := fs.String("config", "", "path to a pgctl config")
 	env := fs.String("env", "", "only this environment")
@@ -251,7 +255,7 @@ func runPrune(_ context.Context, args []string) error {
 		return fmt.Errorf("no storage.retention configured, so there is nothing to prune")
 	}
 
-	groups, err := e.SnapshotGroups(*env)
+	groups, err := e.SnapshotGroups(ctx, *env, printer(false))
 	if err != nil {
 		return err
 	}
@@ -269,7 +273,7 @@ func runPrune(_ context.Context, args []string) error {
 			freed += m.Bytes
 			deleted++
 			if *apply {
-				if err := e.DeleteSnapshot(m.ID); err != nil {
+				if err := e.DeleteSnapshotEverywhere(ctx, m.ID); err != nil {
 					return err
 				}
 			}

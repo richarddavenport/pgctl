@@ -28,6 +28,9 @@ type DumpRequest struct {
 
 	// At fixes the snapshot's timestamp and id. Zero means now.
 	At time.Time
+
+	// NoPush keeps the snapshot local even when a remote store is configured.
+	NoPush bool
 }
 
 // Dump takes a snapshot of one database.
@@ -166,8 +169,22 @@ func (e *Engine) Dump(ctx context.Context, req DumpRequest, report Reporter) (*s
 	if err := snapshot.Write(dir, m); err != nil {
 		return nil, err
 	}
-	report.send(Event{Kind: EventDone, Step: "dump", Bytes: m.Bytes,
+	report.send(Event{Kind: EventProgress, Step: "dump", Bytes: m.Bytes,
 		Message: fmt.Sprintf("snapshot %s written to %s (%s)", id, dir, humanBytes(m.Bytes))})
+
+	// Uploaded as part of taking it, not as a separate command someone has to
+	// remember: a nightly whose artifact is still on the runner when the runner
+	// is recycled has not backed anything up.
+	if !req.NoPush {
+		if err := e.Push(ctx, id, report); err != nil {
+			// The snapshot exists and is complete; failing to upload it is
+			// worth failing the run over, but not worth deleting it over.
+			return m, fmt.Errorf("snapshot %s is on disk but could not be uploaded: %w", id, err)
+		}
+	}
+
+	report.send(Event{Kind: EventDone, Step: "dump", Bytes: m.Bytes,
+		Message: fmt.Sprintf("snapshot %s complete (%s)", id, humanBytes(m.Bytes))})
 	return m, nil
 }
 

@@ -155,6 +155,18 @@ type Storage struct {
 
 	Container string `yaml:"container"`
 
+	// Endpoint overrides the blob service URL. Azure needs nothing here; it
+	// exists for a storage emulator and for a private endpoint with its own
+	// hostname.
+	Endpoint string `yaml:"endpoint"`
+
+	// CredentialsFrom names the environment whose secrets file holds the
+	// storage account and key. Empty means each environment's own, which is
+	// right only when every environment has its own container; a project with
+	// one snapshots account names that environment here so prd's nightly and
+	// QAT's refresh reach the same place.
+	CredentialsFrom string `yaml:"credentialsFrom"`
+
 	// AccountKey and KeyKey name the environment-file keys holding the storage
 	// account and its key, following Credentials' reasoning.
 	AccountKey string `yaml:"accountKey"`

@@ -38,6 +38,10 @@ type Plan struct {
 	Snapshot *snapshot.Manifest
 	Target   *Target
 
+	// Local records whether the snapshot is already on this machine. When it is
+	// not, Execute downloads what it needs first.
+	Local bool
+
 	// WholeDatabase distinguishes the two mechanisms: a drop-and-recreate of
 	// the database, or a load of some tables into the one that is there.
 	WholeDatabase bool
@@ -94,7 +98,7 @@ func (r *RefusalError) Error() string { return r.Reason }
 // target's constraints are what a load has to satisfy, not the source's — and
 // refuses rather than guesses.
 func (e *Engine) Plan(ctx context.Context, req ApplyRequest, report Reporter) (*Plan, error) {
-	man, _, err := e.openSnapshot(req.Snapshot)
+	man, local, err := e.openSnapshotIn(ctx, req.Snapshot, report)
 	if err != nil {
 		return nil, err
 	}
@@ -114,7 +118,7 @@ func (e *Engine) Plan(ctx context.Context, req ApplyRequest, report Reporter) (*
 		report.warn(fmt.Sprintf("applying %s back to %s, the environment it came from", man.ID, man.Environment))
 	}
 
-	plan := &Plan{Snapshot: man, Target: target}
+	plan := &Plan{Snapshot: man, Target: target, Local: local}
 	plan.WholeDatabase = req.Set == "" && len(req.Tables) == 0
 
 	// A whole-database apply drops and recreates the database, so the target's
