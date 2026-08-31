@@ -77,19 +77,38 @@ func (m *Model) screenWidth() int {
 }
 
 func (m *Model) header() string {
+	width := m.screenWidth()
+
+	// The name, then whatever room is left for the config path and a message.
+	// An absolute path to a config in a deep directory is longer than most
+	// terminals are wide, and an untruncated header pushed the whole frame
+	// sideways.
+	const name = "pgctl"
+	line := titleStyle.Render(name)
+	remaining := width - len(name)
+
 	source := m.cfg.Source
 	if source == "" {
 		source = "no config"
 	}
-	line := titleStyle.Render("pgctl") + mutedStyle.Render("  "+source)
-
+	var message, style = "", mutedStyle
 	switch {
 	case m.err != nil:
-		line += "   " + dangerStyle.Render("✗ "+truncate(m.err.Error(), m.screenWidth()-40))
+		message, style = "✗ "+m.err.Error(), dangerStyle
 	case m.status != "":
-		line += "   " + okStyle.Render("✓ "+truncate(m.status, m.screenWidth()-40))
+		message, style = "✓ "+m.status, okStyle
 	}
-	return line
+
+	// A message earns its space first: it is the thing that just happened.
+	if message != "" {
+		shown := truncate(message, remaining-4)
+		remaining -= lipgloss.Width(shown) + 3
+		if remaining > 6 {
+			line += mutedStyle.Render("  " + truncate(source, remaining-2))
+		}
+		return line + "   " + style.Render(shown)
+	}
+	return line + mutedStyle.Render("  "+truncate(source, remaining-2))
 }
 
 // leftColumn stacks the panels, giving each a share of the height weighted by

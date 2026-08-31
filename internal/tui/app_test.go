@@ -8,6 +8,7 @@ import (
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 
 	"github.com/richarddavenport/pgctl/internal/config"
 	"github.com/richarddavenport/pgctl/internal/engine"
@@ -401,5 +402,41 @@ func TestRendersBeforeAWindowSizeArrives(t *testing.T) {
 	}
 	if !strings.Contains(view, "Connections") {
 		t.Errorf("nothing rendered without a window size:\n%s", view)
+	}
+}
+
+func TestAModalNeverDrawsWiderThanTheTerminal(t *testing.T) {
+	// The plan description contains lines as long as a list of every table a
+	// widened selection adds. An unbounded box drew itself off the side of the
+	// screen.
+	m := model(t)
+	withSnapshot(t, m)
+	m.focus = panelSnapshots
+	m.now = time.Now()
+	m.width, m.height = 100, 40
+
+	press(t, m, "a")
+	m.action.stage = stagePlan
+	m.action.plan = &planPreview{plan: &engine.Plan{
+		Snapshot: m.entries[0].Manifest,
+		Target: &engine.Target{
+			Conn:     config.Connection{Name: "qat", Guarded: true},
+			Database: "product-development",
+		},
+		Selection: make([]string, 38),
+		Added: []string{
+			"operations.remittance", "operations.remittance_status_type",
+			"operations.remittance_type", "ory.identity", "public.account",
+			"public.account_type", "public.address", "public.address_type",
+			"public.contact", "public.work_status_type", "shared.payment_method_type",
+			"shared.type", "shared.type_group",
+		},
+	}, needsName: true}
+
+	for _, line := range strings.Split(m.View(), "\n") {
+		if w := lipgloss.Width(line); w > m.width {
+			t.Fatalf("a line is %d columns wide in a %d-column terminal:\n%s",
+				w, m.width, line)
+		}
 	}
 }

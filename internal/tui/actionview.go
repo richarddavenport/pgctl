@@ -5,15 +5,33 @@ import (
 	"strings"
 )
 
+// actionWidth is how wide a modal may be: enough for a load order to read on
+// one line where it can, never wider than the terminal.
+//
+// The plan's description contains lines as long as a list of every table a
+// widened selection adds, and an unbounded box drew itself off the side of the
+// screen — which the screenshots caught before anyone else did.
+func (m *Model) actionWidth() int {
+	width := m.screenWidth() - 12
+	if width > 104 {
+		width = 104
+	}
+	if width < 32 {
+		width = 32
+	}
+	return width
+}
+
 // viewAction renders the open form, the plan it produced, or the wait between
 // them.
 func (m *Model) viewAction() string {
 	a := m.action
+	width := m.actionWidth()
 
 	var b strings.Builder
-	b.WriteString(titleStyle.Render(a.title) + "\n")
+	b.WriteString(titleStyle.Render(truncate(a.title, width)) + "\n")
 	if a.explain != "" {
-		b.WriteString(mutedStyle.Render(wrap(a.explain, 68)) + "\n")
+		b.WriteString(mutedStyle.Render(wrap(a.explain, width)) + "\n")
 	}
 	b.WriteString("\n")
 
@@ -29,9 +47,9 @@ func (m *Model) viewAction() string {
 	}
 
 	if a.err != nil {
-		b.WriteString("\n\n" + dangerStyle.Render(wrap(a.err.Error(), 68)))
+		b.WriteString("\n\n" + dangerStyle.Render(wrap(a.err.Error(), width)))
 	}
-	return boxStyle.Render(b.String())
+	return boxStyle.Width(width).Render(b.String())
 }
 
 // viewForm renders every field at once, so the operator can see what they have
@@ -139,7 +157,7 @@ func renderToggle(f formField) string {
 func (m *Model) viewPlanPreview() string {
 	p := m.action.plan
 	var b strings.Builder
-	b.WriteString(p.plan.Describe())
+	b.WriteString(wrapIndented(p.plan.Describe(), m.actionWidth()))
 
 	if p.needsName {
 		b.WriteString("\n" + dangerStyle.Render(
@@ -227,4 +245,34 @@ func (m *Model) viewHelp() string {
 	}
 	b.WriteString("\n" + mutedStyle.Render("any key closes this"))
 	return boxStyle.Render(b.String())
+}
+
+// wrapIndented wraps text that is already laid out with leading indentation,
+// keeping a wrapped line under the one it continues rather than back at the
+// margin. Used for the plan description, whose lines list tables and can be
+// arbitrarily long.
+func wrapIndented(s string, width int) string {
+	var out []string
+	for _, line := range strings.Split(strings.TrimRight(s, "\n"), "\n") {
+		indent := line[:len(line)-len(strings.TrimLeft(line, " "))]
+		body := strings.TrimLeft(line, " ")
+		if body == "" {
+			out = append(out, "")
+			continue
+		}
+		avail := width - len(indent) - 2
+		if avail < 20 {
+			avail = 20
+		}
+		for i, wrapped := range strings.Split(wrap(body, avail), "\n") {
+			if i == 0 {
+				out = append(out, indent+wrapped)
+				continue
+			}
+			// Continuations sit two columns in from their line, so a wrapped
+			// list still reads as one item.
+			out = append(out, indent+"  "+wrapped)
+		}
+	}
+	return strings.Join(out, "\n")
 }

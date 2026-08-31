@@ -411,8 +411,8 @@ func (p *Plan) Describe() string {
 		fmt.Fprintf(&b, "  %d foreign keys dropped and rebuilt, %d indexes rebuilt\n",
 			len(p.DropFKs)+len(p.BlockingFKs), len(p.DropIndexes))
 		if n := len(p.TriggerTables); n > 0 {
-			fmt.Fprintf(&b, "  %s disabled for the load (%d tables)\n",
-				plural(p.triggerCount(), "user trigger"), n)
+			fmt.Fprintf(&b, "  %s disabled for the load on %s\n",
+				plural(p.triggerCount(), "user trigger"), plural(n, "table"))
 		}
 		b.WriteString("\nload order:\n")
 		b.WriteString(indent(p.Order.String()))
