@@ -35,15 +35,15 @@ connections:
 # ~/.pg_service.conf for the above would look like:
 #
 #   [prd]
-#   host=postgres.mbpnetwork.com
+#   host=postgres.example.com
 #   port=5432
-#   user=mbpiadmin
+#   user=youruser
 #   dbname=product-development
 #   sslmode=require
 #
 # and ~/.pgpass (chmod 600):
 #
-#   postgres.mbpnetwork.com:5432:*:mbpiadmin:the-password
+#   postgres.example.com:5432:*:youruser:the-password
 
 databases:
   # Databases are discovered from each server, not declared here: a server

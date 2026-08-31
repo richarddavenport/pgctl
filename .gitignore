@@ -1,2 +1,5 @@
 bin/
+
+# Snapshots land here by default and are measured in gigabytes.
+.pgctl/
 snapshots/
