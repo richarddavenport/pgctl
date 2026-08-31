@@ -137,6 +137,11 @@ PostgreSQL tool in the stack already needs.
 
 ## Design
 
+`design/dba-surface.md` is the enumeration of database administration work —
+fifteen domains, grounded in what this project's database actually reports, with
+a verdict per domain on whether pgctl is the right home for it. Nothing there is
+built except where it says so.
+
 `design/maintenance.md` is the open notebook on PostgreSQL maintenance — what
 pgctl already does after a restore, what it could report, and what it should
 stay out of. Nothing there is built except where it says so.

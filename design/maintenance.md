@@ -153,5 +153,12 @@ the guarded confirmation an apply uses.
 2. **Is a report enough to start with?** A panel that tells you the truth about
    production is useful on its own, and it is a fraction of the work of making
    any of these fixable from the tool.
-3. **Is `pg_repack` available, or installable?** It decides whether reclaiming
-   bloat is possible at all without an outage window.
+3. ~~**Is `pg_repack` available, or installable?**~~ **Answered 2026-08-31: it is
+   not available on this server.** So there is currently no way to reclaim bloat
+   without an exclusive lock, which makes reporting bloat more useful than
+   offering to fix it, and makes getting `pg_repack` installed a prerequisite for
+   the fix rather than a detail of it.
+
+The wider enumeration this came out of is in
+[dba-surface.md](dba-surface.md) — fifteen domains, with what was measured on
+this database against each.
