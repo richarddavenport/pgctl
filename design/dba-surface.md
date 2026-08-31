@@ -17,9 +17,25 @@ client, and is not.
 ## Measured on the dev database, 2026-08-31
 
 Grounding, so the list below argues from evidence rather than from everything
-PostgreSQL can be told to do. Caveat throughout: this server was restored
-recently, so anything counter-based (index scans, transaction age) is not
-representative of production. Marked ⚠ where that applies.
+PostgreSQL can be told to do.
+
+**Two caveats, and the second is the important one.** This server was restored
+recently, so anything counter-based — index scan counts, transaction age — says
+nothing about production; marked ⚠ below. And every reading here is from the
+**local dev container**, a plain `postgres` image. The `shared_preload_libraries`
+and logging settings in particular are *managed by Azure* on prd, qat and latest,
+where they may well already be set differently. Nothing in the configuration rows
+below should be believed about production until this is run there:
+
+```sql
+SELECT name, setting FROM pg_settings
+ WHERE name IN ('shared_preload_libraries','track_io_timing',
+                'log_min_duration_statement','log_lock_waits',
+                'default_toast_compression','autovacuum_vacuum_scale_factor');
+```
+
+That query is the first thing a configuration-diff report would do, which is
+itself an argument for building the report.
 
 | Signal | Reading | Why it matters |
 |---|---|---|
@@ -148,10 +164,25 @@ completeness.
 
 ## 5. Performance and observability
 
-Currently impossible: `shared_preload_libraries` is empty, so
-`pg_stat_statements` is not loaded. **Getting it loaded is the single highest
--value change on this page**, because everything else in this section depends on
-it and it cannot be turned on without a restart.
+`pg_stat_statements` keeps a running tally per *query shape* — literals
+normalised away, so ten thousand executions of one query collapse to a single
+row with total time, calls, mean time, rows and, with `track_io_timing`, I/O
+time. Postgres records none of this on its own: `pg_stat_activity` shows only
+what is running this instant, so "the database was slow at 3pm yesterday" has no
+data behind it at all.
+
+It hooks the executor, so it must be in `shared_preload_libraries`, which is
+read only at startup. `CREATE EXTENSION` alone does nothing. That means a
+restart, and on Azure it means a server-parameter change.
+
+**It is not required for all of this section, and the split matters.** Available
+without it: what is running now, blocking trees, lock waits, deadlocks,
+idle-in-transaction sessions, sequential scans per table, vacuum and bloat state
+— everything needed for live triage. Requiring it: everything retrospective and
+query-level, which is the rest of the list.
+
+The dev container has an empty `shared_preload_libraries`. Whether production
+does is unknown and is one query away — see the caveat above the table.
 
 - **Top statements** by total time, mean time, calls, rows, I/O — the standard
   first question of any "the database is slow" conversation.
@@ -355,10 +386,12 @@ already take, assembled for a moment when nobody wants to remember them.
 
 Ordered by value against effort, from the evidence above rather than from taste.
 
-1. **Get `pg_stat_statements` loaded.** It needs a restart, so it needs
-   planning, and nothing in section 5 is possible without it. Turning on
-   `log_min_duration_statement` and `log_lock_waits` needs no restart and helps
-   immediately.
+1. **Find out what production is actually configured with**, which is one
+   read-only query and settles several rows of the table above. Then, if
+   `pg_stat_statements` is not loaded there, plan the restart that loads it:
+   nothing retrospective in section 5 is possible without it, while live triage
+   needs none of it. `log_min_duration_statement` and `log_lock_waits` need no
+   restart and help immediately.
 2. **A read-only health report** — `pgctl check`, and a panel. Wraparound,
    vacuum blockers, invalid indexes, tables without statistics, bloat, comment
    coverage, sequence headroom. Every query is one pgctl can already run against
