@@ -275,3 +275,67 @@ reporting the maintenance state nobody looks at until it is urgent, and the one
 job only it knows to do: acting on the moment a restore just finished. The
 candidates, with what is measured and what is guessed, are in
 [maintenance.md](maintenance.md).
+
+## 16. One tool, with a read-only boundary rather than a second tool
+
+The enumeration in [dba-surface.md](dba-surface.md) is about a hundred and
+twelve tasks against pgctl's six verbs, which raised a fair question: is
+database administration a second tool?
+
+It is not, for three reasons. The connection model — DSNs, discovery, guarded
+and protected — is the expensive shared part, and a second tool would need all
+of it and then drift from it. The overlap points are real rather than
+incidental: a restore is when statistics must be collected, a migration is when
+lock analysis matters, and restore verification is simultaneously a backup
+concern and a health check — split the tools and those fall in the gap between
+them. And swarmctl is the precedent: it is not one narrow verb but the thing you
+operate a swarm with, so a single broad operator tool per domain is the house
+shape.
+
+The boundary that matters is not two binaries. It is **reading against
+changing**, inside one:
+
+- The reporting surface cannot mutate, by construction, and must work through a
+  PostgreSQL role holding no write privileges at all. That makes it safe on a
+  cron, in CI, and in the hands of somebody who should not be given a tool that
+  can drop a database — and safe regardless of a bug in pgctl.
+- Everything destructive keeps the machinery it already has: a plan shown
+  before it runs, guarded targets that need their name typed, protected ones
+  that can never be a target.
+
+## 17. pgctl reports; it does not sample
+
+No daemon, no metrics table, no background collection. pgctl reads the current
+state when asked and prints it.
+
+This is affordable because most of what looked like it needed history does not,
+and the rest is already being retained by something else:
+
+- **Sizes, bloat, wraparound age, invalid indexes, comment coverage,
+  configuration values, grants, replication lag** are facts about now. There was
+  never a series to keep.
+- **What is expensive** is answered by `pg_stat_statements`, whose counters are
+  cumulative since reset. That is enough for "what costs the most", which is the
+  question actually asked.
+- **What happened at a particular time** is in the PostgreSQL log, which records
+  slow statements, lock waits, autovacuum runs and deadlocks with timestamps —
+  when `log_min_duration_statement`, `log_lock_waits` and
+  `log_autovacuum_min_duration` are set. That is configuration, not code.
+- **Which query got slower** is Azure's Query Store, which already stores query
+  performance in time windows on Flexible Server.
+- **CPU, IOPS, storage and connection trends** are Azure Monitor, which has been
+  sampling all along.
+
+So the useful question is not "should pgctl store history" but "is the retention
+that already exists switched on" — which a configuration report answers, and
+which needs nothing built.
+
+What this deliberately gives up is narrow: per-table growth forecasting, and
+configuration drift as a series rather than a diff. Neither justifies a storage
+design, a schema to migrate, or a process that has to be running.
+
+**What would have to change to reverse this.** A requirement for sub-minute
+sampling, or for state held between runs that no PostgreSQL or Azure facility
+retains. Wanting a nightly report is not that: a scheduler running the CLI
+covers it without anything long-lived. This decision exists mainly to be read
+by whoever later proposes "just a small metrics table".

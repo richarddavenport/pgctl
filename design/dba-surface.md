@@ -157,8 +157,9 @@ completeness.
   current date. Rolling-window management is pure DBA work and a common
   scheduled job.
 - **Growth and forecasting** — size per table and per database over time, and
-  the date a threshold is reached. Nothing records this today; a nightly row per
-  database would.
+  the date a threshold is reached. Azure Monitor trends storage at the server
+  level; per-table is the one genuine gap, and decision 17 accepts it rather
+  than build a store for it.
 - **Tablespaces**, **fillfactor**, and **temp file usage** — `log_temp_files`
   shows queries spilling `work_mem` to disk.
 
@@ -186,8 +187,11 @@ does is unknown and is one query away — see the caveat above the table.
 
 - **Top statements** by total time, mean time, calls, rows, I/O — the standard
   first question of any "the database is slow" conversation.
-- **Statement regression** — the same query slower than last week. Needs
-  snapshots of `pg_stat_statements` over time, which is a table and a nightly job.
+- **Statement regression** — the same query slower than last week.
+  `pg_stat_statements` counters are cumulative, so this needs two readings to
+  subtract — which pgctl does not do (decision 17). Azure's **Query Store**
+  stores query performance in time windows already; whether it is enabled is the
+  question, not whether to build it.
 - **Active session inventory** — what is running now, for how long, waiting on what.
 - **Blocking trees** — who blocks whom, transitively. `pg_locks` joined to
   `pg_stat_activity`, which is unpleasant to write by hand and perfect for a tool.
@@ -346,7 +350,8 @@ pgctl's core, with the gaps named.
 - **A nightly** — designed, not built ([nightly.md](nightly.md)).
 - **Scheduled verification** — restore last night's snapshot and compare.
 - **Scheduled reporting** — the maintenance and drift reports, on a cadence,
-  somewhere people see them.
+  somewhere people see them. A scheduler running the CLI, not a process that
+  stays up.
 - **Maintenance windows** — a declared window per environment, which everything
   destructive checks.
 - **`pg_cron` inventory** where it is used; and this database has its own job
@@ -408,12 +413,20 @@ Ordered by value against effort, from the evidence above rather than from taste.
 1. **Which of these is a real problem for you, as opposed to a real problem in
    general?** The same measurements against production would sort them, and it
    is one read-only query set away.
-2. **Report first, or act first?** A tool that only tells the truth about
-   production is a fraction of the work and most of the value.
+2. ~~**Report first, or act first?**~~ **Settled: report first**, and the
+   reporting surface is read-only by construction — see decisions 16 and 17. It
+   is a fraction of the work and most of the value, and it can run as a role
+   with no write privileges.
 3. **Where do Azure's own controls fit?** Backups, HA, firewall rules and server
    parameters all have an Azure API that is authoritative over anything pgctl
    would do with SQL. Reading both and reconciling them is a coherent product;
    ignoring one of them is not.
-4. **Does anything here belong in pgctl at all, or is some of it a second
-   tool?** Backup-and-restore and health-reporting share a connection model and
-   little else.
+4. ~~**Is some of it a second tool?**~~ **Settled: one tool** with a read-only
+   boundary inside it rather than two binaries — decision 16. The connection
+   model is the expensive shared part, and the overlap points (statistics after
+   a restore, lock analysis before a migration, restore verification) fall in the
+   gap if they are split.
+
+5. **Is Azure Query Store enabled, and are the log settings on?** This replaced
+   the question of whether pgctl should record history. If the retention is
+   already switched on, several items above need nothing built.
