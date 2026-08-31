@@ -137,6 +137,10 @@ PostgreSQL tool in the stack already needs.
 
 ## Design
 
+`design/maintenance.md` is the open notebook on PostgreSQL maintenance — what
+pgctl already does after a restore, what it could report, and what it should
+stay out of. Nothing there is built except where it says so.
+
 `design/decisions.md` records every decision and the reasoning behind it —
 directory format, zstd, why filtered tables use binary `COPY`, why constraints
 are rebuilt `NOT VALID` and validated separately, and why masking is a seam with

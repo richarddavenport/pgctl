@@ -251,3 +251,27 @@ two — and more on a server with more cores.
 The pipe remains the right answer in one case: a small selection of tables where
 the whole operation is over before parallelism would have paid for itself. That
 is not the case worth building first.
+
+## 15. A restore collects statistics; it does not vacuum
+
+`pg_restore` leaves a database with no planner statistics. Nothing collects them
+until autovacuum happens by, so until this was fixed every whole-database
+refresh handed back an environment whose planner knew nothing about the data it
+had just received — measured as 173 tables with rows and no statistics on a
+database an earlier pgctl had restored. The first hours after a refresh were
+slow for a reason nobody would have connected to the refresh.
+
+So an apply now finishes by collecting statistics, with
+`vacuumdb --analyze-only --jobs=N`: it ships with the same client tools as
+pg_dump, and it analyses tables concurrently where a single `ANALYZE` statement
+works through them one at a time — 7 seconds for 212 tables. A failure warns
+rather than failing the restore, because the data is in and correct and
+statistics can be collected afterwards.
+
+It stops there. It does not vacuum, and pgctl has no `vacuum` command, because
+autovacuum is on and does that job — a command people run by hand would mostly
+be a way to add I/O at a bad moment. Where pgctl has something to add is
+reporting the maintenance state nobody looks at until it is urgent, and the one
+job only it knows to do: acting on the moment a restore just finished. The
+candidates, with what is measured and what is guessed, are in
+[maintenance.md](maintenance.md).

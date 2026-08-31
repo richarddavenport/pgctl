@@ -132,7 +132,47 @@ func (e *Engine) applyWholeDatabase(ctx context.Context, plan *Plan, dir string,
 		return err
 	}
 
-	return e.loadFilteredSidecars(ctx, plan, dir, plan.Snapshot.Filtered(), report)
+	if err := e.loadFilteredSidecars(ctx, plan, dir, plan.Snapshot.Filtered(), report); err != nil {
+		return err
+	}
+	return e.analyzeDatabase(ctx, target, plan.Snapshot.Database, report)
+}
+
+// analyzeDatabase collects planner statistics for a freshly restored database.
+//
+// pg_restore does not do this, and nothing else will until autovacuum gets
+// round to it — so without this step a refreshed environment runs every query
+// against a planner that knows nothing about the data it just received. The
+// symptom is that the first hours after a refresh are inexplicably slow, which
+// is a bad thing to leave for somebody else to notice. Measured on a database
+// restored by an earlier version of pgctl: 173 tables with rows and no
+// statistics at all.
+//
+// vacuumdb rather than a bare ANALYZE: it ships with the same client tools as
+// pg_dump, and --jobs analyses tables concurrently where a single ANALYZE
+// statement works through them one at a time.
+func (e *Engine) analyzeDatabase(ctx context.Context, target *Target, database string, report Reporter) error {
+	jobs := target.Jobs(e.cfg.Defaults)
+	report.step("analyze", fmt.Sprintf("collecting planner statistics, %d jobs", jobs))
+
+	args := []string{
+		"--analyze-only",
+		fmt.Sprintf("--jobs=%d", jobs),
+		"--no-password",
+		"--dbname=" + target.DSN(database),
+	}
+	cmd := exec.CommandContext(ctx, "vacuumdb", args...)
+	cmd.Env = target.SubprocessEnv(os.Environ())
+	if out, err := cmd.CombinedOutput(); err != nil {
+		// The data is in and correct; statistics can be collected later. Worth
+		// reporting loudly, not worth failing the restore over.
+		report.warn(fmt.Sprintf("could not collect statistics — the first queries "+
+			"against %s will be slow until autovacuum catches up: %v: %s",
+			database, err, lastLines(string(out), 3)))
+		return nil
+	}
+	report.send(Event{Kind: EventProgress, Step: "analyze", Message: "statistics collected"})
+	return nil
 }
 
 // applyTables replaces a subset of a database's tables in place.
