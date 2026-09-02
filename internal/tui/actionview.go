@@ -3,6 +3,8 @@ package tui
 import (
 	"fmt"
 	"strings"
+
+	"github.com/richarddavenport/tuikit/comp"
 )
 
 // actionWidth is how wide a modal may be: enough for a load order to read on
@@ -240,16 +242,56 @@ func (m *Model) viewHelp() string {
 		}},
 	}
 
-	var b strings.Builder
-	b.WriteString(titleStyle.Render("pgctl keys") + "\n")
+	// Built as lines rather than written straight into a builder, so the
+	// overlay can show a window of them. The full list is 35 lines; a 24-line
+	// terminal showed the first 22 and offered no way to see the rest, which
+	// is the least helpful possible state for a help screen.
+	var lines []string
+	lines = append(lines, titleStyle.Render("pgctl keys"), "")
 	for _, g := range groups {
-		b.WriteString(section(g.title))
+		lines = append(lines, headerStyle.Render(strings.ToUpper(g.title)))
 		for _, k := range g.keys {
-			fmt.Fprintf(&b, "  %s %s\n", accentStyle.Render(fmt.Sprintf("%-12s", k[0])), k[1])
+			// comp.Pad, not %-12s: Sprintf counts BYTES, so a hint containing
+			// ↑ or ← comes out three columns short and the descriptions stop
+			// lining up. Every arrow row in this list has that problem.
+			lines = append(lines, "  "+accentStyle.Render(comp.Pad(k[0], 12))+" "+k[1])
 		}
+		lines = append(lines, "")
 	}
-	b.WriteString("\n" + mutedStyle.Render("any key closes this"))
-	return boxStyle.Render(b.String())
+
+	// boxStyle is a rounded border plus Padding(1, 2): two rows of border and
+	// two of padding, so the content gets four fewer rows than the terminal
+	// has, and one more goes to the hint at the bottom.
+	height := m.height
+	if height <= 0 {
+		height = 24
+	}
+	visible := height - 5
+	if visible < 1 {
+		visible = 1
+	}
+
+	offset := m.helpOffset
+	if offset > len(lines)-visible {
+		offset = len(lines) - visible
+	}
+	if offset < 0 {
+		offset = 0
+	}
+	m.helpOffset = offset
+
+	end := min(offset+visible, len(lines))
+	shown := append([]string{}, lines[offset:end]...)
+
+	hint := "any key closes this"
+	switch below := len(lines) - end; {
+	case below > 0:
+		hint = fmt.Sprintf("%d more — ↑↓ to scroll, any other key closes", below)
+	case offset > 0:
+		hint = "the end — ↑↓ to scroll, any other key closes"
+	}
+	shown = append(shown, mutedStyle.Render(hint))
+	return boxStyle.Render(strings.Join(shown, "\n"))
 }
 
 // wrapIndented wraps text that is already laid out with leading indentation,

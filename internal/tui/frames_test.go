@@ -17,10 +17,17 @@ import (
 // model is a frame that may not be reachable at all.
 func states(t *testing.T) []struct {
 	name  string
-	build func() *Model
+	build func(w, h int) *Model
 } {
-	loaded := func() *Model {
+	// The size is set BEFORE the keys are pressed, and that is not a detail: a
+	// state reached at 132x38 and then resized to 80x24 is not the state a
+	// person on an eighty-column terminal reaches. The help overlay is the case
+	// that proved it — it fits at 38 lines with nothing to scroll, so a
+	// "scrolled" frame built at the wide size and rendered narrow showed the
+	// top of the list and looked like a broken scroll.
+	loaded := func(w, h int) *Model {
 		m := fixtureModel(t)
+		m.SetSize(w, h)
 		fixtureSnapshot(t, m)
 		return m
 	}
@@ -30,45 +37,54 @@ func states(t *testing.T) []struct {
 	}
 	return []struct {
 		name  string
-		build func() *Model
+		build func(w, h int) *Model
 	}{
 		{"connections", loaded},
-		{"databases", func() *Model { return keys(loaded(), "2") }},
-		{"snapshots", func() *Model { return keys(loaded(), "3") }},
-		{"sets", func() *Model { return keys(loaded(), "4") }},
-		{"runs", func() *Model { return keys(loaded(), "5") }},
+		{"databases", func(w, h int) *Model { return keys(loaded(w, h), "2") }},
+		{"snapshots", func(w, h int) *Model { return keys(loaded(w, h), "3") }},
+		{"sets", func(w, h int) *Model { return keys(loaded(w, h), "4") }},
+		{"runs", func(w, h int) *Model { return keys(loaded(w, h), "5") }},
 
 		// The right pane with the keys, and its tabs. Remembered per panel, so
 		// the tab strip is part of what a panel means.
-		{"detail-pane", func() *Model { return keys(loaded(), "right") }},
-		{"snapshot-tables", func() *Model { return keys(loaded(), "3", "right", "tab") }},
-		{"snapshot-warnings", func() *Model { return keys(loaded(), "3", "right", "tab", "tab") }},
-		{"snapshot-drift", func() *Model { return keys(loaded(), "3", "right", "tab", "tab", "tab") }},
+		{"detail-pane", func(w, h int) *Model { return keys(loaded(w, h), "right") }},
+		{"snapshot-tables", func(w, h int) *Model { return keys(loaded(w, h), "3", "right", "tab") }},
+		{"snapshot-warnings", func(w, h int) *Model { return keys(loaded(w, h), "3", "right", "tab", "tab") }},
+		{"snapshot-drift", func(w, h int) *Model { return keys(loaded(w, h), "3", "right", "tab", "tab", "tab") }},
 
 		// An environment pgctl could not reach. The detail pane has to explain
 		// itself rather than render an empty form.
-		{"unreachable", func() *Model { return keys(loaded(), "down", "down") }},
+		{"unreachable", func(w, h int) *Model { return keys(loaded(w, h), "down", "down") }},
 
 		// The modal forms, which are where an operator does damage.
-		{"form-snapshot", func() *Model { return keys(loaded(), "n") }},
-		{"form-apply", func() *Model { return keys(loaded(), "3", "a") }},
-		{"form-move", func() *Model { return keys(loaded(), "m") }},
-		{"form-prune", func() *Model { return keys(loaded(), "p") }},
+		{"form-snapshot", func(w, h int) *Model { return keys(loaded(w, h), "n") }},
+		{"form-apply", func(w, h int) *Model { return keys(loaded(w, h), "3", "a") }},
+		{"form-move", func(w, h int) *Model { return keys(loaded(w, h), "m") }},
+		{"form-prune", func(w, h int) *Model { return keys(loaded(w, h), "p") }},
 
-		{"help", func() *Model { return keys(loaded(), "?") }},
-		{"filter", func() *Model { return keys(loaded(), "/", "q") }},
-		{"filter-matches-nothing", func() *Model { return keys(loaded(), "/", "z", "z") }},
+		{"help", func(w, h int) *Model { return keys(loaded(w, h), "?") }},
+		// The help scrolled to the bottom. The list is longer than a short
+		// terminal, so the state that matters is the one where the last group
+		// is reachable at all.
+		{"help-scrolled", func(w, h int) *Model {
+			m := keys(loaded(w, h), "?")
+			for i := 0; i < 20; i++ {
+				harness.Press(m, "j")
+			}
+			return m
+		}},
+		{"filter", func(w, h int) *Model { return keys(loaded(w, h), "/", "q") }},
+		{"filter-matches-nothing", func(w, h int) *Model { return keys(loaded(w, h), "/", "z", "z") }},
 
 		// Nothing loaded: no probe has answered and there are no snapshots.
 		// Every panel's empty state at once, which is the first thing a new
 		// user sees and the last thing anybody looks at.
-		{"empty", func() *Model { return fixtureModel(t) }},
+		{"empty", func(w, h int) *Model {
+			m := fixtureModel(t)
+			m.SetSize(w, h)
+			return m
+		}},
 	}
-}
-
-func sized(m *Model, w, h int) *Model {
-	m.SetSize(w, h)
-	return m
 }
 
 // The screens as goldens: a layout change is an ordinary test failure.
@@ -77,7 +93,7 @@ func sized(m *Model, w, h int) *Model {
 func TestFramesMatchTheirGoldens(t *testing.T) {
 	for _, st := range states(t) {
 		t.Run(st.name, func(t *testing.T) {
-			harness.Golden(t, "testdata", st.name, sized(st.build(), 132, 38).View())
+			harness.Golden(t, "testdata", st.name, st.build(132, 38).View())
 		})
 	}
 }
@@ -89,7 +105,7 @@ func TestFramesMatchTheirGoldens(t *testing.T) {
 func TestFramesAtEightyColumns(t *testing.T) {
 	for _, st := range states(t) {
 		t.Run(st.name, func(t *testing.T) {
-			harness.Golden(t, "testdata/80", st.name, sized(st.build(), 80, 24).View())
+			harness.Golden(t, "testdata/80", st.name, st.build(80, 24).View())
 		})
 	}
 }
@@ -103,7 +119,7 @@ func TestColourDoesNotChangeTheShape(t *testing.T) {
 	for _, size := range []struct{ w, h int }{{132, 38}, {80, 24}} {
 		for _, st := range states(t) {
 			harness.ShapeSurvivesColour(t, st.name, func() string {
-				return sized(st.build(), size.w, size.h).View()
+				return st.build(size.w, size.h).View()
 			})
 		}
 	}
@@ -124,7 +140,7 @@ func TestCaptureFrames(t *testing.T) {
 	}
 	s := harness.Capture(t, dir, harness.Size(132, 38), harness.At(epoch))
 	for _, st := range states(t) {
-		s.Shot(st.name, st.build())
+		s.Shot(st.name, st.build(132, 38))
 	}
 	s.Done()
 }

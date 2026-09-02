@@ -2,7 +2,7 @@ pgctl  pgctl.yaml
 ╭──────────────────────────────╮ ╭─────────────────────────────────────────────╮
 │ 1 Connections (3)            │ │  Manifest  Tables  Warnings  Drift          │
 │ ● prd       protected        │ │                                             │
-│ ● qat       guarded          │ │ ! rule "operations.gone" matches no table i │
+│ ● qat       guarded          │ │ ! rule "operations.gone" matches no table … │
 ╰──────────────────────────────╯ │                                             │
 ╭──────────────────────────────╮ │                                             │
 │ 2 Databases (3)              │ │                                             │
@@ -20,7 +20,5 @@ pgctl  pgctl.yaml
 ╭──────────────────────────────╮ │                                             │
 │ 5 Runs                       │ │                                             │
 │ nothing run yet              │ │                                             │
-╰──────────────────────────────╯ │                                             │
-                                 │                                             │
-                                 ╰─────────────────────────────────────────────╯
-n snapshot  ·  a apply  ·  m move  ·  p prune  ·  x delete  ·  / filter  ·  tab pane  ·  ? keys
+╰──────────────────────────────╯ ╰─────────────────────────────────────────────╯
+n snapshot  ·  a apply  ·  m move  ·  p prune  ·  x delete  ·  ? keys

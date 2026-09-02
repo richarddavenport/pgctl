@@ -11,20 +11,18 @@ pgctl  pgctl.yaml
 │ claims               48.0 MB │ │ total size     31.0 GB                                                                          │
 │ quote                20.0 GB │ │ checked        just now                                                                         │
 ╰──────────────────────────────╯ │                                                                                                 │
-╭──────────────────────────────╮ │ SNAPSHOTS                                                                                       │
-│ 3 Snapshots╭────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ 08-27 22:00│                                                                                                        │
-╰────────────│  Prune snapshots                                                                                       │
-╭────────────│  Retention: 7 daily, 4 weekly, 0 monthly. An incomplete snapshot is never kept, and the newest always  │
-│ 4 Sets (1) │  is.                                                                                                   │
-│ claims 2+2 │                                                                                                        │
-╰────────────│  ▸ Connection            ‹ all ›  (1/4)                                                                │
-╭────────────│      ← → to change                                                                                     │
-│ 5 Runs     │    Delete them           off                                                                           │
+╭────────────╭────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ 3 Snapshots│                                                                                                        │
+│ 08-27 22:00│  Prune snapshots                                                                                       │
+╰────────────│  Retention: 7 daily, 4 weekly, 0 monthly. An incomplete snapshot is never kept, and the newest always  │
+╭────────────│  is.                                                                                                   │
+│ 4 Sets (1) │                                                                                                        │
+│ claims 2+2 │  ▸ Connection            ‹ all ›  (1/4)                                                                │
+╰────────────│      ← → to change                                                                                     │
+╭────────────│    Delete them           off                                                                           │
+│ 5 Runs     │                                                                                                        │
 │ nothing run│                                                                                                        │
-╰────────────│                                                                                                        │
-             ╰────────────────────────────────────────────────────────────────────────────────────────────────────────╯
-                                 │                                                                                                 │
+╰────────────╰────────────────────────────────────────────────────────────────────────────────────────────────────────╯
                                  │                                                                                                 │
                                  │                                                                                                 │
                                  │                                                                                                 │

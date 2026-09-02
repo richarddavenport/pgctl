@@ -20,7 +20,5 @@ pgctl  pgctl.yaml
 ╭──────────────────────────────╮ │ foreign keys   0                            │
 │ 5 Runs                       │ │                                             │
 │ nothing run yet              │ │ ! 1 warnings — see the Warnings tab         │
-╰──────────────────────────────╯ │                                             │
-                                 │                                             │
-                                 ╰─────────────────────────────────────────────╯
-n snapshot  ·  a apply  ·  m move  ·  p prune  ·  x delete  ·  / filter  ·  tab pane  ·  ? keys
+╰──────────────────────────────╯ ╰─────────────────────────────────────────────╯
+n snapshot  ·  a apply  ·  m move  ·  p prune  ·  x delete  ·  ? keys

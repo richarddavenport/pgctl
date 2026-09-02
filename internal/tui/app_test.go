@@ -367,9 +367,29 @@ func TestHelpListsEveryActionKey(t *testing.T) {
 			t.Errorf("the help does not document %q", key)
 		}
 	}
+	// j and k scroll instead of closing, because the full list is 35 lines and
+	// a 24-line terminal is a normal one — a help screen that shows two thirds
+	// of itself with no way to reach the rest is the least useful thing on the
+	// screen. Everything else still closes it.
+	m.SetSize(80, 24)
+	_ = m.View()
 	press(t, m, "j")
+	if !m.showHelp {
+		t.Error("j closed the help; it should scroll it")
+	}
+	if m.helpOffset == 0 {
+		t.Error("j did not scroll the help")
+	}
+	press(t, m, "k")
+	if m.helpOffset != 0 {
+		t.Errorf("k left the help at offset %d, want 0", m.helpOffset)
+	}
+	press(t, m, "x")
 	if m.showHelp {
-		t.Error("a keypress did not close the help")
+		t.Error("a key that is not a scroll did not close the help")
+	}
+	if m.helpOffset != 0 {
+		t.Error("closing the help did not reset its scroll")
 	}
 }
 

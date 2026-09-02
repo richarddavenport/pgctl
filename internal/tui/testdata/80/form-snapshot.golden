@@ -1,26 +1,24 @@
 pgctl  pgctl.yaml
 ╭──────────────────────────────╮ ╭─────────────────────────────────────────────╮
 │ 1 Connections (3)            │ │  Overview  Databases  Config                │
-│ ● prd       protected        │ │                                             │
-│ ● q╭────────────────────────────────────────────────────────────────────╮
+│ ● p╭────────────────────────────────────────────────────────────────────╮
+│ ● q│                                                                    │
+╰────│  Take a snapshot                                                   │
+╭────│  Reads the chosen databases and writes a compressed copy. Nothing  │
+│ 2 D│  is                                                                │
+│ pro│  written to the source.                                            │
+│ cla│                                                                    │
+╰────│  ▸ Connection            ‹ prd  PostgreSQL 17.4, 3 databases ›     │
+╭────│  (1/3)                                                             │
+│ 3 S│      ← → to change                                                 │
+│ 08-│    Databases             ○ claims  ● product-development  ○ quote  │
+╰────│  1 of 3                                                            │
+╭────│    Upload to storage     —                                         │
+│ 4 S│      storage.kind is local — there is nowhere to upload to         │
+│ cla│                                                                    │
 ╰────│                                                                    │
-╭────│  Take a snapshot                                                   │
-│ 2 D│  Reads the chosen databases and writes a compressed copy. Nothing  │
-│ pro│  is                                                                │
-│ cla│  written to the source.                                            │
-╰────│                                                                    │
-╭────│  ▸ Connection            ‹ prd  PostgreSQL 17.4, 3 databases ›     │
-│ 3 S│  (1/3)                                                             │
-│ 08-│      ← → to change                                                 │
-╰────│    Databases             ○ claims  ● product-development  ○ quote  │
-╭────│  1 of 3                                                            │
-│ 4 S│    Upload to storage     —                                         │
-│ cla│      storage.kind is local — there is nowhere to upload to         │
-╰────│                                                                    │
-╭────│                                                                    │
-│ 5 R╰────────────────────────────────────────────────────────────────────╯
+╭────╰────────────────────────────────────────────────────────────────────╯
+│ 5 Runs                       │ │                                             │
 │ nothing run yet              │ │                                             │
-╰──────────────────────────────╯ │                                             │
-                                 │                                             │
-                                 ╰─────────────────────────────────────────────╯
+╰──────────────────────────────╯ ╰─────────────────────────────────────────────╯
 ← → change  ·  ↑↓ fields  ·  enter run  ·  esc cancel

@@ -73,8 +73,10 @@ type Model struct {
 	// action is the modal form in front of everything, when one is open.
 	action *actionModel
 
-	// help is the ? overlay.
-	showHelp bool
+	// help is the ? overlay. It scrolls, because the full key list is 35 lines
+	// and a 24-line terminal is a normal one.
+	showHelp   bool
+	helpOffset int
 
 	err    error
 	status string
@@ -226,7 +228,21 @@ func (m *Model) key(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	key := msg.String()
 
 	if m.showHelp {
-		m.showHelp = false
+		// The key list is longer than a short terminal, so the overlay scrolls
+		// rather than showing two thirds of itself and no way to reach the
+		// rest. Anything that is not a scroll closes it, which keeps the
+		// "press any key" feel for the common case where it all fits.
+		switch key {
+		case "up", "k":
+			m.helpOffset = max(m.helpOffset-1, 0)
+		case "down", "j":
+			m.helpOffset++
+		case "g", "home":
+			m.helpOffset = 0
+		default:
+			m.showHelp = false
+			m.helpOffset = 0
+		}
 		return m, nil
 	}
 	if m.action != nil {

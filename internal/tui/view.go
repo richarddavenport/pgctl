@@ -5,6 +5,8 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
+
+	"github.com/richarddavenport/tuikit/comp"
 )
 
 // Layout: a fixed-width left column of panels, the rest to the detail pane.
@@ -293,7 +295,35 @@ func (m *Model) footer() string {
 		keys = []string{"q cancel the run"}
 	}
 	keys = append(keys, "/ filter", "tab pane", "? keys")
-	return footerStyle.Render(strings.Join(keys, "  ·  "))
+	return footerStyle.Render(fitKeys(keys, m.screenWidth()))
+}
+
+// fitKeys joins key hints into one line no wider than the terminal.
+//
+// The footer used to render whatever it had: eight hints and two separators
+// each is 95 columns, so on an eighty-column terminal it ran fifteen columns
+// off the side — and because it is the last line of the frame, that is the one
+// place an overflow makes the terminal scroll and tear the whole screen.
+//
+// Hints are dropped from the RIGHT, except "? keys", which is kept whatever
+// else goes: it is the hint that leads to all the others, so it is the last
+// thing worth losing. If even that will not fit there is nothing useful to say
+// and the line is cut.
+func fitKeys(keys []string, width int) string {
+	const sep = "  ·  "
+	if width <= 0 || len(keys) == 0 {
+		return ""
+	}
+
+	last := keys[len(keys)-1]
+	head := keys[:len(keys)-1]
+	for n := len(head); n >= 0; n-- {
+		line := strings.Join(append(append([]string{}, head[:n]...), last), sep)
+		if comp.Width(line) <= width {
+			return line
+		}
+	}
+	return comp.Truncate(last, width)
 }
 
 // overlay centres a box over the screen, which is how a modal appears without

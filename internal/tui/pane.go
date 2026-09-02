@@ -7,6 +7,8 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 
+	"github.com/richarddavenport/tuikit/comp"
+
 	"github.com/richarddavenport/pgctl/internal/config"
 )
 
@@ -84,9 +86,18 @@ func (m *Model) pane(width, height int) string {
 
 	var b strings.Builder
 	for i := 0; i < shown && offset+i < len(rows); i++ {
-		line := rows[offset+i]
+		// Every line, not just the focused one. lipgloss's Width is a MINIMUM,
+		// so a line longer than the pane is not clipped by the style — it runs
+		// out of the box and past the edge of the terminal. A snapshot ID at
+		// eighty columns was fifteen columns over.
+		//
+		// comp.Truncate rather than this package's truncateHard: it counts
+		// columns and it is ANSI-aware, and these lines are already styled, so
+		// cutting by runes can end a line halfway through an escape sequence
+		// and leave the rest of the frame wearing the colour.
+		line := comp.Truncate(rows[offset+i], inner)
 		if m.paneFocus && offset+i == m.paneCursor {
-			line = currentStyle.Render(truncateHard(line, inner))
+			line = currentStyle.Render(line)
 		}
 		b.WriteString(line)
 		if i < shown-1 {
@@ -94,15 +105,24 @@ func (m *Model) pane(width, height int) string {
 		}
 	}
 	if len(rows) > shown {
-		b.WriteString("\n" + mutedStyle.Render(fmt.Sprintf("  %d more — tab to focus, j/k to scroll",
-			len(rows)-shown-offset)))
+		b.WriteString("\n" + mutedStyle.Render(comp.Truncate(
+			fmt.Sprintf("  %d more — tab to focus, j/k to scroll", len(rows)-shown-offset), inner)))
 	}
 
 	style := panelStyle
 	if m.paneFocus {
 		style = focusedPanelStyle
 	}
-	return style.Width(width - 2).Height(height).Render(bar.String() + "\n\n" + b.String())
+	// Height is the CONTENT height in lipgloss, and the border is added
+	// outside it — so passing the height the pane was given made every frame
+	// two lines taller than the terminal, which pushed the footer off the
+	// bottom of every screen pgctl has ever drawn. Width already accounts for
+	// this; Height did not.
+	inside := height - 2
+	if inside < 1 {
+		inside = 1
+	}
+	return style.Width(width - 2).Height(inside).Render(bar.String() + "\n\n" + b.String())
 }
 
 // paneRowCount is how many lines the pane's body has, for cursor clamping.

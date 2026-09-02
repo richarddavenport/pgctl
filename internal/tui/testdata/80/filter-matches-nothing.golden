@@ -20,7 +20,5 @@ pgctl  pgctl.yaml
 │ nothing run yet              │ │                                             │
 ╰──────────────────────────────╯ │                                             │
                                  │                                             │
-                                 │                                             │
-                                 │                                             │
                                  ╰─────────────────────────────────────────────╯
 filter: zz▏   enter accept · esc clear

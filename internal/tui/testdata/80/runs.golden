@@ -2,10 +2,10 @@ pgctl  pgctl.yaml
 ╭──────────────────────────────╮ ╭─────────────────────────────────────────────╮
 │ 1 Connections (3)            │ │  Log                                        │
 │ ● prd       protected        │ │                                             │
-│ ● qat       guarded          │ │ Nothing has run yet.                        │
-╰──────────────────────────────╯ │                                             │
-╭──────────────────────────────╮ │ n takes a snapshot, a applies one, m moves  │
-│ 2 Databases (3)              │ │ between environments.                       │
+│ ● qat       guarded          │ │ Nothing has run yet.                      … │
+╰──────────────────────────────╯ │                                           … │
+╭──────────────────────────────╮ │ n takes a snapshot, a applies one, m moves… │
+│ 2 Databases (3)              │ │                                             │
 │ product-development  11.0 GB │ │                                             │
 │ claims               48.0 MB │ │                                             │
 ╰──────────────────────────────╯ │                                             │
@@ -20,7 +20,5 @@ pgctl  pgctl.yaml
 ╭──────────────────────────────╮ │                                             │
 │ 5 Runs                       │ │                                             │
 │ nothing run yet              │ │                                             │
-╰──────────────────────────────╯ │                                             │
-                                 │                                             │
-                                 ╰─────────────────────────────────────────────╯
-n snapshot  ·  a apply  ·  m move  ·  p prune  ·  / filter  ·  tab pane  ·  ? keys
+╰──────────────────────────────╯ ╰─────────────────────────────────────────────╯
+n snapshot  ·  a apply  ·  m move  ·  p prune  ·  / filter  ·  ? keys
