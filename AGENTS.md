@@ -55,6 +55,25 @@ PGCTL_FRAMES=/tmp/pgctl-frames go test ./internal/tui -run CaptureFrames
 tuikit frames /tmp/pgctl-frames -out /tmp/frames.html -title pgctl
 ```
 
+## When comp cannot do something
+
+You will hit this. The rule is **not** to work around it quietly.
+
+If you are about to write `c.Text`, `c.Fill`, `c.Set`, or arithmetic on a Rect,
+stop: the canvas exists so a tool never does that. Work around it if you must —
+you have a thing to ship — but read `../tuikit/AGENTS.md` § "When comp cannot do
+something" and file the report **in the same commit**, or it will not be
+reported:
+
+```sh
+gh issue create -R richarddavenport/tuikit --template from-a-tool.md
+```
+
+Include **the code you wrote by hand**, not a description of it. A component
+gets built when two tools have hand-rolled the same thing, and "the same" is a
+judgement nobody can make from prose. A guess at the API is welcome, and a wrong
+guess is useful.
+
 ## Working principles
 
 - **PostgreSQL's own mechanisms first.** A connection is a libpq DSN; credentials
