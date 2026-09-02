@@ -339,3 +339,45 @@ sampling, or for state held between runs that no PostgreSQL or Azure facility
 retains. Wanting a nightly report is not that: a scheduler running the CLI
 covers it without anything long-lived. This decision exists mainly to be read
 by whoever later proposes "just a small metrics table".
+
+## 18. The interface is built on tuikit, migrated rather than restarted
+
+pgctl is one of the four tools tuikit was extracted from, so the question was
+never whether the framework fits — its `harness` package comment names this
+repo's `screenshot_probe_test.go` as the prototype it generalises. The question
+was whether to run `tuikit new` and backfill, or migrate in place.
+
+**Migrate in place.** `tuikit new` generates the structure that azctl's
+migration turned out to need, and pgctl already had all of it: `internal/`
+split into `engine`, `tui` and `cli`; an engine with no terminal imports, which
+`guard.Engine` passed on five packages unedited; a CLI that is a peer over the
+engine rather than a wrapper around it; and a **pointer** model, which the
+tuikit README calls out as the one change azctl had to make in every file.
+Starting over would have re-earned the three layout bugs the probe tests had
+already found and fixed, and thrown away 3,286 lines that work.
+
+The scaffold is still the donor. One was generated into a scratch directory and
+read, and what pgctl lacked was lifted from it: the palette and glyph set, the
+three `guard_test.go` files, the workflows, `install.sh`. What pgctl already had
+was left alone.
+
+**What this bought, in the order it arrived.** The colour roles stop being
+seven hex pairs and become the terminal's own ANSI indices, so pgctl is themed
+by whatever themed the terminal — decision 28 in tuikit argues this out. The
+glyph set is closed, which found four characters pgctl printed that a terminal
+font may not have. And a fixture plus `harness.Golden` made the frames visible
+without a database, which found four layout bugs in one run, including one — the
+detail pane two lines taller than the terminal — that had pushed the footer off
+the bottom of every screen pgctl had ever drawn.
+
+**What it costs.** tuikit is private and untagged, so `go.mod` resolves it
+through `replace ... => ../tuikit`: building pgctl needs a sibling checkout, CI
+checks out two repositories with a PAT, and `go install` does not work. All of
+that goes when tuikit is tagged. The `replace` is the whole of the coupling —
+there is no vendored copy and no fork.
+
+**What would have to change to reverse this.** tuikit going unmaintained while
+pgctl still needs to ship, or a screen pgctl needs that `comp` actively gets in
+the way of. Neither is a reason to fork: the components are ordinary Go, and a
+tool that outgrows one can draw that screen itself, which is what `theme` and
+`guard` exist to keep honest either way.

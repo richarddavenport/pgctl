@@ -11,7 +11,7 @@ respect the foreign keys between them.
 
 - [`README.md`](./README.md) — what the tool does and how it is configured.
 - [`design/decisions.md`](./design/decisions.md) — **read before changing how
-  anything behaves.** Seventeen numbered decisions, each with the reasoning that
+  anything behaves.** Eighteen numbered decisions, each with the reasoning that
   produced it. A change that contradicts one is not forbidden, but it has to say
   so rather than quietly reverse it.
 
@@ -27,6 +27,33 @@ Read these when the work touches the area:
   Nothing there is built except where it says so.
 - [`docs/nightly.md`](./docs/nightly.md) — the scheduled snapshot: what it needs
   and where it should run.
+
+## Building it
+
+pgctl's interface is built on [tuikit](https://github.com/richarddavenport/tuikit)
+— decision 18. tuikit is private and untagged, so `go.mod` resolves it through
+`replace github.com/richarddavenport/tuikit => ../tuikit`: **you need a tuikit
+checkout beside this one**, or nothing builds. CI checks out both.
+
+Three things will fail your change that did not exist before:
+
+- `guard.Engine` in `internal/{engine,pg,config,store,snapshot}` — those
+  packages may not import a colour, a width, a key or a UI framework.
+- `guard.Tokens`, `guard.Glyphs` and `guard.Chrome` in `internal/tui` — a colour
+  that is not a role in `theme.go`, or a non-ASCII character not in its glyph
+  set, is a test failure.
+- the goldens in `internal/tui/testdata` — 19 states at two terminal sizes, 38 frames. A
+  layout change is an ordinary test failure; run
+  `go test ./internal/tui -update-goldens` when it is intended, and **read the
+  diff**. `TestEveryFrameFitsItsTerminal` is the one that stops a frame drawing
+  off the side of the screen.
+
+To look at a screen rather than assert on it:
+
+```sh
+PGCTL_FRAMES=/tmp/pgctl-frames go test ./internal/tui -run CaptureFrames
+tuikit frames /tmp/pgctl-frames -out /tmp/frames.html -title pgctl
+```
 
 ## Working principles
 
