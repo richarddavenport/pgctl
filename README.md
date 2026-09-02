@@ -37,6 +37,22 @@ PostgreSQL **16 or newer**, server and client tools both — below 16 there is n
 Nothing else. There is no credential store to set up: pgctl connects the way
 `psql` does.
 
+## Installing
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/richarddavenport/pgctl/master/install.sh | bash
+```
+
+The repository is private, so `install.sh` fetches the release asset through the
+`gh` CLI rather than plain `curl` — a token is needed either way, and `gh`
+already has one.
+
+To change pgctl rather than run it, clone it with a [tuikit] checkout beside it
+and `make install`. tuikit is unpublished, so `go.mod` resolves it through a
+`replace` to `../tuikit`.
+
+[tuikit]: https://github.com/richarddavenport/tuikit
+
 ## Getting started
 
 With no configuration at all, pgctl connects wherever `psql` with no arguments

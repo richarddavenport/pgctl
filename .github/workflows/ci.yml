@@ -1,0 +1,109 @@
+name: CI
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+# The two checkouts are the price of go.mod's `replace ... => ../tuikit`.
+# tuikit is private and untagged, so it cannot be fetched as a module; it has to
+# be a sibling directory on the runner, which means pgctl cannot be checked out
+# at the workspace root. TUIKIT_TOKEN is a PAT with read access to
+# richarddavenport/tuikit — GITHUB_TOKEN is scoped to this repository and will
+# not reach another one. All three steps go when tuikit is tagged and the
+# replace comes out.
+defaults:
+  run:
+    working-directory: pgctl
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: pgctl
+      - uses: actions/checkout@v4
+        with:
+          repository: richarddavenport/tuikit
+          path: tuikit
+          token: ${{ secrets.TUIKIT_TOKEN }}
+      - uses: actions/setup-go@v5
+        with:
+          # The go directive, not a number repeated here: a version in two
+          # places is a version that drifts.
+          go-version-file: pgctl/go.mod
+      - name: gofmt
+        run: gofmt -l . | tee /dev/stderr | (! read)
+      - name: vet
+        run: go vet ./...
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v8
+        with:
+          working-directory: pgctl
+          # Pinned to the v2 line explicitly, and to the same version the
+          # Makefile runs. The action's "latest" resolves to v1, which is built
+          # with an older Go than this module's directive and refuses to run
+          # rather than degrading.
+          version: v2.12
+      # No database. Every test that needs one skips without PGCTL_TEST_DSN, so
+      # this is the same suite `make test` runs; `make test-all` against a lab
+      # container is the operator's job, because the interesting failures there
+      # need plv8 and a 31 GB restore, not a runner.
+      - name: test
+        run: go test ./...
+      - name: cross-build
+        run: |
+          for target in darwin/arm64 darwin/amd64 linux/arm64 linux/amd64; do
+            GOOS=${target%/*} GOARCH=${target#*/} CGO_ENABLED=0 \
+              go build -o /dev/null ./cmd/pgctl
+          done
+
+  # The tests that need a server, which the `check` job skips.
+  #
+  # Two packages, not `./...`, and that is the point worth reading. Both env
+  # vars name a TARGET for the package that reads them:
+  #
+  #   internal/pg     connects to PGCTL_TEST_DSN and runs the catalog queries
+  #   internal/store  round-trips a snapshot tree through Azurite
+  #
+  # internal/engine is deliberately absent. TestDumpAgainstRealServer takes
+  # PGCTL_TEST_DSN as a GATE and then dumps whatever `testConfig` names —
+  # 127.0.0.1:5432, database product-development — and asserts the manifest
+  # records foreign keys, so it needs a populated copy of the real database
+  # rather than an empty cluster. That is `make test-all` against a lab
+  # container with plv8, and it is the operator's job. Setting the variable
+  # here would un-skip a test that cannot pass.
+  integration:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: pgctl
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready --health-interval 5s
+          --health-timeout 5s --health-retries 10
+      azurite:
+        image: mcr.microsoft.com/azure-storage/azurite
+        ports: ['10000:10000']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: pgctl
+      - uses: actions/checkout@v4
+        with:
+          repository: richarddavenport/tuikit
+          path: tuikit
+          token: ${{ secrets.TUIKIT_TOKEN }}
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: pgctl/go.mod
+      - name: catalog queries against a real server
+        env:
+          PGCTL_TEST_DSN: postgres://postgres:pgctl@127.0.0.1:5432/postgres
+        run: go test ./internal/pg/ -count=1 -run RealServer -v
+      - name: blob round trip against Azurite
+        env:
+          PGCTL_TEST_BLOB_ENDPOINT: http://127.0.0.1:10000/devstoreaccount1
+        run: go test ./internal/store/ -count=1 -run Blob -v

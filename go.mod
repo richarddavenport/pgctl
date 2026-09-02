@@ -40,4 +40,9 @@ require (
 	golang.org/x/text v0.38.0 // indirect
 )
 
+// tuikit is private and untagged, so it cannot be fetched as a module; it
+// resolves from a sibling checkout instead. Relative, so it works on any
+// machine with both repos side by side rather than only on the one that wrote
+// it — which is also why CI checks out two repositories. All of that goes when
+// tuikit is tagged.
 replace github.com/richarddavenport/tuikit => ../tuikit
