@@ -230,7 +230,6 @@ func (m *Model) Update(msg tea.Msg) (app.Model, tea.Cmd) {
 			return m, nil
 		}
 		m.entries = msg.entries
-		m.clampCursors()
 		return m, nil
 
 	case liveTablesMsg:
@@ -439,11 +438,14 @@ func (m *Model) navigate(key string) (app.Model, tea.Cmd) {
 }
 
 func (m *Model) setCursor(i int) {
+	// No clamping here. comp.List settles the cursor against the rows that
+	// actually exist when it draws, because that is the only moment the rows
+	// are known — the list does not hold them.
 	if m.paneFocus {
-		m.paneList.Select(clamp(i, m.paneRowCount()-1))
+		m.paneList.Select(i)
 		return
 	}
-	m.lists[m.focus].Select(clamp(i, m.panelLen(m.focus)-1))
+	m.lists[m.focus].Select(i)
 }
 
 // cursor is the selected row of a panel. A method rather than a field read,
@@ -454,17 +456,14 @@ func (m *Model) cursor(panel int) int { return m.lists[panel].Cursor() }
 // onSelectionChanged loads whatever the new selection needs. Selection is
 // hierarchical, so moving the environment cursor changes what every panel
 // below it is about.
-func (m *Model) onSelectionChanged() tea.Cmd {
-	m.clampCursors()
-	return m.paneLoad()
-}
-
-func (m *Model) clampCursors() {
-	for panel := range m.lists {
-		m.lists[panel].Select(clamp(m.lists[panel].Cursor(), m.panelLen(panel)-1))
-	}
-	m.paneList.Select(clamp(m.paneList.Cursor(), m.paneRowCount()-1))
-}
+//
+// It used to clamp every cursor first, from when they were plain ints that
+// could point past a list that had shrunk under them. comp.List owns that now
+// and does it at DRAW time, which is the only moment it knows what rows exist.
+// Clamping here was worse than redundant: it went through Select, and Select
+// cancels a pending Move — so every arrow key was applied and then immediately
+// undone, and the cursor never left the first row.
+func (m *Model) onSelectionChanged() tea.Cmd { return m.paneLoad() }
 
 func (m *Model) quit() tea.Cmd {
 	if m.active != nil && m.active.running {

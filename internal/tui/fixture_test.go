@@ -113,5 +113,4 @@ func fixtureSnapshot(t *testing.T, m *Model) {
 		t.Fatalf("write manifest: %v", err)
 	}
 	m.entries = []*engine.Entry{{Manifest: man, Local: true}}
-	m.clampCursors()
 }

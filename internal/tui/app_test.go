@@ -101,6 +101,16 @@ func press(t *testing.T, m *Model, keys ...string) {
 			msg = tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune(k)}
 		}
 		m.Update(msg)
+
+		// Redraw after every key, the way a running program does.
+		//
+		// Not optional since the cursors became comp.Lists: a List records a
+		// Move and resolves it when it DRAWS, because that is the only moment
+		// it knows which rows exist — so a test that pressed ↓ and then asked
+		// what was selected got the answer from before the keystroke. Bubble
+		// Tea draws between every message anyway; this helper was the only
+		// thing that did not.
+		_ = app.New(m, app.WithChrome(Chrome), app.WithSize(m.width, m.height)).View()
 	}
 }
 
