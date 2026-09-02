@@ -279,7 +279,7 @@ func (m *Model) emptyPanel(panel int) string {
 
 func (m *Model) footer() string {
 	if m.filtering {
-		return footerStyle.Render("filter: " + m.filter + "▌   enter accept · esc clear")
+		return footerStyle.Render("filter: " + m.filter + "▏   enter accept · esc clear")
 	}
 	if m.action != nil {
 		return footerStyle.Render(m.actionFooter())

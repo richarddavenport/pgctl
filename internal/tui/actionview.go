@@ -86,7 +86,7 @@ func (m *Model) viewForm() string {
 				text = mutedStyle.Render("(none)")
 			}
 			if focused && !f.disabled {
-				text += "▌"
+				text += "▏"
 			}
 			b.WriteString(text)
 		}
@@ -122,9 +122,14 @@ func (m *Model) renderChoice(f formField, focused bool) string {
 func (m *Model) renderMulti(f formField, focused bool) string {
 	parts := make([]string, 0, len(f.options))
 	for i, opt := range f.options {
-		box := "☐"
+		// The same filled/hollow pair the Connections panel marks reachability
+		// with, rather than a ballot box. One question shape — is this one in or
+		// out — should not have two glyphs, and ☐/☑ are the characters a
+		// terminal font is most likely to draw as a replacement box or, worse,
+		// as double-width emoji that shift the column.
+		box := "○"
 		if f.selected[i] {
-			box = okStyle.Render("☑")
+			box = okStyle.Render("●")
 		}
 		item := box + " " + opt
 		if focused && i == f.choice {
@@ -162,7 +167,7 @@ func (m *Model) viewPlanPreview() string {
 	if p.needsName {
 		b.WriteString("\n" + dangerStyle.Render(
 			fmt.Sprintf("%s is guarded. Type its name to continue: ", p.plan.Target.Conn.Name)) +
-			p.typed + "▌")
+			p.typed + "▏")
 	}
 	return b.String()
 }
@@ -204,7 +209,7 @@ func (m *Model) viewHelp() string {
 		keys  [][2]string
 	}{
 		{"Moving", [][2]string{
-			{"1 – 5", "jump to a panel"},
+			{"1-5", "jump to a panel"},
 			{"↑ ↓ / j k", "move within a panel"},
 			{"J K", "next / previous panel"},
 			{"g G", "first / last row"},
