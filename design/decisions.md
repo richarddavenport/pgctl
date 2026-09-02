@@ -146,55 +146,46 @@ as a database greyed out for reasons nobody remembers. `databases.exclude` trims
 what is not interesting, and everything else is fair game — including the one
 somebody added last week.
 
-## 8b. The service file lives beside pgctl's config, not at libpq's default
+## 8b. The service file stays at libpq's default — tried elsewhere, reverted
 
-`~/.config/pgctl/pg_service.conf`, or `$XDG_CONFIG_HOME/pgctl/pg_service.conf`.
-pgctl's own `config.yaml` moved to the same directory, from
-`os.UserConfigDir()` — which on Linux already answered `~/.config` and on macOS
-answered `~/Library/Application Support`, where a GUI keeps state and where
-nobody was ever going to look for a file they edit by hand.
+The service file is `~/.pg_service.conf`, where libpq looks for it. pgctl does
+not move it, does not set `PGSERVICEFILE`, and has no opinion about it.
 
-**This does not reverse decision 8.** The file is a libpq service file, in
-libpq's format, parsed by libpq. What changes is only WHERE it is, and libpq
-parameterises that itself with `PGSERVICEFILE`. pgctl sets that variable once in
-`main` and nothing else: pgx reads it when it parses a connection string, and
-`pg_dump` and `pg_restore` inherit it through the environment, so both halves of
-an operation resolve `service=prd` from the same file. Verified on all three
-paths before it was written.
+**This entry records an attempt and its reversal**, because the attempt looked
+reasonable and the reasoning against it is the useful part.
 
-The alternative that WOULD have reversed decision 8 was putting host, port, user
-and sslmode in `pgctl.yaml` under a pgctl-shaped schema. That is the parallel
-scheme the decision exists to refuse, and it has been deleted from this tool
-twice.
+For about an hour the file lived at `~/.config/pgctl/pg_service.conf`, with
+pgctl setting `PGSERVICEFILE` once in `main` so that pgx and the `pg_dump`
+subprocesses resolved it from the same place. That worked — verified on all
+three paths — and it did not violate decision 8 in the way a pgctl-shaped
+connection schema would have: the file was still a libpq service file, in
+libpq's format, parsed by libpq, and `PGSERVICEFILE` is libpq's own way of
+saying where one lives.
 
-The rejected implementation is worth recording too: pgx accepts a `servicefile=`
-keyword inside a connection string, which libpq does not. Using it would have
-worked for the library and silently not for the subprocesses, and it would have
-meant pgctl rewriting a DSN a person wrote — which decision 8 says it has no
-business doing.
+It was still wrong, for the reason decision 8 exists:
 
-**Three things `UseServiceFile` deliberately does not do**, each because the
-alternative is worse:
+- **It broke `psql`.** `psql service=prd` stopped working, because psql reads
+  only libpq's default. The whole point of a service file is that every
+  PostgreSQL tool on the machine shares one set of definitions; a location only
+  pgctl knows about is a second scheme wearing the first one's file format.
+- **The fix for that was a shell export**, which is a thing every person and
+  every CI job has to remember — the same class of problem as distributing the
+  file, now applied to knowing where it is.
+- **libpq already solves relocation.** Anyone who wants the file elsewhere sets
+  `PGSERVICEFILE` themselves. pgctl adding a default did not add a capability;
+  it only disagreed with the ecosystem about the default.
 
-- **Override an existing `PGSERVICEFILE`.** Someone who has told libpq where
-  their services are has said something more specific than a default.
-- **Anything at all when the file is absent.** libpq then falls back to
-  `~/.pg_service.conf` as it always has, so a machine set up the old way keeps
-  working and this is strictly additive. Pointing the variable at a file that is
-  not there would break that fallback and report nothing.
-- **Report an error.** There is nothing to fail. A malformed file is libpq's to
-  complain about, by name, when a connection is actually attempted.
+So it is deleted, which is what has happened to every parallel scheme pgctl has
+invented — and this one was barely parallel, just relocated. `Home()` and the
+`config.yaml` search path keep the change that came with it, because that part
+was a bug rather than a preference: the path used `os.UserConfigDir()`, which
+answers `~/.config` on Linux and `~/Library/Application Support` on macOS, so
+pgctl was looking for a hand-edited file where a GUI keeps its state. It is
+`$XDG_CONFIG_HOME/pgctl` or `~/.config/pgctl` on both now.
 
-**What it costs.** `psql service=prd` in a shell does not work without
-`export PGSERVICEFILE=~/.config/pgctl/pg_service.conf`, because psql only reads
-libpq's default. That is the price of moving the file and it is in the README. A
-symlink from `~/.pg_service.conf` is the other way and is nobody's business but
-the reader's.
-
-**What would have to change to reverse this.** libpq gaining an XDG search path
-of its own, which would make the variable unnecessary; or a second tool in the
-family needing the same file, at which point where it lives stops being pgctl's
-decision to make.
+**What would have to change to reverse this again.** libpq gaining an XDG
+search path of its own — at which point pgctl would not have to do anything,
+which is the point.
 
 ## 9. Production is never a target, and guarded environments need typed consent
 

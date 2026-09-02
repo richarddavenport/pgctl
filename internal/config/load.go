@@ -75,59 +75,6 @@ func Home() string {
 	return filepath.Join(home, ".config", "pgctl")
 }
 
-// ServiceFile is the libpq service file pgctl keeps beside its own config, and
-// where a `service=prd` DSN is resolved from.
-//
-// It is a LIBPQ SERVICE FILE, in libpq's format, read by libpq — not a second
-// configuration scheme. Decision 8 says a connection is a libpq DSN and nothing
-// else, and every parallel scheme pgctl has invented has been deleted again;
-// this changes only WHERE the file is, which libpq itself parameterises with
-// PGSERVICEFILE. The file name is kept as pg_service.conf so that what it is,
-// and whose documentation describes it, are not in doubt.
-//
-// Passwords do not live here. They stay in ~/.pgpass, exactly as for psql.
-func ServiceFile() string {
-	dir := Home()
-	if dir == "" {
-		return ""
-	}
-	return filepath.Join(dir, "pg_service.conf")
-}
-
-// UseServiceFile points libpq at [ServiceFile] for the rest of this process.
-//
-// One process-wide variable rather than a rewritten DSN, and that is the whole
-// reason it works: pgx reads PGSERVICEFILE when it parses a connection string,
-// and pg_dump and pg_restore inherit it through os.Environ(), so both halves of
-// an operation resolve `service=prd` from the same file. Adding a servicefile=
-// keyword to the DSN would work for pgx and not for the subprocesses, and it
-// would mean pgctl rewriting a DSN a person wrote, which decision 8 says it has
-// no business doing.
-//
-// Three things it deliberately does not do:
-//
-//   - override an existing PGSERVICEFILE. Someone who has already told libpq
-//     where their services are has said something more specific than a default.
-//   - do anything at all when the file is not there. libpq then falls back to
-//     ~/.pg_service.conf as it always has, so a machine set up the old way keeps
-//     working and this is strictly additive.
-//   - report an error. There is nothing to fail: no file means no change, and a
-//     malformed one is libpq's to complain about, by name, when a connection is
-//     actually attempted.
-func UseServiceFile() {
-	if os.Getenv("PGSERVICEFILE") != "" {
-		return
-	}
-	path := ServiceFile()
-	if path == "" {
-		return
-	}
-	if _, err := os.Stat(path); err != nil {
-		return
-	}
-	_ = os.Setenv("PGSERVICEFILE", path)
-}
-
 func loadFile(path string) (*Config, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {

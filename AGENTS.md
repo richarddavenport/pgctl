@@ -77,9 +77,7 @@ guess is useful.
 ## Working principles
 
 - **PostgreSQL's own mechanisms first.** A connection is a libpq DSN; credentials
-  come from `~/.pgpass` and a libpq service file (which pgctl keeps at
-  `~/.config/pgctl/pg_service.conf` via `PGSERVICEFILE` — decision 8b);
-  databases are discovered from
+  come from `~/.pgpass` and `~/.pg_service.conf`; databases are discovered from
   the server. Every time pgctl has invented a parallel scheme for something
   PostgreSQL already has, it has been deleted again — see decisions 8 and 8a.
 - **Refusals are the engine's, not the front end's.** The TUI and the CLI render

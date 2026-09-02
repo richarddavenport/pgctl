@@ -11,7 +11,6 @@ import (
 	"os"
 
 	"github.com/richarddavenport/pgctl/internal/cli"
-	"github.com/richarddavenport/pgctl/internal/config"
 )
 
 // Stamped by the release workflow via -ldflags; "dev" for local builds.
@@ -21,13 +20,6 @@ var (
 )
 
 func main() {
-	// Before anything connects. libpq resolves a `service=` DSN against
-	// PGSERVICEFILE, and both halves of an operation have to agree about which
-	// file that is: pgx reads it when it parses a connection string, pg_dump
-	// and pg_restore inherit it. main is where it belongs because it is a
-	// property of the process, and main is the only thing here that owns one.
-	config.UseServiceFile()
-
 	if len(os.Args) > 1 {
 		switch os.Args[1] {
 		case "version", "--version", "-v":
@@ -74,12 +66,8 @@ its timestamp alone when that is unambiguous, or as <env>/latest.
   pgctl version               print the version
   pgctl help                  this text
 
-Configuration lives in ~/.config/pgctl (or $XDG_CONFIG_HOME/pgctl):
-
-  config.yaml         this tool's config, when there is no pgctl.yaml here
-  pg_service.conf     a libpq service file, so a service= DSN resolves
-
-Passwords are never read from either. They come from ~/.pgpass, exactly as
-they do for psql.
+A service= DSN is resolved from ~/.pg_service.conf, and the password from
+~/.pgpass — libpq's own files, the same ones psql and pg_dump read. pgctl's own
+config is ./pgctl.yaml, or ~/.config/pgctl/config.yaml.
 `)
 }
