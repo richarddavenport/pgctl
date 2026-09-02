@@ -146,6 +146,56 @@ as a database greyed out for reasons nobody remembers. `databases.exclude` trims
 what is not interesting, and everything else is fair game — including the one
 somebody added last week.
 
+## 8b. The service file lives beside pgctl's config, not at libpq's default
+
+`~/.config/pgctl/pg_service.conf`, or `$XDG_CONFIG_HOME/pgctl/pg_service.conf`.
+pgctl's own `config.yaml` moved to the same directory, from
+`os.UserConfigDir()` — which on Linux already answered `~/.config` and on macOS
+answered `~/Library/Application Support`, where a GUI keeps state and where
+nobody was ever going to look for a file they edit by hand.
+
+**This does not reverse decision 8.** The file is a libpq service file, in
+libpq's format, parsed by libpq. What changes is only WHERE it is, and libpq
+parameterises that itself with `PGSERVICEFILE`. pgctl sets that variable once in
+`main` and nothing else: pgx reads it when it parses a connection string, and
+`pg_dump` and `pg_restore` inherit it through the environment, so both halves of
+an operation resolve `service=prd` from the same file. Verified on all three
+paths before it was written.
+
+The alternative that WOULD have reversed decision 8 was putting host, port, user
+and sslmode in `pgctl.yaml` under a pgctl-shaped schema. That is the parallel
+scheme the decision exists to refuse, and it has been deleted from this tool
+twice.
+
+The rejected implementation is worth recording too: pgx accepts a `servicefile=`
+keyword inside a connection string, which libpq does not. Using it would have
+worked for the library and silently not for the subprocesses, and it would have
+meant pgctl rewriting a DSN a person wrote — which decision 8 says it has no
+business doing.
+
+**Three things `UseServiceFile` deliberately does not do**, each because the
+alternative is worse:
+
+- **Override an existing `PGSERVICEFILE`.** Someone who has told libpq where
+  their services are has said something more specific than a default.
+- **Anything at all when the file is absent.** libpq then falls back to
+  `~/.pg_service.conf` as it always has, so a machine set up the old way keeps
+  working and this is strictly additive. Pointing the variable at a file that is
+  not there would break that fallback and report nothing.
+- **Report an error.** There is nothing to fail. A malformed file is libpq's to
+  complain about, by name, when a connection is actually attempted.
+
+**What it costs.** `psql service=prd` in a shell does not work without
+`export PGSERVICEFILE=~/.config/pgctl/pg_service.conf`, because psql only reads
+libpq's default. That is the price of moving the file and it is in the README. A
+symlink from `~/.pg_service.conf` is the other way and is nobody's business but
+the reader's.
+
+**What would have to change to reverse this.** libpq gaining an XDG search path
+of its own, which would make the variable unnecessary; or a second tool in the
+family needing the same file, at which point where it lives stops being pgctl's
+decision to make.
+
 ## 9. Production is never a target, and guarded environments need typed consent
 
 `guarded: true` in the environment config makes an apply require the

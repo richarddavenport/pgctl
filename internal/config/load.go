@@ -20,7 +20,7 @@ const EnvVar = "PGCTL_CONFIG"
 const DefaultConnection = "default"
 
 // Load finds and parses the configuration. Search order: the explicit path
-// (flag), $PGCTL_CONFIG, ./pgctl.yaml, then the user config dir.
+// (flag), $PGCTL_CONFIG, ./pgctl.yaml, then ~/.config/pgctl/config.yaml.
 //
 // A missing config is not an error. pgctl then does what psql with no
 // arguments does — connects wherever the environment points — which is enough
@@ -44,10 +44,88 @@ func Load(explicit string) (*Config, error) {
 
 func searchPaths() []string {
 	paths := []string{"pgctl.yaml"}
-	if dir, err := os.UserConfigDir(); err == nil {
-		paths = append(paths, filepath.Join(dir, "pgctl", "config.yaml"))
+	if dir := Home(); dir != "" {
+		paths = append(paths, filepath.Join(dir, "config.yaml"))
 	}
 	return paths
+}
+
+// Home is the directory pgctl's own configuration lives in:
+// $XDG_CONFIG_HOME/pgctl, or ~/.config/pgctl.
+//
+// Not os.UserConfigDir, which is what this used to be. On Linux that function
+// already answers $XDG_CONFIG_HOME or ~/.config, so nothing changes there — but
+// on macOS it answers ~/Library/Application Support unconditionally, which is
+// where a GUI application keeps its state and not where anyone looks for a file
+// they edit by hand. On this machine ~/.config holds gh, git, fish, btop and
+// gcloud among others, and ~/Library/Application Support/pgctl held nothing,
+// because nobody ever went there to make one.
+//
+// Empty when there is no home directory to hang it off, which is a container
+// running as a user with no passwd entry — in which case pgctl falls back to
+// ./pgctl.yaml and the environment, as it does with no config at all.
+func Home() string {
+	if dir := os.Getenv("XDG_CONFIG_HOME"); dir != "" {
+		return filepath.Join(dir, "pgctl")
+	}
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return ""
+	}
+	return filepath.Join(home, ".config", "pgctl")
+}
+
+// ServiceFile is the libpq service file pgctl keeps beside its own config, and
+// where a `service=prd` DSN is resolved from.
+//
+// It is a LIBPQ SERVICE FILE, in libpq's format, read by libpq — not a second
+// configuration scheme. Decision 8 says a connection is a libpq DSN and nothing
+// else, and every parallel scheme pgctl has invented has been deleted again;
+// this changes only WHERE the file is, which libpq itself parameterises with
+// PGSERVICEFILE. The file name is kept as pg_service.conf so that what it is,
+// and whose documentation describes it, are not in doubt.
+//
+// Passwords do not live here. They stay in ~/.pgpass, exactly as for psql.
+func ServiceFile() string {
+	dir := Home()
+	if dir == "" {
+		return ""
+	}
+	return filepath.Join(dir, "pg_service.conf")
+}
+
+// UseServiceFile points libpq at [ServiceFile] for the rest of this process.
+//
+// One process-wide variable rather than a rewritten DSN, and that is the whole
+// reason it works: pgx reads PGSERVICEFILE when it parses a connection string,
+// and pg_dump and pg_restore inherit it through os.Environ(), so both halves of
+// an operation resolve `service=prd` from the same file. Adding a servicefile=
+// keyword to the DSN would work for pgx and not for the subprocesses, and it
+// would mean pgctl rewriting a DSN a person wrote, which decision 8 says it has
+// no business doing.
+//
+// Three things it deliberately does not do:
+//
+//   - override an existing PGSERVICEFILE. Someone who has already told libpq
+//     where their services are has said something more specific than a default.
+//   - do anything at all when the file is not there. libpq then falls back to
+//     ~/.pg_service.conf as it always has, so a machine set up the old way keeps
+//     working and this is strictly additive.
+//   - report an error. There is nothing to fail: no file means no change, and a
+//     malformed one is libpq's to complain about, by name, when a connection is
+//     actually attempted.
+func UseServiceFile() {
+	if os.Getenv("PGSERVICEFILE") != "" {
+		return
+	}
+	path := ServiceFile()
+	if path == "" {
+		return
+	}
+	if _, err := os.Stat(path); err != nil {
+		return
+	}
+	_ = os.Setenv("PGSERVICEFILE", path)
 }
 
 func loadFile(path string) (*Config, error) {

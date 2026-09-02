@@ -119,13 +119,26 @@ See `pgctl.example.yaml` for the whole surface, including hooks and storage.
 There are none in the config, and pgctl has no credential store of its own.
 
 A `dsn` is a libpq connection string: a service name (`service=prd`, resolved
-from `~/.pg_service.conf`), a URI, or keyword pairs. pgctl resolves it with pgx
+from `~/.config/pgctl/pg_service.conf`), a URI, or keyword pairs. pgctl resolves it with pgx
 and hands the identical string to `pg_dump` and `pg_restore` — so both halves of
 an operation connect by exactly the same rules, and the password comes from
 `~/.pgpass` or `PGPASSWORD` as it does for every other PostgreSQL tool.
 
+pgctl keeps the service file beside its own config rather than at libpq's
+default `~/.pg_service.conf`. It is still a libpq service file, in libpq's
+format — pgctl only sets `PGSERVICEFILE`, which is libpq's own way of saying
+where one lives, so `pg_dump` and pgx resolve `service=prd` from the same file.
+If `PGSERVICEFILE` is already set, pgctl leaves it alone; if there is no file
+there, libpq falls back to `~/.pg_service.conf` exactly as before.
+
+To make `psql service=prd` work in your shell too, export it:
+
+```sh
+export PGSERVICEFILE=~/.config/pgctl/pg_service.conf
 ```
-# ~/.pg_service.conf
+
+```
+# ~/.config/pgctl/pg_service.conf   (chmod 600)
 [prd]
 host=postgres.example.com
 user=mbpiadmin

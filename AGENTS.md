@@ -11,7 +11,7 @@ respect the foreign keys between them.
 
 - [`README.md`](./README.md) — what the tool does and how it is configured.
 - [`design/decisions.md`](./design/decisions.md) — **read before changing how
-  anything behaves.** Eighteen numbered decisions, each with the reasoning that
+  anything behaves.** Nineteen numbered decisions, each with the reasoning that
   produced it. A change that contradicts one is not forbidden, but it has to say
   so rather than quietly reverse it.
 
@@ -77,7 +77,9 @@ guess is useful.
 ## Working principles
 
 - **PostgreSQL's own mechanisms first.** A connection is a libpq DSN; credentials
-  come from `~/.pgpass` and `~/.pg_service.conf`; databases are discovered from
+  come from `~/.pgpass` and a libpq service file (which pgctl keeps at
+  `~/.config/pgctl/pg_service.conf` via `PGSERVICEFILE` — decision 8b);
+  databases are discovered from
   the server. Every time pgctl has invented a parallel scheme for something
   PostgreSQL already has, it has been deleted again — see decisions 8 and 8a.
 - **Refusals are the engine's, not the front end's.** The TUI and the CLI render

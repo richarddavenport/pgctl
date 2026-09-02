@@ -28,9 +28,11 @@ an Azure VM. Failing that, any Azure-hosted runner.
 
 - **PostgreSQL 16+ client tools** on the runner: `pg_dump` and `pg_restore`, at
   least as new as the server. Use 17 to match the cluster.
-- **A `.pgpass` and, if the config names services, a `~/.pg_service.conf`**,
-  written from CI's secret store. Nothing pgctl-specific: it is what any
-  PostgreSQL client on that runner would need.
+- **A `.pgpass` and, if the config names services, a service file**, written
+  from CI's secret store. Nothing pgctl-specific: it is what any PostgreSQL
+  client on that runner would need. pgctl reads it from
+  `~/.config/pgctl/pg_service.conf`, or wherever `PGSERVICEFILE` points — set
+  that in the job and the file can live anywhere the secret store can write.
 - **The storage account and key** for the snapshots container, under
   `AZURE_STORAGE_ACCOUNT` / `AZURE_STORAGE_KEY`.
 - **Network reach to the database.** On Azure Database for PostgreSQL that means

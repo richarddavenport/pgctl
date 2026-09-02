@@ -8,7 +8,7 @@
 # server, and pgctl uses it rather than inventing a second one.
 #
 # A DSN may be:
-#   a service name   service=prd          → resolved from ~/.pg_service.conf
+#   a service name   service=prd          → resolved from ~/.config/pgctl/pg_service.conf
 #   a URI            postgres://host/db
 #   keyword pairs    host=… port=… user=…
 #
@@ -32,7 +32,7 @@ connections:
 
   local: "postgres://localhost/postgres"
 
-# ~/.pg_service.conf for the above would look like:
+# ~/.config/pgctl/pg_service.conf for the above would look like:
 #
 #   [prd]
 #   host=postgres.example.com
