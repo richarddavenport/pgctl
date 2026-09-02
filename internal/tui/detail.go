@@ -5,6 +5,8 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/richarddavenport/tuikit/comp"
+
 	"github.com/richarddavenport/pgctl/internal/config"
 	"github.com/richarddavenport/pgctl/internal/engine"
 	"github.com/richarddavenport/pgctl/internal/snapshot"
@@ -513,25 +515,14 @@ func compactCount(n int64) string {
 
 // wrap breaks text at word boundaries so a long error is readable in a pane.
 func wrap(s string, width int) string {
+	// The floor is this package's, not comp's: a pane squeezed to fifteen
+	// columns is better read as overflowing than as one word per line.
 	if width < 20 {
 		width = 20
 	}
-	var out []string
-	for _, paragraph := range strings.Split(s, "\n") {
-		line := ""
-		for _, word := range strings.Fields(paragraph) {
-			if line == "" {
-				line = word
-				continue
-			}
-			if len(line)+1+len(word) > width {
-				out = append(out, line)
-				line = word
-				continue
-			}
-			line += " " + word
-		}
-		out = append(out, line)
-	}
-	return strings.Join(out, "\n")
+	// comp.Wrap, because the version this replaces compared BYTES against the
+	// width — len(line)+1+len(word) — so every description containing an em
+	// dash or an arrow wrapped two or three columns early. This file is full of
+	// them.
+	return strings.Join(comp.Wrap(s, width), "\n")
 }

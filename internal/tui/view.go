@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
+	"github.com/charmbracelet/x/ansi"
 
 	"github.com/richarddavenport/tuikit/comp"
 )
@@ -355,43 +356,36 @@ func (m *Model) overlay(screen, box string) string {
 	return strings.Join(lines, "\n")
 }
 
-func truncate(s string, width int) string {
-	if width <= 0 {
-		return ""
-	}
-	if lipgloss.Width(s) <= width {
-		return s
-	}
-	// Cut by runes, leaving room for the ellipsis.
-	runes := []rune(s)
-	if width == 1 {
-		return "…"
-	}
-	for len(runes) > 0 && lipgloss.Width(string(runes))+1 > width {
-		runes = runes[:len(runes)-1]
-	}
-	return string(runes) + "…"
-}
+// The text helpers are comp's now. They stay as functions here because they
+// have thirty-odd call sites between them and because two of them differ from
+// comp's in a way this package relies on.
+//
+// All three of the versions these replace cut by RUNES. That is wrong twice
+// over: a rune is not a column, so a CJK name measured this way is half its
+// real width; and a rendered line contains escape sequences, so cutting between
+// runes can end a line in the middle of one and leave the rest of the frame
+// wearing whatever colour it was setting. comp counts columns and is ANSI-aware.
 
-// clip returns the first width columns of a rendered line, ANSI intact enough
-// for an overlay's purposes.
+// truncate shortens to width columns with an ellipsis when it had to cut.
+func truncate(s string, width int) string { return comp.Truncate(s, width) }
+
+// clip returns the first width columns, with no ellipsis.
+//
+// Not comp.Truncate: the overlay uses this to cut the screen behind a modal,
+// and an ellipsis there would draw a "…" against the modal's left edge on every
+// row, which reads as content rather than as a seam.
 func clip(s string, width int) string {
 	if width <= 0 {
 		return ""
 	}
-	return truncateHard(s, width)
+	return ansi.Truncate(s, width, "")
 }
 
-func truncateHard(s string, width int) string {
-	runes := []rune(s)
-	for len(runes) > 0 && lipgloss.Width(string(runes)) > width {
-		runes = runes[:len(runes)-1]
-	}
-	return string(runes)
-}
-
+// padTo pads to width columns, and unlike comp.Pad leaves a longer string
+// alone. Callers here pad columns into alignment and clip separately; a pad
+// that silently truncated would hide the overflow rather than show it.
 func padTo(s string, width int) string {
-	if w := lipgloss.Width(s); w < width {
+	if w := comp.Width(s); w < width {
 		return s + strings.Repeat(" ", width-w)
 	}
 	return s

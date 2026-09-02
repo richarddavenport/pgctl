@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/richarddavenport/tuikit/comp"
+
 	"github.com/richarddavenport/pgctl/internal/engine"
 )
 
@@ -180,13 +182,15 @@ func age(d time.Duration) string {
 	}
 }
 
-// spinnerFrames turn in one direction at one dot per frame, so a dropped
-// redraw looks like a pause rather than a reversal.
-var spinnerFrames = []string{"⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"}
-
 // spinner picks its frame from the clock rather than from a counter, so every
 // spinner on screen turns together and at a steady rate however often the view
 // happens to be rebuilt.
+//
+// The frames and that rule are now comp.Spinner's — tuikit took them from this
+// file and says so in its comment. Every is passed explicitly rather than left
+// to default, because it has to agree with tickInterval or the spinner jumps
+// several frames between redraws and reads as flicker; the two constants being
+// equal by coincidence is exactly the arrangement that breaks quietly.
 func spinner(now time.Time) string {
-	return spinnerFrames[int(now.UnixNano()/int64(tickInterval))%len(spinnerFrames)]
+	return comp.Spinner{Every: tickInterval}.Frame(now)
 }
