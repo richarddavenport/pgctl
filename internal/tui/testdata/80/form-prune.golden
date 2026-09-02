@@ -1,0 +1,26 @@
+pgctl  pgctl.yaml
+╭──────────────────────────────╮ ╭─────────────────────────────────────────────╮
+│ 1 Connections (3)            │ │  Overview  Databases  Config                │
+│ ● prd       protected        │ │                                             │
+│ ● qat       guarded          │ │ prd  protected — never a target             │
+╰──────────────────────────────╯ │                                             │
+╭────╭────────────────────────────────────────────────────────────────────╮
+│ 2 D│                                                                    │
+│ pro│  Prune snapshots                                                   │
+│ cla│  Retention: 7 daily, 4 weekly, 0 monthly. An incomplete snapshot   │
+╰────│  is                                                                │
+╭────│  never kept, and the newest always is.                             │
+│ 3 S│                                                                    │
+│ 08-│  ▸ Connection            ‹ all ›  (1/4)                            │
+╰────│      ← → to change                                                 │
+╭────│    Delete them           off                                       │
+│ 4 S│                                                                    │
+│ cla│                                                                    │
+╰────╰────────────────────────────────────────────────────────────────────╯
+╭──────────────────────────────╮ │                                             │
+│ 5 Runs                       │ │                                             │
+│ nothing run yet              │ │                                             │
+╰──────────────────────────────╯ │                                             │
+                                 │                                             │
+                                 ╰─────────────────────────────────────────────╯
+← → change  ·  ↑↓ fields  ·  enter run  ·  esc cancel

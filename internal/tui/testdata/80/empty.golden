@@ -1,0 +1,26 @@
+pgctl  pgctl.yaml
+╭──────────────────────────────╮ ╭─────────────────────────────────────────────╮
+│ 1 Connections (3)            │ │  Overview  Databases  Config                │
+│ ● prd       protected        │ │                                             │
+│ ● qat       guarded          │ │ prd  protected — never a target             │
+╰──────────────────────────────╯ │                                             │
+╭──────────────────────────────╮ │ host           prd.example:5432             │
+│ 2 Databases (3)              │ │ user           mbpiadmin                    │
+│ product-development  11.0 GB │ │ server         PostgreSQL 17.4              │
+│ claims               48.0 MB │ │ databases      3                            │
+╰──────────────────────────────╯ │ total size     31.0 GB                      │
+╭──────────────────────────────╮ │ checked        just now                     │
+│ 3 Snapshots                  │ │                                             │
+│ none — press n               │ │ SNAPSHOTS                                   │
+╰──────────────────────────────╯ │ none — press n to take one                  │
+╭──────────────────────────────╮ │                                             │
+│ 4 Sets (1)                   │ │                                             │
+│ claims 2+2                   │ │                                             │
+╰──────────────────────────────╯ │                                             │
+╭──────────────────────────────╮ │                                             │
+│ 5 Runs                       │ │                                             │
+│ nothing run yet              │ │                                             │
+╰──────────────────────────────╯ │                                             │
+                                 │                                             │
+                                 ╰─────────────────────────────────────────────╯
+n snapshot  ·  a apply  ·  m move  ·  p prune  ·  / filter  ·  tab pane  ·  ? keys

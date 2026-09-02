@@ -1,0 +1,26 @@
+pgctl  pgctl.yaml
+╭──────────────────────────────╮ ╭─────────────────────────────────────────────╮
+│ 1 Connections (3)            │ │  Manifest  Tables  Warnings  Drift          │
+│ ● p╭────────────────────────────────────────────────────────────────────╮
+│ ● q│                                                                    │
+╰────│  Apply prd/product-development/20260828T030000Z                    │
+╭────│  Replaces data on the target. The plan is shown before anything    │
+│ 2 D│  is                                                                │
+│ pro│  touched.                                                          │
+│ cla│                                                                    │
+╰────│  ▸ Target                ‹ qat  (guarded — needs its name typed)   │
+╭────│  ›  (1/2)                                                          │
+│ 3 S│      ← → to change                                                 │
+│ 08-│    Scope                   whole database — drop and recreate it   │
+╰────│  (1/3)                                                             │
+╭────│    Tables                (none)                                    │
+│ 4 S│      used only when the scope is `tables`                          │
+│ cla│    Widen to closure      —                                         │
+╰────│      a whole-database apply replaces everything, so there is       │
+╭────│  nothing to widen                                                  │
+│ 5 R│                                                                    │
+│ not│                                                                    │
+╰────╰────────────────────────────────────────────────────────────────────╯
+                                 │                                             │
+                                 ╰─────────────────────────────────────────────╯
+← → change  ·  ↑↓ fields  ·  enter run  ·  esc cancel

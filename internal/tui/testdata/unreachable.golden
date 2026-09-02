@@ -1,0 +1,40 @@
+pgctl  pgctl.yaml
+╭──────────────────────────────╮ ╭─────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ 1 Connections (3)            │ │  Overview  Databases  Config                                                                    │
+│ ● prd       protected        │ │                                                                                                 │
+│ ● qat       guarded          │ │ scratch                                                                                         │
+│ ✗ scratch                    │ │                                                                                                 │
+╰──────────────────────────────╯ │ cannot reach scratch                                                                            │
+╭──────────────────────────────╮ │                                                                                                 │
+│ 2 Databases                  │ │ dial tcp 127.0.0.1:5432: connect: connection refused                                            │
+│ unreachable                  │ │                                                                                                 │
+╰──────────────────────────────╯ │ r retries. A secrets file that will not decrypt, a firewall                                     │
+╭──────────────────────────────╮ │ rule that does not list this address, and a stopped server all                                  │
+│ 3 Snapshots                  │ │ look the same from here.                                                                        │
+│ none — press n               │ │                                                                                                 │
+╰──────────────────────────────╯ │                                                                                                 │
+╭──────────────────────────────╮ │                                                                                                 │
+│ 4 Sets (1)                   │ │                                                                                                 │
+│ claims ?                     │ │                                                                                                 │
+╰──────────────────────────────╯ │                                                                                                 │
+╭──────────────────────────────╮ │                                                                                                 │
+│ 5 Runs                       │ │                                                                                                 │
+│ nothing run yet              │ │                                                                                                 │
+╰──────────────────────────────╯ │                                                                                                 │
+                                 │                                                                                                 │
+                                 │                                                                                                 │
+                                 │                                                                                                 │
+                                 │                                                                                                 │
+                                 │                                                                                                 │
+                                 │                                                                                                 │
+                                 │                                                                                                 │
+                                 │                                                                                                 │
+                                 │                                                                                                 │
+                                 │                                                                                                 │
+                                 │                                                                                                 │
+                                 │                                                                                                 │
+                                 │                                                                                                 │
+                                 │                                                                                                 │
+                                 │                                                                                                 │
+                                 ╰─────────────────────────────────────────────────────────────────────────────────────────────────╯
+n snapshot  ·  a apply  ·  m move  ·  p prune  ·  / filter  ·  tab pane  ·  ? keys

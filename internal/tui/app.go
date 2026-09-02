@@ -81,6 +81,13 @@ type Model struct {
 
 	// now is read once per frame so every duration on screen agrees.
 	now time.Time
+
+	// clock is where now comes from. A field rather than a call to time.Now,
+	// so a frame can be pinned to a fixed instant: every duration on screen is
+	// relative to it, and a golden written today still reads the same tomorrow.
+	// Update overwrites now on every message, so pinning the field alone would
+	// last exactly until the next keystroke.
+	clock func() time.Time
 }
 
 // setSummary is a set resolved against a live database.
@@ -102,9 +109,30 @@ func New(e *engine.Engine) *Model {
 		liveErr:   map[string]error{},
 		loading:   map[string]bool{},
 		setInfo:   map[string]*setSummary{},
-		now:       time.Now(),
+		clock:     time.Now,
 	}
+	m.now = m.clock()
 	return m
+}
+
+// SetSize tells the model how big the terminal is.
+//
+// For a harness rendering a frame rather than a program running one: there is
+// no WindowSizeMsg when nothing is attached to a terminal. Satisfies
+// harness.Sizer.
+func (m *Model) SetSize(w, h int) {
+	if w > 0 {
+		m.width = w
+	}
+	if h > 0 {
+		m.height = h
+	}
+}
+
+// Now pins the clock to an instant. Satisfies harness.Clock.
+func (m *Model) Now(t time.Time) {
+	m.clock = func() time.Time { return t }
+	m.now = t
 }
 
 // Init loads what can be loaded without a network round trip, and starts
@@ -115,7 +143,7 @@ func (m *Model) Init() tea.Cmd {
 
 // Update handles a message.
 func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	m.now = time.Now()
+	m.now = m.clock()
 
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:

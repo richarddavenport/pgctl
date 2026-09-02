@@ -1,0 +1,40 @@
+pgctl  pgctl.yaml
+╭──────────────────────────────╮ ╭─────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ 1 Connections (3)            │ │  Overview  Databases  Config                                                                    │
+│ ● prd       protected        │ │                                                                                                 │
+│ ● qat       guarded          │ │ prd  protected — never a target                                                                 │
+│ ✗ scratch                    │ │                                                                                                 │
+╰──────────────────────────────╯ │ host           prd.example:5432                                                                 │
+╭──────────────────────────────╮ │ user           mbpiadmin                                                                        │
+│ 2 Databases (3)              │ │ server         PostgreSQL 17.4                                                                  │
+│ product-development  11.0 GB │ │ databases      3                                                                                │
+│ claims               48.0 MB │ │ total size     31.0 GB                                                                          │
+│ quote                20.0 GB │ │ checked        just now                                                                         │
+╰──────────────────────────────╯ │                                                                                                 │
+╭──────────────────────────────╮ │ SNAPSHOTS                                                                                       │
+│ 3 Snapshots╭────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ 08-27 22:00│                                                                                                        │
+╰────────────│  Prune snapshots                                                                                       │
+╭────────────│  Retention: 7 daily, 4 weekly, 0 monthly. An incomplete snapshot is never kept, and the newest always  │
+│ 4 Sets (1) │  is.                                                                                                   │
+│ claims 2+2 │                                                                                                        │
+╰────────────│  ▸ Connection            ‹ all ›  (1/4)                                                                │
+╭────────────│      ← → to change                                                                                     │
+│ 5 Runs     │    Delete them           off                                                                           │
+│ nothing run│                                                                                                        │
+╰────────────│                                                                                                        │
+             ╰────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+                                 │                                                                                                 │
+                                 │                                                                                                 │
+                                 │                                                                                                 │
+                                 │                                                                                                 │
+                                 │                                                                                                 │
+                                 │                                                                                                 │
+                                 │                                                                                                 │
+                                 │                                                                                                 │
+                                 │                                                                                                 │
+                                 │                                                                                                 │
+                                 │                                                                                                 │
+                                 │                                                                                                 │
+                                 ╰─────────────────────────────────────────────────────────────────────────────────────────────────╯
+← → change  ·  ↑↓ fields  ·  enter run  ·  esc cancel

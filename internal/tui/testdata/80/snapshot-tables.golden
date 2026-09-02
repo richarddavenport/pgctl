@@ -1,0 +1,26 @@
+pgctl  pgctl.yaml
+╭──────────────────────────────╮ ╭─────────────────────────────────────────────╮
+│ 1 Connections (3)            │ │  Manifest  Tables  Warnings  Drift          │
+│ ● prd       protected        │ │                                             │
+│ ● qat       guarded          │ │ TABLE    SOURCE SIZE  ROWS     CARRIED      │
+╰──────────────────────────────╯ │ audit.l… 0 B          -        none         │
+╭──────────────────────────────╮ │ claims.… 180.0 MB     483k     all          │
+│ 2 Databases (3)              │ │ quotes.… 20.0 GB      147k     4k rows      │
+│ product-development  11.0 GB │ │                                             │
+│ claims               48.0 MB │ │                                             │
+╰──────────────────────────────╯ │                                             │
+╭──────────────────────────────╮ │                                             │
+│ 3 Snapshots (1)              │ │                                             │
+│ 08-27 22:00  1.9 GB l        │ │                                             │
+╰──────────────────────────────╯ │                                             │
+╭──────────────────────────────╮ │                                             │
+│ 4 Sets (1)                   │ │                                             │
+│ claims 2+2                   │ │                                             │
+╰──────────────────────────────╯ │                                             │
+╭──────────────────────────────╮ │                                             │
+│ 5 Runs                       │ │                                             │
+│ nothing run yet              │ │                                             │
+╰──────────────────────────────╯ │                                             │
+                                 │                                             │
+                                 ╰─────────────────────────────────────────────╯
+n snapshot  ·  a apply  ·  m move  ·  p prune  ·  x delete  ·  / filter  ·  tab pane  ·  ? keys
