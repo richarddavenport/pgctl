@@ -86,7 +86,7 @@ func fixtureModel(t *testing.T) *Model {
 
 // fixtureSnapshot writes a manifest to the model's storage and loads it, at
 // fixed times.
-func fixtureSnapshot(t *testing.T, m *Model) *snapshot.Manifest {
+func fixtureSnapshot(t *testing.T, m *Model) {
 	t.Helper()
 	id := "prd/product-development/20260828T030000Z"
 	dir := snapshot.Path(m.cfg.Storage.Dir, id)
@@ -114,5 +114,4 @@ func fixtureSnapshot(t *testing.T, m *Model) *snapshot.Manifest {
 	}
 	m.entries = []*engine.Entry{{Manifest: man, Local: true}}
 	m.clampCursors()
-	return man
 }

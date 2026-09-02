@@ -35,4 +35,4 @@ pgctl  pgctl.yaml
                                  │                                                                                                 │
                                  │                                                                                                 │
                                  ╰─────────────────────────────────────────────────────────────────────────────────────────────────╯
-n snapshot  ·  a apply  ·  m move  ·  p prune  ·  / filter  ·  tab pane  ·  ? keys
+n snapshot · a apply · m move · p prune · / filter · tab pane · ? keys

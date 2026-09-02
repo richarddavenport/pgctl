@@ -143,42 +143,26 @@ func (m *Model) leftColumn(height int) string {
 func (m *Model) panelHeights(rows int) [panelCount]int {
 	const minRows = 2 // a title and one row
 
-	var need [panelCount]int
-	total := 0
+	// comp.Layout, which is this arithmetic as a constraint solve. The three
+	// rules pgctl wanted map onto it exactly, and reading them off the
+	// constraints is the point — the version this replaces spelled them out as
+	// twenty lines of proportional division, and the rule each line implemented
+	// was only in the comment above it:
+	//
+	//	Fill(want)  a squeezed panel's share is proportional to what it asked for
+	//	Min(2)      everyone keeps a title and one row
+	//	Max(want)   a panel is never stretched past what it has to show, so
+	//	            slack is left at the bottom of the column rather than
+	//	            inflating a panel that has nothing to put in it
+	cs := make([]comp.Constraint, panelCount)
 	for panel := 0; panel < panelCount; panel++ {
-		need[panel] = max(m.panelLen(panel)+1, minRows)
-		total += need[panel]
-	}
-
-	if total <= rows {
-		// Everything fits. Any slack is left at the bottom of the column
-		// rather than inflating a panel that has nothing to put in it.
-		return need
+		want := max(m.panelLen(panel)+1, minRows)
+		cs[panel] = comp.Fill(want).Min(minRows).Max(want)
 	}
 
 	var out [panelCount]int
-	spare := rows
-	for panel := 0; panel < panelCount; panel++ {
-		out[panel] = minRows
-		spare -= minRows
-	}
-	if spare <= 0 {
-		return out
-	}
-
-	// Proportional share of what each panel still wants.
-	wanted := 0
-	for panel := 0; panel < panelCount; panel++ {
-		wanted += need[panel] - minRows
-	}
-	used := 0
-	for panel := 0; panel < panelCount && wanted > 0; panel++ {
-		extra := (need[panel] - minRows) * spare / wanted
-		out[panel] += extra
-		used += extra
-	}
-	if left := spare - used; left > 0 {
-		out[m.focus] += left
+	for i, band := range (comp.Layout{Constraints: cs}).Rows(comp.Rect{W: 1, H: rows}) {
+		out[i] = band.H
 	}
 	return out
 }
@@ -288,43 +272,54 @@ func (m *Model) footer() string {
 		return footerStyle.Render(m.actionFooter())
 	}
 
-	keys := []string{"n snapshot", "a apply", "m move", "p prune"}
+	hints := []comp.Hint{
+		{Key: "n", Label: "snapshot"},
+		{Key: "a", Label: "apply"},
+		{Key: "m", Label: "move"},
+		{Key: "p", Label: "prune"},
+	}
 	if m.focus == panelSnapshots {
-		keys = append(keys, "x delete")
+		hints = append(hints, comp.Hint{Key: "x", Label: "delete"})
 	}
 	if m.active != nil {
-		keys = []string{"q cancel the run"}
+		hints = []comp.Hint{{Key: "q", Label: "cancel the run"}}
 	}
-	keys = append(keys, "/ filter", "tab pane", "? keys")
-	return footerStyle.Render(fitKeys(keys, m.screenWidth()))
+	hints = append(hints,
+		comp.Hint{Key: "/", Label: "filter"},
+		comp.Hint{Key: "tab", Label: "pane"},
+		comp.Hint{Key: "?", Label: "keys"},
+	)
+	return footerStyle.Render(fitHints(hints, m.screenWidth()))
 }
 
-// fitKeys joins key hints into one line no wider than the terminal.
+// fitHints joins key hints into one line no wider than the terminal.
 //
-// The footer used to render whatever it had: eight hints and two separators
-// each is 95 columns, so on an eighty-column terminal it ran fifteen columns
-// off the side — and because it is the last line of the frame, that is the one
-// place an overflow makes the terminal scroll and tear the whole screen.
+// comp.Hint rather than pre-formatted strings, and comp.Hints to join them, so
+// the separator lives in the glyph set once instead of in every footer string —
+// and so this list is the same type a context menu is built from. tuikit's
+// mouse notes make that the rule: the keyboard path and the pointer path to an
+// action have to be ONE list, not a list and a keymap maintained beside it.
 //
-// Hints are dropped from the RIGHT, except "? keys", which is kept whatever
-// else goes: it is the hint that leads to all the others, so it is the last
-// thing worth losing. If even that will not fit there is nothing useful to say
-// and the line is cut.
-func fitKeys(keys []string, width int) string {
-	const sep = "  ·  "
-	if width <= 0 || len(keys) == 0 {
+// The fitting is pgctl's own, because comp.Hints does not measure. The footer
+// used to render whatever it had: eight hints at 95 columns, on the LAST line
+// of the frame, which is the one place an overflow makes the terminal scroll
+// and tear the whole screen rather than clip a row.
+//
+// Hints are dropped from the RIGHT, except the last, which is kept whatever
+// else goes — it is "? keys", the hint that leads to all the others.
+func fitHints(hints []comp.Hint, width int) string {
+	if width <= 0 || len(hints) == 0 {
 		return ""
 	}
-
-	last := keys[len(keys)-1]
-	head := keys[:len(keys)-1]
+	last := hints[len(hints)-1]
+	head := hints[:len(hints)-1]
 	for n := len(head); n >= 0; n-- {
-		line := strings.Join(append(append([]string{}, head[:n]...), last), sep)
+		line := comp.Hints(append(append([]comp.Hint{}, head[:n]...), last)...)
 		if comp.Width(line) <= width {
 			return line
 		}
 	}
-	return comp.Truncate(last, width)
+	return comp.Truncate(comp.Hints(last), width)
 }
 
 // overlay centres a box over the screen, which is how a modal appears without

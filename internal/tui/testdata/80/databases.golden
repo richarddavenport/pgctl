@@ -21,4 +21,4 @@ pgctl  pgctl.yaml
 │ 5 Runs                       │ │                                             │
 │ nothing run yet              │ │                                             │
 ╰──────────────────────────────╯ ╰─────────────────────────────────────────────╯
-n snapshot  ·  a apply  ·  m move  ·  p prune  ·  / filter  ·  ? keys
+n snapshot · a apply · m move · p prune · / filter · tab pane · ? keys
