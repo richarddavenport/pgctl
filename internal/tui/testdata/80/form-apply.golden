@@ -1,24 +1,23 @@
 pgctl  pgctl.yaml
-╭──────────────────────────────╮ ╭─────────────────────────────────────────────╮
-│ 1 C╭────────────────────────────────────────────────────────────────────╮
-│ ● p│                                                                    │
-│ ● q│  Apply prd/product-development/20260828T030000Z                    │
-╰────│  Replaces data on the target. The plan is shown before anything    │
-╭────│  is                                                                │
-│ 2 D│  touched.                                                          │
-│ pro│                                                                    │
-│ cla│  ▸ Target                ‹ qat  (guarded — needs its name typed)   │
-╰────│  ›  (1/2)                                                          │
-╭────│      ← → to change                                                 │
-│ 3 S│    Scope                   whole database — drop and recreate it   │
-│ 08-│  (1/3)                                                             │
-╰────│    Tables                (none)                                    │
-╭────│      used only when the scope is `tables`                          │
-│ 4 S│    Widen to closure      —                                         │
-│ cla│      a whole-database apply replaces everything, so there is       │
-╰────│  nothing to widen                                                  │
-╭────│                                                                    │
-│ 5 R│                                                                    │
-│ not╰────────────────────────────────────────────────────────────────────╯
+╭─ 1 Connections (3) ──────────╮ ╭─────────────────────────────────────────────╮
+│ ● prd       protected        │ │ ‹ Manifest · Tables · Warnings · Drift ›    │
+│ ●╭────────────────────────────────────────────────────────────────────────╮  │
+│  │                                                                        │  │
+╰──│ Apply prd/product-development/20260828T030000Z                         │  │
+╭─ │ Replaces data on the target. The plan is shown before anything is      │  │
+│ p│ touched.                                                               │  │
+│  │                                                                        │  │
+╰──│ ▸ Target                ‹ qat  (guarded — needs its name typed) ›  (1… │  │
+╭─ │     ← → to change                                                      │  │
+│ 0│   Scope                   whole database — drop and recreate it  (1/3) │  │
+│  │   Tables                (none)                                         │  │
+╰──│     used only when the scope is `tables`                               │  │
+╭─ │   Widen to closure      —                                              │  │
+│ c│     a whole-database apply replaces everything, so there is nothing t… │  │
+│  │                                                                        │  │
+╰──│                                                                        │  │
+╭─ ╰────────────────────────────────────────────────────────────────────────╯  │
+│ nothing run yet              │ │ foreign keys   0                            │
+│                              │ │                                      16/18  │
 ╰──────────────────────────────╯ ╰─────────────────────────────────────────────╯
 ← → change  ·  ↑↓ fields  ·  enter run  ·  esc cancel

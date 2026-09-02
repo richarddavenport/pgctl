@@ -1,24 +1,23 @@
 pgctl  pgctl.yaml
-╭──────────────────────────────╮ ╭─────────────────────────────────────────────╮
-│ 1 Connections (3)            │ │  Overview  Databases  Config                │
-│ ● prd       protected        │ │                                             │
-│ ● qat       guarded          │ │ scratch                                     │
+╭─ 1 Connections (3) ──────────╮ ╭─────────────────────────────────────────────╮
+│ ● qat       guarded          │ │ ‹ Overview · Databases · Config ›           │
 │ ✗ scratch                    │ │                                             │
-╰──────────────────────────────╯ │ cannot reach scratch                        │
-╭──────────────────────────────╮ │                                             │
-│ 2 Databases                  │ │ dial tcp 127.0.0.1:5432: connect: connecti… │
+│                         3/3  │ │ scratch                                     │
+╰──────────────────────────────╯ │                                             │
+╭─ 2 Databases ────────────────╮ │ cannot reach scratch                        │
 │ unreachable                  │ │                                             │
-╰──────────────────────────────╯ │ r retries. A secrets file that will not de… │
-╭──────────────────────────────╮ │ rule that does not list this address, and … │
-│ 3 Snapshots                  │ │ look the same from here.                  … │
-│ none — press n               │ │                                             │
+│                              │ │ dial tcp 127.0.0.1:5432: connect: connectio │
 ╰──────────────────────────────╯ │                                             │
-╭──────────────────────────────╮ │                                             │
-│ 4 Sets (1)                   │ │                                             │
+╭─ 3 Snapshots ────────────────╮ │ r retries. A secrets file that will not dec │
+│ none — press n               │ │ rule that does not list this address, and a │
+│                              │ │ look the same from here.                    │
+╰──────────────────────────────╯ │                                             │
+╭─ 4 Sets (1) ─────────────────╮ │                                             │
 │ claims ?                     │ │                                             │
+│                         1/1  │ │                                             │
 ╰──────────────────────────────╯ │                                             │
-╭──────────────────────────────╮ │                                             │
-│ 5 Runs                       │ │                                             │
+╭─ 5 Runs ─────────────────────╮ │                                             │
 │ nothing run yet              │ │                                             │
+│                              │ │                                        9/9  │
 ╰──────────────────────────────╯ ╰─────────────────────────────────────────────╯
 n snapshot · a apply · m move · p prune · / filter · tab pane · ? keys

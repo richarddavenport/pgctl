@@ -10,6 +10,8 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 
+	"github.com/richarddavenport/tuikit/app"
+
 	"github.com/richarddavenport/pgctl/internal/config"
 	"github.com/richarddavenport/pgctl/internal/engine"
 	"github.com/richarddavenport/pgctl/internal/snapshot"
@@ -372,7 +374,7 @@ func TestHelpListsEveryActionKey(t *testing.T) {
 	// of itself with no way to reach the rest is the least useful thing on the
 	// screen. Everything else still closes it.
 	m.SetSize(80, 24)
-	_ = m.View()
+	_ = run(m, m.width, m.height).View()
 	press(t, m, "j")
 	if !m.showHelp {
 		t.Error("j closed the help; it should scroll it")
@@ -398,7 +400,7 @@ func TestViewRendersWithoutData(t *testing.T) {
 	// it must not panic on the empty state.
 	m := model(t)
 	m.now = time.Now()
-	view := m.View()
+	view := run(m, m.width, m.height).View()
 	for _, want := range []string{"Connections", "Databases", "Snapshots", "Sets", "Runs"} {
 		if !strings.Contains(view, want) {
 			t.Errorf("the first frame is missing the %s panel", want)
@@ -416,7 +418,11 @@ func TestRendersBeforeAWindowSizeArrives(t *testing.T) {
 	m.width, m.height = 0, 0
 	m.now = time.Now()
 
-	view := m.View()
+	// No SetSize at all, which is the actual pty case: Bubble Tea never sends
+	// a WindowSizeMsg, so the runner keeps its own default and the model never
+	// hears a size. Forcing the runner to 0x0 instead would test a canvas of
+	// no cells, which is not a state a terminal can be in.
+	view := app.New(m, app.WithChrome(Chrome)).View()
 	if strings.Contains(view, "starting") {
 		t.Errorf("the UI is still waiting for a size:\n%s", view)
 	}
@@ -453,7 +459,7 @@ func TestAModalNeverDrawsWiderThanTheTerminal(t *testing.T) {
 		},
 	}, needsName: true}
 
-	for _, line := range strings.Split(m.View(), "\n") {
+	for _, line := range strings.Split(run(m, m.width, m.height).View(), "\n") {
 		if w := lipgloss.Width(line); w > m.width {
 			t.Fatalf("a line is %d columns wide in a %d-column terminal:\n%s",
 				w, m.width, line)

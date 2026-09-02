@@ -1,38 +1,37 @@
 pgctl  pgctl.yaml
-╭──────────────────────────────╮ ╭─────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ 1 Connections (3)            │ │  Overview  Databases  Config                                                                    │
-│ ● prd       protected        │ │                                                                                                 │
-│ ● qat       guarded          │ │ prd  protected — never a target                                                                 │
-│ ✗ scratch                    │ │                                                                                                 │
-╰──────────────────────────────╯ │ host           prd.example:5432                                                                 │
-╭──────────────────────────────╮ │ user           mbpiadmin                                                                        │
-│ 2 Databases (3)              │ │ server         PostgreSQL 17.4                                                                  │
-│ product-development  11.0 GB │ │ databases      3                                                                                │
-│ claims               48.0 MB │ │ total size     31.0 GB                                                                          │
-│ quote                20.0 GB │ │ checked        just now                                                                         │
-╰──────────────────────────────╯ │                                                                                                 │
-╭────────────╭────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ 3 Snapshots│                                                                                                        │
-│ 08-27 22:00│  Prune snapshots                                                                                       │
-╰────────────│  Retention: 7 daily, 4 weekly, 0 monthly. An incomplete snapshot is never kept, and the newest always  │
-╭────────────│  is.                                                                                                   │
-│ 4 Sets (1) │                                                                                                        │
-│ claims 2+2 │  ▸ Connection            ‹ all ›  (1/4)                                                                │
-╰────────────│      ← → to change                                                                                     │
-╭────────────│    Delete them           off                                                                           │
-│ 5 Runs     │                                                                                                        │
-│ nothing run│                                                                                                        │
-╰────────────╰────────────────────────────────────────────────────────────────────────────────────────────────────────╯
-                                 │                                                                                                 │
-                                 │                                                                                                 │
-                                 │                                                                                                 │
-                                 │                                                                                                 │
-                                 │                                                                                                 │
-                                 │                                                                                                 │
-                                 │                                                                                                 │
-                                 │                                                                                                 │
-                                 │                                                                                                 │
-                                 │                                                                                                 │
-                                 │                                                                                                 │
-                                 ╰─────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭─ 1 Connections (3) ───────────╮ ╭────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ ● prd       protected         │ │ ‹ Overview · Databases · Config ›                                                              │
+│ ● qat       guarded           │ │                                                                                                │
+│ ✗ scratch                     │ │ prd  protected — never a target                                                                │
+│                          3/3  │ │                                                                                                │
+╰───────────────────────────────╯ │ host           prd.example:5432                                                                │
+╭─ 2 Databases (3) ─────────────╮ │ user           mbpiadmin                                                                       │
+│ product-development  11.0 GB  │ │ server         PostgreSQL 17.4                                                                 │
+│ claims               48.0 MB  │ │ databases      3                                                                               │
+│ quote                20.0 GB  │ │ total size     31.0 GB                                                                         │
+│                          3/3  │ │ checked        just now                                                                        │
+╰───────────────────────────────╯ │                                                                                                │
+╭─ 3 Snapsh╭────────────────────────────────────────────────────────────────────────────────────────────────────────────╮          │
+│ 08-27 22:│                                                                                                            │          │
+│          │ Prune snapshots                                                                                            │          │
+╰──────────│ Retention: 7 daily, 4 weekly, 0 monthly. An incomplete snapshot is never kept, and the newest always is.   │          │
+╭─ 4 Sets (│                                                                                                            │          │
+│ claims 2+│ ▸ Connection            ‹ all ›  (1/4)                                                                     │          │
+│          │     ← → to change                                                                                          │          │
+╰──────────│   Delete them           off                                                                                │          │
+╭─ 5 Runs ─│                                                                                                            │          │
+│ nothing r│                                                                                                            │          │
+│          ╰────────────────────────────────────────────────────────────────────────────────────────────────────────────╯          │
+╰───────────────────────────────╯ │                                                                                                │
+                                  │                                                                                                │
+                                  │                                                                                                │
+                                  │                                                                                                │
+                                  │                                                                                                │
+                                  │                                                                                                │
+                                  │                                                                                                │
+                                  │                                                                                                │
+                                  │                                                                                                │
+                                  │                                                                                                │
+                                  │                                                                                         12/12  │
+                                  ╰────────────────────────────────────────────────────────────────────────────────────────────────╯
 ← → change  ·  ↑↓ fields  ·  enter run  ·  esc cancel

@@ -203,7 +203,7 @@ func (m *Model) start(kind, explain string, op func(context.Context, engine.Repo
 	m.active = r
 	m.focus = panelRuns
 	m.paneFocus = false
-	m.cursors[panelRuns] = 0
+	m.lists[panelRuns].Reset()
 	m.err = nil
 	m.status = ""
 

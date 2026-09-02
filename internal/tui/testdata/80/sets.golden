@@ -1,24 +1,23 @@
 pgctl  pgctl.yaml
-╭──────────────────────────────╮ ╭─────────────────────────────────────────────╮
-│ 1 Connections (3)            │ │  Members  Closure  Load order               │
-│ ● prd       protected        │ │                                             │
-│ ● qat       guarded          │ │ claims                                      │
+╭─ 1 Connections (3) ──────────╮ ╭─────────────────────────────────────────────╮
+│ ● prd       protected        │ │ ‹ Members · Closure · Load order ›          │
+│ ● qat       guarded          │ │                                             │
+│                         2/3  │ │ claims                                      │
 ╰──────────────────────────────╯ │ claims and everything a claim points at     │
-╭──────────────────────────────╮ │                                             │
-│ 2 Databases (3)              │ │ patterns       claims.*                     │
-│ product-development  11.0 GB │ │ matches        2 tables on prd              │
-│ claims               48.0 MB │ │ closure        +2 more — see Closure        │
-╰──────────────────────────────╯ │                                             │
-╭──────────────────────────────╮ │ MEMBERS                                     │
-│ 3 Snapshots (1)              │ │ TABLE                            SIZE       │
-│ 08-27 22:00  1.9 GB l        │ │ claims.policy_claim              180.0 MB   │
-╰──────────────────────────────╯ │ claims.claim_detail              -          │
-╭──────────────────────────────╮ │                                             │
-│ 4 Sets (1)                   │ │                                             │
+╭─ 2 Databases (3) ────────────╮ │                                             │
+│ product-development  11.0 GB │ │ patterns       claims.*                     │
+│                         1/3  │ │ matches        2 tables on prd              │
+╰──────────────────────────────╯ │ closure        +2 more — see Closure        │
+╭─ 3 Snapshots (1) ────────────╮ │                                             │
+│ 08-27 22:00  1.9 GB l        │ │ MEMBERS                                     │
+│                         1/1  │ │ TABLE                            SIZE       │
+╰──────────────────────────────╯ │ claims.policy_claim              180.0 MB   │
+╭─ 4 Sets (1) ─────────────────╮ │ claims.claim_detail              -          │
 │ claims 2+2                   │ │                                             │
+│                         1/1  │ │                                             │
 ╰──────────────────────────────╯ │                                             │
-╭──────────────────────────────╮ │                                             │
-│ 5 Runs                       │ │                                             │
+╭─ 5 Runs ─────────────────────╮ │                                             │
 │ nothing run yet              │ │                                             │
+│                              │ │                                      11/11  │
 ╰──────────────────────────────╯ ╰─────────────────────────────────────────────╯
 n snapshot · a apply · m move · p prune · / filter · tab pane · ? keys

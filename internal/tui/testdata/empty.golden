@@ -1,38 +1,37 @@
 pgctl  pgctl.yaml
-╭──────────────────────────────╮ ╭─────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ 1 Connections (3)            │ │  Overview  Databases  Config                                                                    │
-│ ● prd       protected        │ │                                                                                                 │
-│ ● qat       guarded          │ │ prd  protected — never a target                                                                 │
-│ ✗ scratch                    │ │                                                                                                 │
-╰──────────────────────────────╯ │ host           prd.example:5432                                                                 │
-╭──────────────────────────────╮ │ user           mbpiadmin                                                                        │
-│ 2 Databases (3)              │ │ server         PostgreSQL 17.4                                                                  │
-│ product-development  11.0 GB │ │ databases      3                                                                                │
-│ claims               48.0 MB │ │ total size     31.0 GB                                                                          │
-│ quote                20.0 GB │ │ checked        just now                                                                         │
-╰──────────────────────────────╯ │                                                                                                 │
-╭──────────────────────────────╮ │ SNAPSHOTS                                                                                       │
-│ 3 Snapshots                  │ │ none — press n to take one                                                                      │
-│ none — press n               │ │                                                                                                 │
-╰──────────────────────────────╯ │                                                                                                 │
-╭──────────────────────────────╮ │                                                                                                 │
-│ 4 Sets (1)                   │ │                                                                                                 │
-│ claims 2+2                   │ │                                                                                                 │
-╰──────────────────────────────╯ │                                                                                                 │
-╭──────────────────────────────╮ │                                                                                                 │
-│ 5 Runs                       │ │                                                                                                 │
-│ nothing run yet              │ │                                                                                                 │
-╰──────────────────────────────╯ │                                                                                                 │
-                                 │                                                                                                 │
-                                 │                                                                                                 │
-                                 │                                                                                                 │
-                                 │                                                                                                 │
-                                 │                                                                                                 │
-                                 │                                                                                                 │
-                                 │                                                                                                 │
-                                 │                                                                                                 │
-                                 │                                                                                                 │
-                                 │                                                                                                 │
-                                 │                                                                                                 │
-                                 ╰─────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭─ 1 Connections (3) ───────────╮ ╭────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ ● prd       protected         │ │ ‹ Overview · Databases · Config ›                                                              │
+│ ● qat       guarded           │ │                                                                                                │
+│ ✗ scratch                     │ │ prd  protected — never a target                                                                │
+│                          3/3  │ │                                                                                                │
+╰───────────────────────────────╯ │ host           prd.example:5432                                                                │
+╭─ 2 Databases (3) ─────────────╮ │ user           mbpiadmin                                                                       │
+│ product-development  11.0 GB  │ │ server         PostgreSQL 17.4                                                                 │
+│ claims               48.0 MB  │ │ databases      3                                                                               │
+│ quote                20.0 GB  │ │ total size     31.0 GB                                                                         │
+│                          3/3  │ │ checked        just now                                                                        │
+╰───────────────────────────────╯ │                                                                                                │
+╭─ 3 Snapshots ─────────────────╮ │ SNAPSHOTS                                                                                      │
+│ none — press n                │ │ none — press n to take one                                                                     │
+│                               │ │                                                                                                │
+╰───────────────────────────────╯ │                                                                                                │
+╭─ 4 Sets (1) ──────────────────╮ │                                                                                                │
+│ claims 2+2                    │ │                                                                                                │
+│                          1/1  │ │                                                                                                │
+╰───────────────────────────────╯ │                                                                                                │
+╭─ 5 Runs ──────────────────────╮ │                                                                                                │
+│ nothing run yet               │ │                                                                                                │
+│                               │ │                                                                                                │
+╰───────────────────────────────╯ │                                                                                                │
+                                  │                                                                                                │
+                                  │                                                                                                │
+                                  │                                                                                                │
+                                  │                                                                                                │
+                                  │                                                                                                │
+                                  │                                                                                                │
+                                  │                                                                                                │
+                                  │                                                                                                │
+                                  │                                                                                                │
+                                  │                                                                                         11/11  │
+                                  ╰────────────────────────────────────────────────────────────────────────────────────────────────╯
 n snapshot · a apply · m move · p prune · / filter · tab pane · ? keys

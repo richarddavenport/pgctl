@@ -48,7 +48,7 @@ func TestCaptureScreens(t *testing.T) {
 		t.Helper()
 		m.now = time.Date(2026, 8, 31, 9, 14, 3, 0, time.UTC)
 		path := filepath.Join(dir, name+".ansi")
-		if err := os.WriteFile(path, []byte(m.View()), 0o644); err != nil {
+		if err := os.WriteFile(path, []byte(run(m, m.width, m.height).View()), 0o644); err != nil {
 			t.Fatalf("write %s: %v", path, err)
 		}
 	}
@@ -108,7 +108,7 @@ func TestCaptureScreens(t *testing.T) {
 	m.action = nil
 	m.focus = panelRuns
 	m.runs = append(m.runs, captureRun())
-	m.cursors[panelRuns] = 0
+	m.lists[panelRuns].Reset()
 	shot("14-running")
 
 	m.runs[len(m.runs)-1].running = false
@@ -162,7 +162,7 @@ func captureModel(t *testing.T) *Model {
 	// Put the readable connection first under the cursor.
 	for i, conn := range cfg.All() {
 		if conn.Name == name {
-			m.cursors[panelConnections] = i
+			m.lists[panelConnections].Select(i)
 		}
 	}
 
@@ -175,7 +175,7 @@ func captureModel(t *testing.T) *Model {
 	}
 	for i, db := range probe.Databases {
 		if db.Name == database {
-			m.cursors[panelDatabases] = i
+			m.lists[panelDatabases].Select(i)
 		}
 	}
 

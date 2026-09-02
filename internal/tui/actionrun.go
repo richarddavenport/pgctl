@@ -8,6 +8,8 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
+	"github.com/richarddavenport/tuikit/app"
+
 	"github.com/richarddavenport/pgctl/internal/engine"
 )
 
@@ -27,7 +29,7 @@ type planReadyMsg struct {
 }
 
 // actionKey routes a keypress while a form is open.
-func (m *Model) actionKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m *Model) actionKey(msg tea.KeyMsg) (app.Model, tea.Cmd) {
 	a := m.action
 	key := msg.String()
 
@@ -292,7 +294,7 @@ func (m *Model) planApply() tea.Cmd {
 }
 
 // planKey handles the plan preview: read it, then confirm or go back.
-func (m *Model) planKey(key string, msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m *Model) planKey(key string, msg tea.KeyMsg) (app.Model, tea.Cmd) {
 	a := m.action
 	p := a.plan
 

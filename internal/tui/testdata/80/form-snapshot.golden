@@ -1,24 +1,23 @@
 pgctl  pgctl.yaml
-╭──────────────────────────────╮ ╭─────────────────────────────────────────────╮
-│ 1 Connections (3)            │ │  Overview  Databases  Config                │
-│ ● p╭────────────────────────────────────────────────────────────────────╮
-│ ● q│                                                                    │
-╰────│  Take a snapshot                                                   │
-╭────│  Reads the chosen databases and writes a compressed copy. Nothing  │
-│ 2 D│  is                                                                │
-│ pro│  written to the source.                                            │
-│ cla│                                                                    │
-╰────│  ▸ Connection            ‹ prd  PostgreSQL 17.4, 3 databases ›     │
-╭────│  (1/3)                                                             │
-│ 3 S│      ← → to change                                                 │
-│ 08-│    Databases             ○ claims  ● product-development  ○ quote  │
-╰────│  1 of 3                                                            │
-╭────│    Upload to storage     —                                         │
-│ 4 S│      storage.kind is local — there is nowhere to upload to         │
-│ cla│                                                                    │
-╰────│                                                                    │
-╭────╰────────────────────────────────────────────────────────────────────╯
-│ 5 Runs                       │ │                                             │
+╭─ 1 Connections (3) ──────────╮ ╭─────────────────────────────────────────────╮
+│ ● prd       protected        │ │ ‹ Overview · Databases · Config ›           │
+│ ● qat       guarded          │ │                                             │
+│  ╭────────────────────────────────────────────────────────────────────────╮  │
+╰──│                                                                        │  │
+╭─ │ Take a snapshot                                                        │  │
+│ p│ Reads the chosen databases and writes a compressed copy. Nothing is    │  │
+│  │ written to the source.                                                 │  │
+╰──│                                                                        │  │
+╭─ │ ▸ Connection            ‹ prd  PostgreSQL 17.4, 3 databases ›  (1/3)   │  │
+│ 0│     ← → to change                                                      │  │
+│  │   Databases             ○ claims  ● product-development  ○ quote   1 … │  │
+╰──│   Upload to storage     —                                              │  │
+╭─ │     storage.kind is local — there is nowhere to upload to              │  │
+│ c│                                                                        │p │
+│  │                                                                        │  │
+╰──╰────────────────────────────────────────────────────────────────────────╯  │
+╭─ 5 Runs ─────────────────────╮ │                                             │
 │ nothing run yet              │ │                                             │
+│                              │ │                                      12/12  │
 ╰──────────────────────────────╯ ╰─────────────────────────────────────────────╯
 ← → change  ·  ↑↓ fields  ·  enter run  ·  esc cancel

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/x/ansi"
 
 	"github.com/richarddavenport/tuikit/comp"
@@ -28,216 +27,229 @@ const (
 	panelInner = panelBlock - 2
 )
 
-// View renders the whole screen.
-func (m *Model) View() string {
-	// A size of zero means no WindowSizeMsg has arrived. A real terminal sends
-	// one immediately, but a pty with no size attached never does, and a UI
-	// that waits forever for it is a UI that renders nothing at all under
-	// `script`, in CI, or over a connection that lost its window size.
-	width, height := m.width, m.height
-	if width <= 0 {
-		width = 80
-	}
-	if height <= 0 {
-		height = 24
-	}
+// Draw renders the whole screen.
+//
+// Cells, not strings. What that buys pgctl is a mouse it never had — every row
+// records which connection, database or snapshot drew it, so a click resolves
+// to the thing rather than to a line number — and clipping that is structural:
+// a component drawing past its rect is cut by the canvas rather than running
+// off the side of the terminal, which is three of the four layout bugs the
+// goldens found.
+func (m *Model) Draw(c *comp.Canvas, r comp.Rect) {
+	m.frame = r
+	defer func() { m.canvas = c }()
+
+	// The help overlay replaces the frame rather than sitting over it: it is a
+	// reference you read, not a modal you act through, and the panels behind it
+	// are not the question.
 	if m.showHelp {
-		return m.viewHelp()
+		m.drawHelp(c, r)
+		return
 	}
 
-	header := m.header()
-	footer := m.footer()
-	bodyHeight := height - lipgloss.Height(header) - lipgloss.Height(footer)
-	if bodyHeight < 3 {
-		bodyHeight = 3
-	}
+	bands := m.bands(r)
+	m.drawHeader(c, bands[0])
+	m.drawBody(c, bands[1])
+	m.drawFooter(c, bands[2])
 
-	left := m.leftColumn(bodyHeight)
-	paneWidth := width - leftWidth - 1
-	if paneWidth < minPaneWide {
-		// A narrow terminal gets the pane alone: two half-width columns are
-		// worse than one usable one.
-		body := m.pane(width, bodyHeight)
-		return strings.Join([]string{header, body, footer}, "\n")
-	}
-	right := m.pane(paneWidth, bodyHeight)
-	body := lipgloss.JoinHorizontal(lipgloss.Top, left, " ", right)
-
-	screen := strings.Join([]string{header, body, footer}, "\n")
+	// A modal DOES sit over the frame, because what it is about to do is about
+	// what is behind it — the snapshot named in the title is the one selected
+	// in the panel underneath.
 	if m.action != nil {
-		return m.overlay(screen, m.viewAction())
+		m.drawAction(c, r)
 	}
-	return screen
+}
+
+// bands is pgctl's window: a header, the body, one row of key hints.
+//
+// One declaration rather than a rect and a height computed separately. The
+// version this replaces subtracted the header and footer heights from the
+// terminal in View and then recomputed the same thing in three other places;
+// nothing related them, and no test could catch it going wrong because both
+// numbers were equally plausible.
+func (m *Model) bands(r comp.Rect) []comp.Rect {
+	// A rect of zero means no WindowSizeMsg has arrived. A real terminal sends
+	// one immediately, but a pty with no size attached never does, and a UI
+	// that waits forever for it renders nothing at all under `script`.
+	if r.W <= 0 {
+		r.W = 80
+	}
+	if r.H <= 0 {
+		r.H = 24
+	}
+	return comp.Layout{Constraints: []comp.Constraint{
+		comp.Length(1),      // pgctl · the config it read
+		comp.Fill(1).Min(3), // the panel column and the detail pane
+		comp.Length(1),      // the key hints
+	}}.Rows(r)
+}
+
+// body is the space the panes are drawn into.
+func (m *Model) body() comp.Rect { return m.bands(m.bounds())[1] }
+
+// bounds is the rect the last frame was drawn into, which is the canvas the
+// runner made: one row shorter than the terminal, because that is what
+// app.Runner leaves for the terminal itself.
+//
+// Before the first draw there is no frame, so it falls back to the size the
+// model was told about. The bands have to agree with the canvas they are drawn
+// into, or the key hints land on a row that does not exist and are silently
+// clipped.
+func (m *Model) bounds() comp.Rect {
+	if !m.frame.Empty() {
+		return m.frame
+	}
+	return comp.Rect{W: m.screenWidth(), H: max(1, m.screenHeight()-1)}
 }
 
 // screenWidth is the width to lay out against, defaulting when no size has
-// arrived. See View.
+// arrived. See bands.
 func (m *Model) screenWidth() int {
+	if !m.frame.Empty() {
+		return m.frame.W
+	}
 	if m.width <= 0 {
 		return 80
 	}
 	return m.width
 }
 
-func (m *Model) header() string {
-	width := m.screenWidth()
+func (m *Model) screenHeight() int {
+	if m.height <= 0 {
+		return 24
+	}
+	return m.height
+}
 
-	// The name, then whatever room is left for the config path and a message.
-	// An absolute path to a config in a deep directory is longer than most
-	// terminals are wide, and an untruncated header pushed the whole frame
-	// sideways.
-	const name = "pgctl"
-	line := titleStyle.Render(name)
-	remaining := width - len(name)
-
+// drawHeader is the tool's name, the config it read, and whatever just happened.
+func (m *Model) drawHeader(c *comp.Canvas, r comp.Rect) {
 	source := m.cfg.Source
 	if source == "" {
 		source = "no config"
 	}
-	var message, style = "", mutedStyle
+
+	left := []comp.Segment{
+		{Text: "pgctl", Style: &titleStyle},
+		{Text: "  " + source, Style: &mutedStyle},
+	}
+
+	var right []comp.Segment
 	switch {
 	case m.err != nil:
-		message, style = "✗ "+m.err.Error(), dangerStyle
+		right = []comp.Segment{{Text: "✗ " + m.err.Error() + " ", Style: &dangerStyle}}
 	case m.status != "":
-		message, style = "✓ "+m.status, okStyle
+		right = []comp.Segment{{Text: "✓ " + m.status + " ", Style: &okStyle}}
 	}
 
-	// A message earns its space first: it is the thing that just happened.
-	if message != "" {
-		shown := truncate(message, remaining-4)
-		remaining -= lipgloss.Width(shown) + 3
-		if remaining > 6 {
-			line += mutedStyle.Render("  " + truncate(source, remaining-2))
+	// MinLeft protects the name and the config path from being squeezed to
+	// nothing by a long error message. The message is what just happened; the
+	// path is what pgctl is pointed at, and an operator about to apply to an
+	// environment wants to be sure of that one.
+	comp.Bar{Left: left, Right: right, MinLeft: 24}.Draw(c, r, comp.Region(regHeader))
+}
+
+// drawBody splits the panel column from the detail pane.
+func (m *Model) drawBody(c *comp.Canvas, r comp.Rect) {
+	// A narrow terminal gets the pane alone: two half-width columns are worse
+	// than one usable one. Checked against the whole width rather than the
+	// split's answer, because below this there is no useful division to make.
+	if r.W < leftWidth+minPaneWide {
+		m.drawPane(c, r)
+		return
+	}
+	left, right := m.split.Draw(c, r)
+	m.drawPanels(c, left)
+	m.drawPane(c, right)
+}
+
+// drawPanels stacks the five panels, each with a share of the height weighted
+// by how much it has to show.
+func (m *Model) drawPanels(c *comp.Canvas, r comp.Rect) {
+	for panel, band := range m.panelBands(r) {
+		if band.H < 3 {
+			continue
 		}
-		return line + "   " + style.Render(shown)
+		focused := m.focus == panel && !m.paneFocus && m.action == nil
+
+		pane := comp.Pane{
+			Title:      m.panelTitle(panel),
+			Focused:    focused,
+			Border:     &panelBorder,
+			Focus:      &panelFocusBorder,
+			TitleStyle: &headerStyle,
+			FocusTitle: &titleStyle,
+		}
+		// Narrow, not Inset: a column off each side and none off the top, so
+		// the rows sit a space inside the border the way they did when the
+		// panel was a lipgloss box with Padding(0, 1) — and so the first row
+		// is not spent on a blank.
+		inside := pane.Draw(c, band, comp.Region(panelRegions[panel])).Narrow(1)
+
+		rows := m.panelRows(panel)
+		if len(rows) == 0 {
+			c.Text(inside.X, inside.Y, m.emptyPanel(panel), &mutedStyle,
+				comp.Region(panelRegions[panel]))
+			continue
+		}
+
+		m.lists[panel].Focused = focused
+		m.lists[panel].Draw(c, inside, rows)
 	}
-	return line + mutedStyle.Render("  "+truncate(source, remaining-2))
 }
 
-// leftColumn stacks the panels, giving each a share of the height weighted by
-// how much it has to show.
-func (m *Model) leftColumn(height int) string {
-	// Two lines of chrome per panel (border top and bottom), so the rows
-	// available are what is left after that.
-	rows := height - 2*panelCount
-	if rows < panelCount {
-		rows = panelCount
-	}
+// panelBands divides the column between the panels.
+func (m *Model) panelBands(r comp.Rect) []comp.Rect {
+	// Three rows of chrome per panel that a row cannot use: the two borders,
+	// and the row comp.List keeps for its position counter.
+	const chrome = 3
+	// A title and one row is the least a panel can usefully be.
+	const minBand = 1 + chrome
 
-	heights := m.panelHeights(rows)
-	blocks := make([]string, 0, panelCount)
-	for panel := 0; panel < panelCount; panel++ {
-		blocks = append(blocks, m.panel(panel, heights[panel]))
-	}
-	return lipgloss.JoinVertical(lipgloss.Left, blocks...)
-}
-
-// panelHeights divides the available rows between the panels.
-//
-// A panel asks for exactly what it has to show and is never stretched beyond
-// it: a list of three environments given twenty-six rows wastes the space the
-// snapshot list needed, and the empty rows read as a panel that failed to load.
-// When the panels want more than there is, everyone keeps a minimum and the
-// rest is shared out in proportion to what they asked for, with the focused
-// panel — the one being read — taking any rounding.
-func (m *Model) panelHeights(rows int) [panelCount]int {
-	const minRows = 2 // a title and one row
-
-	// comp.Layout, which is this arithmetic as a constraint solve. The three
-	// rules pgctl wanted map onto it exactly, and reading them off the
-	// constraints is the point — the version this replaces spelled them out as
-	// twenty lines of proportional division, and the rule each line implemented
-	// was only in the comment above it:
-	//
-	//	Fill(want)  a squeezed panel's share is proportional to what it asked for
-	//	Min(2)      everyone keeps a title and one row
-	//	Max(want)   a panel is never stretched past what it has to show, so
-	//	            slack is left at the bottom of the column rather than
-	//	            inflating a panel that has nothing to put in it
 	cs := make([]comp.Constraint, panelCount)
-	for panel := 0; panel < panelCount; panel++ {
-		want := max(m.panelLen(panel)+1, minRows)
-		cs[panel] = comp.Fill(want).Min(minRows).Max(want)
+	for panel := range cs {
+		want := max(m.panelLen(panel), 1) + chrome
+		cs[panel] = comp.Fill(want).Min(minBand).Max(want)
 	}
-
-	var out [panelCount]int
-	for i, band := range (comp.Layout{Constraints: cs}).Rows(comp.Rect{W: 1, H: rows}) {
-		out[i] = band.H
-	}
-	return out
+	return comp.Layout{Constraints: cs}.Rows(r)
 }
 
-// panel renders one left-column panel.
-func (m *Model) panel(panel, height int) string {
+// panelTitle is the panel's number, its name, its count and its filter.
+//
+// The number is the key that jumps to it, which is the only reason it is on
+// screen: a panel labelled "1 Connections" tells you how to get there without
+// a legend.
+func (m *Model) panelTitle(panel int) string {
 	focused := m.focus == panel && !m.paneFocus && m.action == nil
-
+	if focused && m.filtering {
+		return fmt.Sprintf("%d /%s▏", panel+1, m.filter)
+	}
 	title := fmt.Sprintf("%d %s", panel+1, panelTitles[panel])
 	if n := m.panelLen(panel); n > 0 {
-		title += mutedStyle.Render(fmt.Sprintf(" (%d)", n))
+		title += fmt.Sprintf(" (%d)", n)
 	}
-	if focused && m.filtering {
-		title = fmt.Sprintf("%d /%s", panel+1, m.filter)
-	} else if focused && m.filter != "" {
-		title += mutedStyle.Render(" /" + m.filter)
+	if focused && m.filter != "" {
+		title += " /" + m.filter
 	}
-
-	rows := m.panelRows(panel)
-	inner := panelInner
-	visible, offset := window(len(rows), height, m.cursors[panel], m.offsets[panel])
-	m.offsets[panel] = offset
-
-	var b strings.Builder
-	for i := 0; i < visible; i++ {
-		idx := offset + i
-		if idx >= len(rows) {
-			break
-		}
-		line := truncate(rows[idx], inner)
-		if idx == m.cursors[panel] && focused {
-			line = selectedStyle.Width(inner).Render(line)
-		} else if idx == m.cursors[panel] {
-			line = currentStyle.Render(line)
-		}
-		b.WriteString(line)
-		if i < visible-1 {
-			b.WriteString("\n")
-		}
-	}
-	if len(rows) == 0 {
-		b.WriteString(mutedStyle.Render(m.emptyPanel(panel)))
-	}
-
-	style := panelStyle
-	if focused {
-		style = focusedPanelStyle
-	}
-	return style.Width(panelBlock).Height(height).Render(
-		headerStyle.Render(title) + "\n" + b.String())
+	return title
 }
 
-// window works out which slice of a list is visible and keeps the cursor in it.
-func window(count, height, cursor, offset int) (visible, newOffset int) {
-	// One row of the panel is its title.
-	visible = height - 1
-	if visible < 1 {
-		visible = 1
+// drawFooter is one row of key hints.
+func (m *Model) drawFooter(c *comp.Canvas, r comp.Rect) {
+	id := comp.Region(regFooter)
+	if m.filtering {
+		comp.Bar{Left: []comp.Segment{{
+			Text:  "filter: " + m.filter + "▏" + comp.Hints(comp.Hint{Key: "enter", Label: "accept"}, comp.Hint{Key: "esc", Label: "clear"}),
+			Style: &footerStyle,
+		}}}.Draw(c, r, id)
+		return
 	}
-	if count <= visible {
-		return count, 0
+	if m.action != nil {
+		comp.Bar{Left: []comp.Segment{{Text: m.actionFooter(), Style: &footerStyle}}}.Draw(c, r, id)
+		return
 	}
-	if cursor < offset {
-		offset = cursor
-	}
-	if cursor >= offset+visible {
-		offset = cursor - visible + 1
-	}
-	if offset > count-visible {
-		offset = count - visible
-	}
-	if offset < 0 {
-		offset = 0
-	}
-	return visible, offset
+	comp.Bar{Left: []comp.Segment{
+		{Text: fitHints(m.hints(), r.W), Style: &footerStyle},
+	}}.Draw(c, r, id)
 }
 
 func (m *Model) emptyPanel(panel int) string {
@@ -264,14 +276,15 @@ func (m *Model) emptyPanel(panel int) string {
 	return ""
 }
 
-func (m *Model) footer() string {
-	if m.filtering {
-		return footerStyle.Render("filter: " + m.filter + "▏   enter accept · esc clear")
+// hints is what acts on what is focused, right now.
+//
+// Not every action pgctl has: swarmctl learned that the expensive way, where a
+// footer listing every action on every panel grew a letter per feature and read
+// as a menu of things mostly not applicable.
+func (m *Model) hints() []comp.Hint {
+	if m.active != nil {
+		return []comp.Hint{{Key: "q", Label: "cancel the run"}}
 	}
-	if m.action != nil {
-		return footerStyle.Render(m.actionFooter())
-	}
-
 	hints := []comp.Hint{
 		{Key: "n", Label: "snapshot"},
 		{Key: "a", Label: "apply"},
@@ -281,15 +294,11 @@ func (m *Model) footer() string {
 	if m.focus == panelSnapshots {
 		hints = append(hints, comp.Hint{Key: "x", Label: "delete"})
 	}
-	if m.active != nil {
-		hints = []comp.Hint{{Key: "q", Label: "cancel the run"}}
-	}
-	hints = append(hints,
+	return append(hints,
 		comp.Hint{Key: "/", Label: "filter"},
 		comp.Hint{Key: "tab", Label: "pane"},
 		comp.Hint{Key: "?", Label: "keys"},
 	)
-	return footerStyle.Render(fitHints(hints, m.screenWidth()))
 }
 
 // fitHints joins key hints into one line no wider than the terminal.
@@ -320,35 +329,6 @@ func fitHints(hints []comp.Hint, width int) string {
 		}
 	}
 	return comp.Truncate(comp.Hints(last), width)
-}
-
-// overlay centres a box over the screen, which is how a modal appears without
-// the panels behind it being torn down and rebuilt.
-func (m *Model) overlay(screen, box string) string {
-	lines := strings.Split(screen, "\n")
-	boxLines := strings.Split(box, "\n")
-
-	top := (len(lines) - len(boxLines)) / 2
-	if top < 0 {
-		top = 0
-	}
-	boxWidth := 0
-	for _, l := range boxLines {
-		boxWidth = max(boxWidth, lipgloss.Width(l))
-	}
-	left := (m.screenWidth() - boxWidth) / 2
-	if left < 0 {
-		left = 0
-	}
-
-	for i, bl := range boxLines {
-		row := top + i
-		if row >= len(lines) {
-			break
-		}
-		lines[row] = padTo(clip(lines[row], left), left) + bl
-	}
-	return strings.Join(lines, "\n")
 }
 
 // The text helpers are comp's now. They stay as functions here because they

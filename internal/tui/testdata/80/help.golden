@@ -1,24 +1,23 @@
-╭────────────────────────────────────────────────────────────────────────╮
-│                                                                        │
-│  pgctl keys                                                            │
-│                                                                        │
-│  MOVING                                                                │
-│    1-5          jump to a panel                                        │
-│    ↑ ↓ / j k    move within a panel                                    │
-│    J K          next / previous panel                                  │
-│    g G          first / last row                                       │
-│    tab          focus the detail pane, then cycle its tabs             │
-│    shift+tab    previous tab                                           │
-│    ← / h        leave the detail pane                                  │
-│    /            filter the focused panel                               │
-│    esc          clear the filter, or leave the pane                    │
-│                                                                        │
-│  DOING                                                                 │
-│    n            take a snapshot — choose environment and databases     │
-│    a            apply the selected snapshot — choose target and scope  │
-│    m            move one environment's data into another               │
-│    p            prune snapshots by the retention policy                │
-│    x            delete the selected snapshot                           │
-│  13 more — ↑↓ to scroll, any other key closes                          │
-│                                                                        │
-╰────────────────────────────────────────────────────────────────────────╯
+   ╭────────────────────────────────────────────────────────────────────────╮
+   │                                                                        │
+   │ pgctl keys                                                             │
+   │                                                                        │
+   │ MOVING                                                                 │
+   │   1-5          jump to a panel                                         │
+   │   ↑ ↓ / j k    move within a panel                                     │
+   │   J K          next / previous panel                                   │
+   │   g G          first / last row                                        │
+   │   tab          focus the detail pane, then cycle its tabs              │
+   │   shift+tab    previous tab                                            │
+   │   ← / h        leave the detail pane                                   │
+   │   /            filter the focused panel                                │
+   │   esc          clear the filter, or leave the pane                     │
+   │                                                                        │
+   │ DOING                                                                  │
+   │   n            take a snapshot — choose environment and databases      │
+   │   a            apply the selected snapshot — choose target and scope   │
+   │   m            move one environment's data into another                │
+   │   p            prune snapshots by the retention policy                 │
+   │   x            delete the selected snapshot                            │
+   │                                                                        │
+   ╰────────────────────────────────────────────────────────────────────────╯

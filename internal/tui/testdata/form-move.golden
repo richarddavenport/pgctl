@@ -1,38 +1,37 @@
 pgctl  pgctl.yaml
-╭──────────────────────────────╮ ╭─────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ 1 Connections (3)            │ │  Overview  Databases  Config                                                                    │
-│ ● prd       protected        │ │                                                                                                 │
-│ ● qat       guarded          │ │ prd  protected — never a target                                                                 │
-│ ✗ scratch                    │ │                                                                                                 │
-╰──────────────────────────────╯ │ host           prd.example:5432                                                                 │
-╭──────────────────────────────╮ │ user           mbpiadmin                                                                        │
-│ 2 Databases (3)              │ │ server         PostgreSQL 17.4                                                                  │
-│ product-development  11.0 GB │ │ databases      3                                                                                │
-│ claims               48.0 MB │ │ total size     31.0 GB                                                                          │
-│ quote                20.0 GB │ │ checked        just now                                                                         │
-╰────────────╭────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-╭────────────│                                                                                                        │
-│ 3 Snapshots│  Move between environments                                                                             │
-│ 08-27 22:00│  Takes a snapshot into a temporary directory, applies it, and deletes it. Nothing is catalogued or     │
-╰────────────│  uploaded.                                                                                             │
-╭────────────│                                                                                                        │
-│ 4 Sets (1) │  ▸ From                  ‹ prd  PostgreSQL 17.4, 3 databases ›  (1/3)                                  │
-│ claims 2+2 │      ← → to change                                                                                     │
-╰────────────│    To                      qat  (guarded — needs its name typed)  (1/2)                                │
-╭────────────│    Databases             ○ claims  ● product-development  ○ quote   1 of 3                             │
-│ 5 Runs     │    Keep the staged snapshotoff                                                                         │
-│ nothing run│                                                                                                        │
-╰────────────│                                                                                                        │
-             ╰────────────────────────────────────────────────────────────────────────────────────────────────────────╯
-                                 │                                                                                                 │
-                                 │                                                                                                 │
-                                 │                                                                                                 │
-                                 │                                                                                                 │
-                                 │                                                                                                 │
-                                 │                                                                                                 │
-                                 │                                                                                                 │
-                                 │                                                                                                 │
-                                 │                                                                                                 │
-                                 │                                                                                                 │
-                                 ╰─────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭─ 1 Connections (3) ───────────╮ ╭────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ ● prd       protected         │ │ ‹ Overview · Databases · Config ›                                                              │
+│ ● qat       guarded           │ │                                                                                                │
+│ ✗ scratch                     │ │ prd  protected — never a target                                                                │
+│                          3/3  │ │                                                                                                │
+╰───────────────────────────────╯ │ host           prd.example:5432                                                                │
+╭─ 2 Databases (3) ─────────────╮ │ user           mbpiadmin                                                                       │
+│ product-development  11.0 GB  │ │ server         PostgreSQL 17.4                                                                 │
+│ claims               48.0 MB  │ │ databases      3                                                                               │
+│ quote                20.0 GB  │ │ total size     31.0 GB                                                                         │
+│          ╭────────────────────────────────────────────────────────────────────────────────────────────────────────────╮          │
+╰──────────│                                                                                                            │          │
+╭─ 3 Snapsh│ Move between environments                                                                                  │          │
+│ 08-27 22:│ Takes a snapshot into a temporary directory, applies it, and deletes it. Nothing is catalogued or          │          │
+│          │ uploaded.                                                                                                  │          │
+╰──────────│                                                                                                            │          │
+╭─ 4 Sets (│ ▸ From                  ‹ prd  PostgreSQL 17.4, 3 databases ›  (1/3)                                       │          │
+│ claims 2+│     ← → to change                                                                                          │          │
+│          │   To                      qat  (guarded — needs its name typed)  (1/2)                                     │          │
+╰──────────│   Databases             ○ claims  ● product-development  ○ quote   1 of 3                                  │          │
+╭─ 5 Runs ─│   Keep the staged snapshotoff                                                                              │          │
+│ nothing r│                                                                                                            │          │
+│          │                                                                                                            │          │
+╰──────────╰────────────────────────────────────────────────────────────────────────────────────────────────────────────╯          │
+                                  │                                                                                                │
+                                  │                                                                                                │
+                                  │                                                                                                │
+                                  │                                                                                                │
+                                  │                                                                                                │
+                                  │                                                                                                │
+                                  │                                                                                                │
+                                  │                                                                                                │
+                                  │                                                                                                │
+                                  │                                                                                         12/12  │
+                                  ╰────────────────────────────────────────────────────────────────────────────────────────────────╯
 ← → change  ·  ↑↓ fields  ·  enter run  ·  esc cancel

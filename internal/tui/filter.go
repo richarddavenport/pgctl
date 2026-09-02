@@ -1,13 +1,17 @@
 package tui
 
-import tea "github.com/charmbracelet/bubbletea"
+import (
+	tea "github.com/charmbracelet/bubbletea"
+
+	"github.com/richarddavenport/tuikit/app"
+)
 
 // filterKey handles typing in the / filter.
 //
 // The filter narrows only the focused panel. Filtering all of them from one box
 // would empty the panels above and below the one being searched, which reads as
 // data loss rather than as a filter.
-func (m *Model) filterKey(key string) (tea.Model, tea.Cmd) {
+func (m *Model) filterKey(key string) (app.Model, tea.Cmd) {
 	switch key {
 	case "esc":
 		m.filtering = false
@@ -29,6 +33,6 @@ func (m *Model) filterKey(key string) (tea.Model, tea.Cmd) {
 	}
 	// The cursor goes to the top of what is left: keeping its index would leave
 	// it pointing at a different row than it was on.
-	m.cursors[m.focus] = 0
+	m.lists[m.focus].Reset()
 	return m, m.onSelectionChanged()
 }

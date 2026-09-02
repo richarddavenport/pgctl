@@ -78,14 +78,13 @@ var (
 	// databases belong to while your cursor is somewhere else entirely.
 	currentStyle = lipgloss.NewStyle().Bold(true).Foreground(Palette.Accent)
 
-	panelStyle = lipgloss.NewStyle().
-			Border(lipgloss.RoundedBorder()).BorderForeground(Palette.Border).Padding(0, 1)
-	focusedPanelStyle = lipgloss.NewStyle().
-				Border(lipgloss.RoundedBorder()).BorderForeground(Palette.Accent).Padding(0, 1)
+	// The border styles are plain foregrounds now, not lipgloss borders: the
+	// box is drawn by comp.Pane out of the chrome's own characters, so a style
+	// here says only what colour the edge is. The rounded corners moved to
+	// Chrome above, where they are a decision rather than three lipgloss calls.
+	panelBorder      = lipgloss.NewStyle().Foreground(Palette.Border)
+	panelFocusBorder = lipgloss.NewStyle().Foreground(Palette.Accent)
 
-	tabStyle       = lipgloss.NewStyle().Foreground(Palette.Muted).Padding(0, 1)
-	activeTabStyle = lipgloss.NewStyle().Foreground(Palette.Accent).Bold(true).Underline(true).Padding(0, 1)
-
-	boxStyle = lipgloss.NewStyle().
-			Border(lipgloss.RoundedBorder()).BorderForeground(Palette.Accent).Padding(1, 2)
+	tabStyle       = lipgloss.NewStyle().Foreground(Palette.Muted)
+	activeTabStyle = lipgloss.NewStyle().Foreground(Palette.Accent).Bold(true).Underline(true)
 )

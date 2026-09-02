@@ -3,6 +3,7 @@ package tui
 import (
 	"testing"
 
+	"github.com/richarddavenport/tuikit/app"
 	"github.com/richarddavenport/tuikit/harness"
 )
 
@@ -17,7 +18,7 @@ import (
 // model is a frame that may not be reachable at all.
 func states(t *testing.T) []struct {
 	name  string
-	build func(w, h int) *Model
+	build func(w, h int) *app.Runner
 } {
 	// The size is set BEFORE the keys are pressed, and that is not a detail: a
 	// state reached at 132x38 and then resized to 80x24 is not the state a
@@ -25,66 +26,78 @@ func states(t *testing.T) []struct {
 	// that proved it — it fits at 38 lines with nothing to scroll, so a
 	// "scrolled" frame built at the wide size and rendered narrow showed the
 	// top of the list and looked like a broken scroll.
-	loaded := func(w, h int) *Model {
+	// A Runner, not a Model. Keys go through it so that every press REDRAWS,
+	// which a running program does and which the components now depend on: a
+	// comp.List learns how many rows fit from the frame it last drew, so a
+	// cursor moved without a redraw is a cursor moved against a viewport that
+	// does not exist yet.
+	loaded := func(w, h int) *app.Runner {
 		m := fixtureModel(t)
-		m.SetSize(w, h)
 		fixtureSnapshot(t, m)
-		return m
+		return run(m, w, h)
 	}
-	keys := func(m *Model, k ...string) *Model {
-		harness.Press(m, k...)
-		return m
+	keys := func(r *app.Runner, k ...string) *app.Runner {
+		harness.Press(r, k...)
+		return r
 	}
 	return []struct {
 		name  string
-		build func(w, h int) *Model
+		build func(w, h int) *app.Runner
 	}{
 		{"connections", loaded},
-		{"databases", func(w, h int) *Model { return keys(loaded(w, h), "2") }},
-		{"snapshots", func(w, h int) *Model { return keys(loaded(w, h), "3") }},
-		{"sets", func(w, h int) *Model { return keys(loaded(w, h), "4") }},
-		{"runs", func(w, h int) *Model { return keys(loaded(w, h), "5") }},
+		{"databases", func(w, h int) *app.Runner { return keys(loaded(w, h), "2") }},
+		{"snapshots", func(w, h int) *app.Runner { return keys(loaded(w, h), "3") }},
+		{"sets", func(w, h int) *app.Runner { return keys(loaded(w, h), "4") }},
+		{"runs", func(w, h int) *app.Runner { return keys(loaded(w, h), "5") }},
 
 		// The right pane with the keys, and its tabs. Remembered per panel, so
 		// the tab strip is part of what a panel means.
-		{"detail-pane", func(w, h int) *Model { return keys(loaded(w, h), "right") }},
-		{"snapshot-tables", func(w, h int) *Model { return keys(loaded(w, h), "3", "right", "tab") }},
-		{"snapshot-warnings", func(w, h int) *Model { return keys(loaded(w, h), "3", "right", "tab", "tab") }},
-		{"snapshot-drift", func(w, h int) *Model { return keys(loaded(w, h), "3", "right", "tab", "tab", "tab") }},
+		{"detail-pane", func(w, h int) *app.Runner { return keys(loaded(w, h), "right") }},
+		{"snapshot-tables", func(w, h int) *app.Runner { return keys(loaded(w, h), "3", "right", "tab") }},
+		{"snapshot-warnings", func(w, h int) *app.Runner { return keys(loaded(w, h), "3", "right", "tab", "tab") }},
+		{"snapshot-drift", func(w, h int) *app.Runner { return keys(loaded(w, h), "3", "right", "tab", "tab", "tab") }},
 
 		// An environment pgctl could not reach. The detail pane has to explain
 		// itself rather than render an empty form.
-		{"unreachable", func(w, h int) *Model { return keys(loaded(w, h), "down", "down") }},
+		{"unreachable", func(w, h int) *app.Runner { return keys(loaded(w, h), "down", "down") }},
 
 		// The modal forms, which are where an operator does damage.
-		{"form-snapshot", func(w, h int) *Model { return keys(loaded(w, h), "n") }},
-		{"form-apply", func(w, h int) *Model { return keys(loaded(w, h), "3", "a") }},
-		{"form-move", func(w, h int) *Model { return keys(loaded(w, h), "m") }},
-		{"form-prune", func(w, h int) *Model { return keys(loaded(w, h), "p") }},
+		{"form-snapshot", func(w, h int) *app.Runner { return keys(loaded(w, h), "n") }},
+		{"form-apply", func(w, h int) *app.Runner { return keys(loaded(w, h), "3", "a") }},
+		{"form-move", func(w, h int) *app.Runner { return keys(loaded(w, h), "m") }},
+		{"form-prune", func(w, h int) *app.Runner { return keys(loaded(w, h), "p") }},
 
-		{"help", func(w, h int) *Model { return keys(loaded(w, h), "?") }},
+		{"help", func(w, h int) *app.Runner { return keys(loaded(w, h), "?") }},
 		// The help scrolled to the bottom. The list is longer than a short
 		// terminal, so the state that matters is the one where the last group
 		// is reachable at all.
-		{"help-scrolled", func(w, h int) *Model {
-			m := keys(loaded(w, h), "?")
+		{"help-scrolled", func(w, h int) *app.Runner {
+			r := keys(loaded(w, h), "?")
 			for i := 0; i < 20; i++ {
-				harness.Press(m, "j")
+				harness.Press(r, "j")
 			}
-			return m
+			return r
 		}},
-		{"filter", func(w, h int) *Model { return keys(loaded(w, h), "/", "q") }},
-		{"filter-matches-nothing", func(w, h int) *Model { return keys(loaded(w, h), "/", "z", "z") }},
+		{"filter", func(w, h int) *app.Runner { return keys(loaded(w, h), "/", "q") }},
+		{"filter-matches-nothing", func(w, h int) *app.Runner { return keys(loaded(w, h), "/", "z", "z") }},
 
 		// Nothing loaded: no probe has answered and there are no snapshots.
 		// Every panel's empty state at once, which is the first thing a new
 		// user sees and the last thing anybody looks at.
-		{"empty", func(w, h int) *Model {
-			m := fixtureModel(t)
-			m.SetSize(w, h)
-			return m
-		}},
+		{"empty", func(w, h int) *app.Runner { return run(fixtureModel(t), w, h) }},
 	}
+}
+
+// run wraps a model so the harness can drive it.
+//
+// The model has no View: the runner owns the canvas, so Update, View and Canvas
+// belong to it. SetSize goes through the runner rather than the model, so the
+// model hears about the size by the same route it would in a running program —
+// two paths to one fact is how they come to disagree.
+func run(m *Model, w, h int) *app.Runner {
+	r := app.New(m, app.WithChrome(Chrome))
+	r.SetSize(w, h)
+	return r
 }
 
 // The screens as goldens: a layout change is an ordinary test failure.

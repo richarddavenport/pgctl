@@ -22,7 +22,7 @@ func (m *Model) connections() []config.Connection {
 // selectedConn is the focused connection.
 func (m *Model) selectedConn() (config.Connection, bool) {
 	list := m.connections()
-	if i := m.cursors[panelConnections]; i >= 0 && i < len(list) {
+	if i := m.cursor(panelConnections); i >= 0 && i < len(list) {
 		return list[i], true
 	}
 	return config.Connection{}, false
@@ -47,7 +47,7 @@ func (m *Model) databases() []engine.DatabaseInfo {
 
 func (m *Model) selectedDatabase() (engine.DatabaseInfo, bool) {
 	list := m.databases()
-	if i := m.cursors[panelDatabases]; i >= 0 && i < len(list) {
+	if i := m.cursor(panelDatabases); i >= 0 && i < len(list) {
 		return list[i], true
 	}
 	return engine.DatabaseInfo{}, false
@@ -80,7 +80,7 @@ func (m *Model) snapshots() []*engine.Entry {
 
 func (m *Model) selectedSnapshot() (*engine.Entry, bool) {
 	list := m.snapshots()
-	if i := m.cursors[panelSnapshots]; i >= 0 && i < len(list) {
+	if i := m.cursor(panelSnapshots); i >= 0 && i < len(list) {
 		return list[i], true
 	}
 	return nil, false
@@ -102,7 +102,7 @@ func (m *Model) sets() []config.Set {
 
 func (m *Model) selectedSet() (config.Set, bool) {
 	list := m.sets()
-	if i := m.cursors[panelSets]; i >= 0 && i < len(list) {
+	if i := m.cursor(panelSets); i >= 0 && i < len(list) {
 		return list[i], true
 	}
 	return config.Set{}, false
@@ -120,7 +120,7 @@ func (m *Model) runList() []*runRecord {
 
 func (m *Model) selectedRun() (*runRecord, bool) {
 	list := m.runList()
-	if i := m.cursors[panelRuns]; i >= 0 && i < len(list) {
+	if i := m.cursor(panelRuns); i >= 0 && i < len(list) {
 		return list[i], true
 	}
 	return nil, false

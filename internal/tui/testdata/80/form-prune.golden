@@ -1,24 +1,23 @@
 pgctl  pgctl.yaml
-╭──────────────────────────────╮ ╭─────────────────────────────────────────────╮
-│ 1 Connections (3)            │ │  Overview  Databases  Config                │
-│ ● prd       protected        │ │                                             │
-│ ● qat       guarded          │ │ prd  protected — never a target             │
-╰────╭────────────────────────────────────────────────────────────────────╮
-╭────│                                                                    │
-│ 2 D│  Prune snapshots                                                   │
-│ pro│  Retention: 7 daily, 4 weekly, 0 monthly. An incomplete snapshot   │
-│ cla│  is                                                                │
-╰────│  never kept, and the newest always is.                             │
-╭────│                                                                    │
-│ 3 S│  ▸ Connection            ‹ all ›  (1/4)                            │
-│ 08-│      ← → to change                                                 │
-╰────│    Delete them           off                                       │
-╭────│                                                                    │
-│ 4 S│                                                                    │
-│ cla╰────────────────────────────────────────────────────────────────────╯
+╭─ 1 Connections (3) ──────────╮ ╭─────────────────────────────────────────────╮
+│ ● prd       protected        │ │ ‹ Overview · Databases · Config ›           │
+│ ● qat       guarded          │ │                                             │
+│                         2/3  │ │ prd  protected — never a target             │
+╰──╭────────────────────────────────────────────────────────────────────────╮  │
+╭─ │                                                                        │  │
+│ p│ Prune snapshots                                                        │  │
+│  │ Retention: 7 daily, 4 weekly, 0 monthly. An incomplete snapshot is     │  │
+╰──│ never kept, and the newest always is.                                  │  │
+╭─ │                                                                        │  │
+│ 0│ ▸ Connection            ‹ all ›  (1/4)                                 │  │
+│  │     ← → to change                                                      │  │
+╰──│   Delete them           off                                            │  │
+╭─ │                                                                        │  │
+│ c│                                                                        │p │
+│  ╰────────────────────────────────────────────────────────────────────────╯  │
 ╰──────────────────────────────╯ │                                             │
-╭──────────────────────────────╮ │                                             │
-│ 5 Runs                       │ │                                             │
+╭─ 5 Runs ─────────────────────╮ │                                             │
 │ nothing run yet              │ │                                             │
+│                              │ │                                      12/12  │
 ╰──────────────────────────────╯ ╰─────────────────────────────────────────────╯
 ← → change  ·  ↑↓ fields  ·  enter run  ·  esc cancel

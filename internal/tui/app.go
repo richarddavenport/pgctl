@@ -16,6 +16,9 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
+	"github.com/richarddavenport/tuikit/app"
+	"github.com/richarddavenport/tuikit/comp"
+
 	"github.com/richarddavenport/pgctl/internal/config"
 	"github.com/richarddavenport/pgctl/internal/engine"
 	"github.com/richarddavenport/pgctl/internal/pg"
@@ -43,15 +46,21 @@ type Model struct {
 	// focus is the panel with the keys, and paneFocus whether the right pane
 	// has taken them instead.
 	focus     int
-	cursors   [panelCount]int
-	offsets   [panelCount]int
 	paneFocus bool
+
+	// lists own the cursors and the scroll offsets that used to be two arrays
+	// of ints here, plus the window arithmetic that kept them in step — a
+	// comp.List will not let a caller assign either, because the invariant
+	// between them is the whole component.
+	lists    [panelCount]comp.List
+	paneList comp.List
+
+	// split divides the panel column from the detail pane, and is draggable.
+	split comp.Split
 
 	// tab is the right pane's selected tab, remembered per panel so that
 	// returning to a panel returns to the tab you were reading.
-	tabs       [panelCount]int
-	paneCursor int
-	paneOffset int
+	tabs [panelCount]int
 
 	// Data. Each is loaded asynchronously and may be absent.
 	probes    map[string]*engine.Probe
@@ -84,6 +93,23 @@ type Model struct {
 	// now is read once per frame so every duration on screen agrees.
 	now time.Time
 
+	// canvas is the last frame, kept so a click can ask what it landed on. The
+	// frame IS the region list, so there is nothing else to keep in step.
+	canvas *comp.Canvas
+	mouse  app.Mouse
+
+	// frame is the rect the last Draw was given.
+	//
+	// The runner makes the canvas and is the authority on how big it is — it
+	// keeps its own default until a WindowSizeMsg arrives, which under a pty
+	// with no size attached is never. So the model asking ITSELF how wide the
+	// screen is gets a different answer from the canvas it is drawing into,
+	// and everything computed off the wrong one lands somewhere the frame is
+	// not. Recording the rect makes the two the same fact, and it is also what
+	// a drag needs: the divider moves relative to the body it was last drawn
+	// in, not the body it would be drawn in next.
+	frame comp.Rect
+
 	// clock is where now comes from. A field rather than a call to time.Now,
 	// so a frame can be pinned to a fixed instant: every duration on screen is
 	// relative to it, and a golden written today still reads the same tomorrow.
@@ -114,8 +140,41 @@ func New(e *engine.Engine) *Model {
 		clock:     time.Now,
 	}
 	m.now = m.clock()
+
+	for panel := range m.lists {
+		m.lists[panel] = comp.List{
+			Name:  panelRowRegions[panel],
+			Empty: "",
+			// No marker column. pgctl's panels are 28 columns of content and
+			// the selection is already a full-width highlight; a "> " would
+			// cost two of them on every row to say what the colour says. The
+			// pane's list does have one, because there the cursor is a single
+			// row inside a body of prose.
+			Selected:   &selectedStyle,
+			Unfocused:  &currentStyle,
+			Status:     &mutedStyle,
+			EmptyStyle: &mutedStyle,
+		}
+	}
+	m.paneList = comp.List{
+		Name:       regBody,
+		Selected:   &currentStyle,
+		Unfocused:  &currentStyle,
+		Status:     &mutedStyle,
+		EmptyStyle: &mutedStyle,
+	}
+	// A quarter of the width to the panels, and never narrower than the widest
+	// thing that has to stay readable there — a snapshot timestamp with its
+	// location marker, which is what leftWidth was measured from. A third, the
+	// obvious default, gave the column 44 columns at 132 and padded every row
+	// with a dozen of dead space.
+	m.split = comp.Split{Name: regSplit, Ratio: [2]int{1, 4}, Min: leftWidth}
 	return m
 }
+
+// Canvas is the last frame, so a mouse event or a capture script can address a
+// region by name.
+func (m *Model) Canvas() *comp.Canvas { return m.canvas }
 
 // SetSize tells the model how big the terminal is.
 //
@@ -144,7 +203,7 @@ func (m *Model) Init() tea.Cmd {
 }
 
 // Update handles a message.
-func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m *Model) Update(msg tea.Msg) (app.Model, tea.Cmd) {
 	m.now = m.clock()
 
 	switch msg := msg.(type) {
@@ -216,6 +275,9 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case runDoneMsg:
 		return m, m.finishRun(msg)
 
+	case tea.MouseMsg:
+		return m, m.onMouse(msg)
+
 	case tea.KeyMsg:
 		return m.key(msg)
 	}
@@ -224,7 +286,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 // key routes a keypress. Order matters: a modal takes everything, then the
 // filter's text entry, then the global keys, then the focused surface.
-func (m *Model) key(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m *Model) key(msg tea.KeyMsg) (app.Model, tea.Cmd) {
 	key := msg.String()
 
 	if m.showHelp {
@@ -288,13 +350,13 @@ func (m *Model) key(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			return m, nil
 		}
 		m.tabs[m.focus] = (m.tabs[m.focus] + 1) % len(m.paneTabs())
-		m.paneCursor, m.paneOffset = 0, 0
+		m.paneList.Reset()
 		return m, m.paneLoad()
 	case "shift+tab":
 		if m.paneFocus {
 			tabs := len(m.paneTabs())
 			m.tabs[m.focus] = (m.tabs[m.focus] + tabs - 1) % tabs
-			m.paneCursor, m.paneOffset = 0, 0
+			m.paneList.Reset()
 			return m, m.paneLoad()
 		}
 		return m, nil
@@ -312,28 +374,28 @@ func (m *Model) key(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 }
 
 // navigate moves the cursor in whichever surface has focus.
-func (m *Model) navigate(key string) (tea.Model, tea.Cmd) {
+func (m *Model) navigate(key string) (app.Model, tea.Cmd) {
 	switch key {
 	case "up", "k":
 		if m.paneFocus {
-			if m.paneCursor > 0 {
-				m.paneCursor--
+			if m.paneList.Cursor() > 0 {
+				m.paneList.Move(-1)
 			}
 			return m, nil
 		}
-		if m.cursors[m.focus] > 0 {
-			m.cursors[m.focus]--
+		if m.cursor(m.focus) > 0 {
+			m.lists[m.focus].Move(-1)
 		}
 		return m, m.onSelectionChanged()
 	case "down", "j":
 		if m.paneFocus {
-			if m.paneCursor < m.paneRowCount()-1 {
-				m.paneCursor++
+			if m.paneList.Cursor() < m.paneRowCount()-1 {
+				m.paneList.Move(1)
 			}
 			return m, nil
 		}
-		if m.cursors[m.focus] < m.panelLen(m.focus)-1 {
-			m.cursors[m.focus]++
+		if m.cursor(m.focus) < m.panelLen(m.focus)-1 {
+			m.lists[m.focus].Move(1)
 		}
 		return m, m.onSelectionChanged()
 	case "left", "h":
@@ -378,11 +440,16 @@ func (m *Model) navigate(key string) (tea.Model, tea.Cmd) {
 
 func (m *Model) setCursor(i int) {
 	if m.paneFocus {
-		m.paneCursor = clamp(i, m.paneRowCount()-1)
+		m.paneList.Select(clamp(i, m.paneRowCount()-1))
 		return
 	}
-	m.cursors[m.focus] = clamp(i, m.panelLen(m.focus)-1)
+	m.lists[m.focus].Select(clamp(i, m.panelLen(m.focus)-1))
 }
+
+// cursor is the selected row of a panel. A method rather than a field read,
+// because the cursor lives in the list now and a caller that could assign it
+// could reintroduce the offset bug the component exists to prevent.
+func (m *Model) cursor(panel int) int { return m.lists[panel].Cursor() }
 
 // onSelectionChanged loads whatever the new selection needs. Selection is
 // hierarchical, so moving the environment cursor changes what every panel
@@ -393,10 +460,10 @@ func (m *Model) onSelectionChanged() tea.Cmd {
 }
 
 func (m *Model) clampCursors() {
-	for i := range m.cursors {
-		m.cursors[i] = clamp(m.cursors[i], m.panelLen(i)-1)
+	for panel := range m.lists {
+		m.lists[panel].Select(clamp(m.lists[panel].Cursor(), m.panelLen(panel)-1))
 	}
-	m.paneCursor = clamp(m.paneCursor, m.paneRowCount()-1)
+	m.paneList.Select(clamp(m.paneList.Cursor(), m.paneRowCount()-1))
 }
 
 func (m *Model) quit() tea.Cmd {
@@ -429,7 +496,17 @@ func Run(configPath string) error {
 		model.status = w
 	}
 
-	p := tea.NewProgram(model, tea.WithAltScreen())
+	// The runner owns the canvas, its size and its chrome — it is the only
+	// place comp.NewCanvas is called, because those are decisions with one
+	// right answer per program and a tool that made them itself would make
+	// them differently in each of its screens.
+	//
+	// Mouse cell motion, because the split between the panel column and the
+	// detail pane is draggable and a drag needs the moves between press and
+	// release, not just the two ends.
+	p := tea.NewProgram(
+		app.New(model, app.WithChrome(Chrome)),
+		tea.WithAltScreen(), tea.WithMouseCellMotion())
 	if _, err := p.Run(); err != nil {
 		return fmt.Errorf("terminal ui: %w", err)
 	}

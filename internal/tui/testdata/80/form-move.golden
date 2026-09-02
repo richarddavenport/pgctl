@@ -1,24 +1,23 @@
 pgctl  pgctl.yaml
-╭──────────────────────────────╮ ╭─────────────────────────────────────────────╮
-│ 1 Connections (3)            │ │  Overview  Databases  Config                │
-│ ● p╭────────────────────────────────────────────────────────────────────╮
-│ ● q│                                                                    │
-╰────│  Move between environments                                         │
-╭────│  Takes a snapshot into a temporary directory, applies it, and      │
-│ 2 D│  deletes                                                           │
-│ pro│  it. Nothing is catalogued or uploaded.                            │
-│ cla│                                                                    │
-╰────│  ▸ From                  ‹ prd  PostgreSQL 17.4, 3 databases ›     │
-╭────│  (1/3)                                                             │
-│ 3 S│      ← → to change                                                 │
-│ 08-│    To                      qat  (guarded — needs its name typed)   │
-╰────│  (1/2)                                                             │
-╭────│    Databases             ○ claims  ● product-development  ○ quote  │
-│ 4 S│  1 of 3                                                            │
-│ cla│    Keep the staged snapshotoff                                     │
-╰────│                                                                    │
-╭────│                                                                    │
-│ 5 R╰────────────────────────────────────────────────────────────────────╯
+╭─ 1 Connections (3) ──────────╮ ╭─────────────────────────────────────────────╮
+│ ● prd       protected        │ │ ‹ Overview · Databases · Config ›           │
+│ ● qat       guarded          │ │                                             │
+│  ╭────────────────────────────────────────────────────────────────────────╮  │
+╰──│                                                                        │  │
+╭─ │ Move between environments                                              │  │
+│ p│ Takes a snapshot into a temporary directory, applies it, and deletes   │  │
+│  │ it. Nothing is catalogued or uploaded.                                 │  │
+╰──│                                                                        │  │
+╭─ │ ▸ From                  ‹ prd  PostgreSQL 17.4, 3 databases ›  (1/3)   │  │
+│ 0│     ← → to change                                                      │  │
+│  │   To                      qat  (guarded — needs its name typed)  (1/2) │  │
+╰──│   Databases             ○ claims  ● product-development  ○ quote   1 … │  │
+╭─ │   Keep the staged snapshotoff                                          │  │
+│ c│                                                                        │p │
+│  │                                                                        │  │
+╰──╰────────────────────────────────────────────────────────────────────────╯  │
+╭─ 5 Runs ─────────────────────╮ │                                             │
 │ nothing run yet              │ │                                             │
+│                              │ │                                      12/12  │
 ╰──────────────────────────────╯ ╰─────────────────────────────────────────────╯
 ← → change  ·  ↑↓ fields  ·  enter run  ·  esc cancel

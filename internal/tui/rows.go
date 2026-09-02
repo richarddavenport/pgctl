@@ -4,14 +4,27 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/charmbracelet/lipgloss"
+
 	"github.com/richarddavenport/tuikit/comp"
 
 	"github.com/richarddavenport/pgctl/internal/engine"
 )
 
-// panelRows renders one panel's list. Each row is a single line already styled
-// for its content but not for selection, which the panel applies.
-func (m *Model) panelRows(panel int) []string {
+// panelRows renders one panel's list.
+//
+// A row is PLAIN TEXT plus styled spans, never a pre-styled string. The canvas
+// draws clusters into cells, so an escape sequence handed to it is text: the
+// first version of this after the canvas port passed the old styled strings
+// straight through, and with colour on the Connections panel drew a blank row.
+// With colour off it worked, so 38 goldens agreed it was fine —
+// TestColourDoesNotChangeTheShape is what caught it, on the first run.
+//
+// Spans also mean the selected row can be ONE colour. comp.List drops a row's
+// own spans under the cursor deliberately: the selection is the reader's mark
+// on the list, and a row that kept its own colours under it makes the cursor
+// hard to find in exactly the list where finding it matters.
+func (m *Model) panelRows(panel int) []comp.Row {
 	switch panel {
 	case panelConnections:
 		return m.connectionRows()
@@ -27,118 +40,140 @@ func (m *Model) panelRows(panel int) []string {
 	return nil
 }
 
-func (m *Model) connectionRows() []string {
+// span is one styled run of a row.
+func span(text string, style *lipgloss.Style) comp.Segment {
+	return comp.Segment{Text: text, Style: style}
+}
+
+// row builds a comp.Row from spans, filling in the plain text a selected row
+// is drawn with — comp.List needs both, and deriving one from the other here
+// means no caller can supply a Text that disagrees with its Spans.
+func row(spans ...comp.Segment) comp.Row {
+	var text string
+	for _, s := range spans {
+		text += s.Text
+	}
+	return comp.Row{Text: text, Spans: spans}
+}
+
+func (m *Model) connectionRows() []comp.Row {
 	conns := m.connections()
-	out := make([]string, 0, len(conns))
+	out := make([]comp.Row, 0, len(conns))
 	for _, conn := range conns {
 		// The marker answers "can I reach it" before the name answers "which
 		// is it", because an unreachable environment changes what every panel
 		// below is showing.
-		mark := mutedStyle.Render("○")
-		note := ""
+		mark, note := span("○", &mutedStyle), comp.Segment{}
 		switch {
 		case m.probing[conn.Name]:
-			mark = mutedStyle.Render(spinner(m.now))
+			mark = span(spinner(m.now), &mutedStyle)
 		case m.probes[conn.Name] == nil:
 		case m.probes[conn.Name].Reachable:
-			mark = okStyle.Render("●")
-			note = mutedStyle.Render(" " + formatServerVersion(m.probes[conn.Name].ServerVersion))
+			mark = span("●", &okStyle)
+			note = span(" "+formatServerVersion(m.probes[conn.Name].ServerVersion), &mutedStyle)
 		default:
-			mark = dangerStyle.Render("✗")
+			mark = span("✗", &dangerStyle)
 		}
 
 		switch {
 		case conn.Protected:
-			note = dangerStyle.Render(" protected")
+			note = span(" protected", &dangerStyle)
 		case conn.Guarded:
-			note = warnStyle.Render(" guarded")
+			note = span(" guarded", &warnStyle)
 		}
-		out = append(out, fmt.Sprintf("%s %-9s%s", mark, truncate(conn.Name, 9), note))
+		out = append(out, row(mark, span(fmt.Sprintf(" %-9s", comp.Truncate(conn.Name, 9)), nil), note))
 	}
 	return out
 }
 
-func (m *Model) databaseRows() []string {
+func (m *Model) databaseRows() []comp.Row {
 	dbs := m.databases()
-	out := make([]string, 0, len(dbs))
+	out := make([]comp.Row, 0, len(dbs))
 	for _, db := range dbs {
-		size := mutedStyle.Render("       -")
+		size := span("       -", &mutedStyle)
 		if db.Bytes > 0 {
-			size = fmt.Sprintf("%8s", engine.HumanBytes(db.Bytes))
+			size = span(fmt.Sprintf("%8s", engine.HumanBytes(db.Bytes)), nil)
 		}
 		// The name takes whatever the size column leaves, so a long database
 		// name is only shortened when it genuinely does not fit.
 		width := panelInner - 9
-		out = append(out, fmt.Sprintf("%-*s %s", width, truncate(db.Name, width), size))
+		out = append(out, row(
+			span(comp.Pad(db.Name, width)+" ", nil),
+			size,
+		))
 	}
 	return out
 }
 
-func (m *Model) snapshotRows() []string {
+func (m *Model) snapshotRows() []comp.Row {
 	snaps := m.snapshots()
-	out := make([]string, 0, len(snaps))
+	out := make([]comp.Row, 0, len(snaps))
 	for _, entry := range snaps {
 		man := entry.Manifest
 		stamp := man.StartedAt.Local().Format("01-02 15:04")
 
-		where := mutedStyle.Render("l")
+		where := span("l", &mutedStyle)
 		switch {
 		case entry.Local && entry.Remote:
-			where = okStyle.Render("l+r")
+			where = span("l+r", &okStyle)
 		case entry.Remote:
-			where = accentStyle.Render("r")
+			where = span("r", &accentStyle)
 		}
-		state := ""
+		spans := []comp.Segment{
+			span(fmt.Sprintf("%s %7s ", stamp, engine.HumanBytes(man.Bytes)), nil),
+			where,
+		}
 		if !man.Complete() {
-			state = dangerStyle.Render(" ✗")
+			spans = append(spans, span(" ✗", &dangerStyle))
 		}
-		out = append(out, fmt.Sprintf("%s %7s %s%s",
-			stamp, engine.HumanBytes(man.Bytes), where, state))
+		out = append(out, row(spans...))
 	}
 	return out
 }
 
-func (m *Model) setRows() []string {
+func (m *Model) setRows() []comp.Row {
 	conn, _ := m.selectedConn()
 	db, _ := m.selectedDatabase()
 
 	sets := m.sets()
-	out := make([]string, 0, len(sets))
+	out := make([]comp.Row, 0, len(sets))
 	for _, set := range sets {
-		note := mutedStyle.Render(" ?")
+		note := span(" ?", &mutedStyle)
 		if s := m.setInfo[setKey(conn.Name, db.Name, set.Name)]; s != nil {
 			switch {
 			case s.loading:
-				note = mutedStyle.Render(" " + spinner(m.now))
+				note = span(" "+spinner(m.now), &mutedStyle)
 			case s.err != nil:
-				note = dangerStyle.Render(" ✗")
+				note = span(" ✗", &dangerStyle)
 			case len(s.added) > 0:
 				// The number that matters about a set is not how many tables it
 				// names but how many it drags in.
-				note = warnStyle.Render(fmt.Sprintf(" %d+%d", len(s.members), len(s.added)))
+				note = span(fmt.Sprintf(" %d+%d", len(s.members), len(s.added)), &warnStyle)
 			default:
-				note = okStyle.Render(fmt.Sprintf(" %d closed", len(s.members)))
+				note = span(fmt.Sprintf(" %d closed", len(s.members)), &okStyle)
 			}
 		}
-		out = append(out, truncate(set.Name, panelInner-8)+note)
+		out = append(out, row(span(comp.Truncate(set.Name, panelInner-8), nil), note))
 	}
 	return out
 }
 
-func (m *Model) runRows() []string {
+func (m *Model) runRows() []comp.Row {
 	runs := m.runList()
-	out := make([]string, 0, len(runs))
+	out := make([]comp.Row, 0, len(runs))
 	for _, r := range runs {
-		mark := okStyle.Render("✓")
+		mark := span("✓", &okStyle)
 		switch {
 		case r.running:
-			mark = accentStyle.Render(spinner(m.now))
+			mark = span(spinner(m.now), &accentStyle)
 		case r.err != nil:
-			mark = dangerStyle.Render("✗")
+			mark = span("✗", &dangerStyle)
 		}
-		out = append(out, fmt.Sprintf("%s %-*s %s",
-			mark, panelInner-9, truncate(r.kind, panelInner-9),
-			mutedStyle.Render(elapsed(r.duration(m.now)))))
+		out = append(out, row(
+			mark,
+			span(" "+comp.Pad(r.kind, panelInner-9)+" ", nil),
+			span(elapsed(r.duration(m.now)), &mutedStyle),
+		))
 	}
 	return out
 }

@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/charmbracelet/lipgloss"
+	"github.com/charmbracelet/x/ansi"
+
 	"github.com/richarddavenport/tuikit/comp"
 )
 
@@ -51,7 +54,55 @@ func (m *Model) viewAction() string {
 	if a.err != nil {
 		b.WriteString("\n\n" + dangerStyle.Render(wrap(a.err.Error(), width)))
 	}
-	return boxStyle.Width(width).Render(b.String())
+	return b.String()
+}
+
+// drawAction centres the open form over the frame.
+//
+// A comp.Pane rather than a lipgloss box over a hand-clipped screen: the canvas
+// blanks a pane's interior, so a modal covers what is behind it without pgctl
+// cutting the rows underneath itself. That cutting was 30 lines — overlay(),
+// clip() and padTo() between them — and it is where the "…" against the modal's
+// left edge came from.
+func (m *Model) drawAction(c *comp.Canvas, r comp.Rect) {
+	lines := strings.Split(m.viewAction(), "\n")
+	m.drawOverlay(c, r, comp.Region(regModal), m.actionWidth(), lines, &panelFocusBorder)
+}
+
+// drawOverlay centres a bordered box of lines over r.
+//
+// Shared by the modal and the help, because they differ only in what is in them
+// and what colour the edge is — and because the arithmetic for "centre a box
+// and do not let it leave the screen" is the kind that gets written twice and
+// then diverges.
+func (m *Model) drawOverlay(
+	c *comp.Canvas, r comp.Rect, id comp.ID, width int, lines []string, edge *lipgloss.Style,
+) {
+	// Two columns of border and two of padding on each side.
+	box := comp.Rect{W: min(width+6, r.W), H: min(len(lines)+4, r.H)}
+	box.X = r.X + (r.W-box.W)/2
+	box.Y = r.Y + (r.H-box.H)/2
+
+	inside := comp.Pane{Border: edge, Focus: edge}.Draw(c, box, id).Inset(1)
+
+	// Clipped to the box, so a line longer than the modal is cut by the canvas
+	// rather than drawn over the border and out the other side. The form's
+	// field rows used to be wrapped by lipgloss's Width; nothing wraps them
+	// now, and at eighty columns two of them wrote straight through the right
+	// edge. Truncating as well as clipping, so the reader is told the line was
+	// cut instead of finding out by its ending mid-word.
+	c = c.Clip(inside)
+	for i, line := range lines {
+		if i >= inside.H {
+			break
+		}
+		line = comp.Truncate(line, inside.W)
+		// ansi.Strip for the same reason the detail pane does it, and it goes
+		// the same way: the form and the key list still build styled strings,
+		// and the canvas draws cells rather than replaying escape sequences.
+		// See drawPane.
+		c.Text(inside.X, inside.Y+i, ansi.Strip(line), nil, id)
+	}
 }
 
 // viewForm renders every field at once, so the operator can see what they have
@@ -291,7 +342,17 @@ func (m *Model) viewHelp() string {
 		hint = "the end — ↑↓ to scroll, any other key closes"
 	}
 	shown = append(shown, mutedStyle.Render(hint))
-	return boxStyle.Render(strings.Join(shown, "\n"))
+	return strings.Join(shown, "\n")
+}
+
+// drawHelp centres the key list over the frame.
+func (m *Model) drawHelp(c *comp.Canvas, r comp.Rect) {
+	lines := strings.Split(m.viewHelp(), "\n")
+	width := 0
+	for _, l := range lines {
+		width = max(width, comp.Width(l))
+	}
+	m.drawOverlay(c, r, comp.Region(regHelp), width, lines, &panelFocusBorder)
 }
 
 // wrapIndented wraps text that is already laid out with leading indentation,

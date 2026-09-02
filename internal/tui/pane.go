@@ -6,6 +6,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/charmbracelet/x/ansi"
 
 	"github.com/richarddavenport/tuikit/comp"
 
@@ -56,73 +57,71 @@ func (m *Model) paneLoad() tea.Cmd {
 	return nil
 }
 
-// pane renders the detail panel.
-func (m *Model) pane(width, height int) string {
+// drawPane renders the detail panel: a tab strip, then the body of whichever
+// tab is selected.
+func (m *Model) drawPane(c *comp.Canvas, r comp.Rect) {
+	pane := comp.Pane{
+		Focused:    m.paneFocus,
+		Border:     &panelBorder,
+		Focus:      &panelFocusBorder,
+		TitleStyle: &headerStyle,
+	}
+	inside := pane.Draw(c, r, comp.Region(regPane))
+	if inside.Empty() {
+		return
+	}
+
 	tabs := m.paneTabs()
 	active := clamp(m.tabs[m.focus], len(tabs)-1)
-
-	var bar strings.Builder
+	entries := make([]comp.Tab, len(tabs))
 	for i, t := range tabs {
-		if i == active {
-			bar.WriteString(activeTabStyle.Render(t))
-		} else {
-			bar.WriteString(tabStyle.Render(t))
-		}
+		entries[i] = comp.Tab{Name: t}
 	}
+	// The chevrons round the strip say that it CYCLES and that tab is the key,
+	// which is a fact about the keymap rather than about the state — and the
+	// active tab is already styled, so chevrons around IT would only repeat
+	// what the colour says.
+	comp.Tabs{
+		Tabs:          entries,
+		Active:        active,
+		Focused:       m.paneFocus,
+		Style:         &tabStyle,
+		Selected:      &activeTabStyle,
+		FocusSelected: &activeTabStyle,
+		Chrome:        &mutedStyle,
+	}.Draw(c, inside.Narrow(1), regTabs)
 
-	// As in panel(): the border takes two columns and the padding two more.
-	inner := width - 4
-	body := m.paneBody(active, inner)
+	// A blank row between the strip and the body, so the tabs read as chrome
+	// rather than as the first line of what they label.
+	body := comp.Rect{X: inside.X, Y: inside.Y + 2, W: inside.W, H: inside.H - 2}.Narrow(1)
+	if body.H < 1 {
+		return
+	}
 
 	// The pane scrolls rather than truncating: a manifest of 213 tables is the
-	// normal case, not an edge one.
-	rows := strings.Split(body, "\n")
-	visible := height - 4
-	if visible < 1 {
-		visible = 1
-	}
-	shown, offset := window(len(rows)+1, visible+1, m.paneCursor, m.paneOffset)
-	m.paneOffset = offset
-
-	var b strings.Builder
-	for i := 0; i < shown && offset+i < len(rows); i++ {
-		// Every line, not just the focused one. lipgloss's Width is a MINIMUM,
-		// so a line longer than the pane is not clipped by the style — it runs
-		// out of the box and past the edge of the terminal. A snapshot ID at
-		// eighty columns was fifteen columns over.
+	// normal case, not an edge one. comp.List does the scrolling, keeps the
+	// cursor in view when it moves, and reports the position — all of which
+	// was hand-written arithmetic sharing a window() helper with the panels.
+	lines := strings.Split(m.paneBody(active, body.W), "\n")
+	m.paneList.Focused = m.paneFocus
+	m.paneList.DrawFunc(c, body, len(lines), func(i int) comp.Row {
+		// ansi.Strip is SCAFFOLDING, and the only reason the detail pane draws
+		// in one colour right now.
 		//
-		// comp.Truncate rather than this package's truncateHard: it counts
-		// columns and it is ANSI-aware, and these lines are already styled, so
-		// cutting by runes can end a line halfway through an escape sequence
-		// and leave the rest of the frame wearing the colour.
-		line := comp.Truncate(rows[offset+i], inner)
-		if m.paneFocus && offset+i == m.paneCursor {
-			line = currentStyle.Render(line)
-		}
-		b.WriteString(line)
-		if i < shown-1 {
-			b.WriteString("\n")
-		}
-	}
-	if len(rows) > shown {
-		b.WriteString("\n" + mutedStyle.Render(comp.Truncate(
-			fmt.Sprintf("  %d more — tab to focus, j/k to scroll", len(rows)-shown-offset), inner)))
-	}
-
-	style := panelStyle
-	if m.paneFocus {
-		style = focusedPanelStyle
-	}
-	// Height is the CONTENT height in lipgloss, and the border is added
-	// outside it — so passing the height the pane was given made every frame
-	// two lines taller than the terminal, which pushed the footer off the
-	// bottom of every screen pgctl has ever drawn. Width already accounts for
-	// this; Height did not.
-	inside := height - 2
-	if inside < 1 {
-		inside = 1
-	}
-	return style.Width(width - 2).Height(inside).Render(bar.String() + "\n\n" + b.String())
+		// The canvas draws clusters into cells, so an escape sequence handed to
+		// it is text, not styling — the first version of this port passed
+		// detail.go's styled strings straight through and the pane rendered
+		// blank rows. The real fix is for the tab renderers to emit
+		// []comp.Row with spans, the way rows.go now does, which is 528 lines
+		// of detail.go and its own commit.
+		//
+		// Stripping rather than passing through keeps the SHAPE exactly right
+		// — Strip does not change any width — so the layout, the scrolling and
+		// the goldens are all honest. What is missing is colour, and
+		// TestTheDetailPaneHasNoColourYet says so out loud, because the
+		// goldens are colour-stripped and could never notice.
+		return comp.Row{Text: ansi.Strip(lines[i])}
+	})
 }
 
 // paneRowCount is how many lines the pane's body has, for cursor clamping.
