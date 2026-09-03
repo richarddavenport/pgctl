@@ -4,13 +4,13 @@ pgctl  pgctl.yaml
 │ ● qat       guarded           │ │                                                                                                │
 │ ✗ scratch                     │ │ scratch                                                                                        │
 │                          3/3  │ │                                                                                                │
-╰───────────────────────────────╯ │ cannot reach scratch                                                                           │
-╭─ 2 Databases ─────────────────╮ │                                                                                                │
-│ unreachable                   │ │ dial tcp 127.0.0.1:5432: connect: connection refused                                           │
-│                               │ │                                                                                                │
-╰───────────────────────────────╯ │ r retries. A secrets file that will not decrypt, a firewall                                    │
-╭─ 3 Snapshots ─────────────────╮ │ rule that does not list this address, and a stopped server all                                 │
-│ none — press n                │ │ look the same from here.                                                                       │
+╰───────────────────────────────╯ │ CANNOT REACH SCRATCH                                                                           │
+╭─ 2 Databases ─────────────────╮ │   dial tcp 127.0.0.1:5432: connect: connection refused                                         │
+│ unreachable                   │ │                                                                                                │
+│                               │ │ r retries. A secrets file that will not decrypt, a firewall rule that does not list this       │
+╰───────────────────────────────╯ │ address, and a stopped server all look the same from here.                                     │
+╭─ 3 Snapshots ─────────────────╮ │                                                                                                │
+│ none — press n                │ │                                                                                                │
 │                               │ │                                                                                                │
 ╰───────────────────────────────╯ │                                                                                                │
 ╭─ 4 Sets (1) ──────────────────╮ │                                                                                                │
@@ -32,6 +32,6 @@ pgctl  pgctl.yaml
                                   │                                                                                                │
                                   │                                                                                                │
                                   │                                                                                                │
-                                  │                                                                                           9/9  │
+                                  │                                                                                                │
                                   ╰────────────────────────────────────────────────────────────────────────────────────────────────╯
 n snapshot · a apply · m move · p prune · / filter · tab pane · ? keys

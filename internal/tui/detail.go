@@ -12,118 +12,161 @@ import (
 	"github.com/richarddavenport/pgctl/internal/snapshot"
 )
 
-func (m *Model) viewConnectionTab(tab, width int) string {
+// viewConnectionTab is the detail beside the Connections panel.
+//
+// comp.Detail rather than a strings.Builder and a field() helper. What that
+// buys, beyond the colour the canvas was stripping: the label column takes what
+// its widest label needs, per block, instead of pgctl's hardcoded fourteen —
+// which every label longer than fourteen quietly pushed out of line.
+func (m *Model) viewConnectionTab(tab, width int) paneContent {
 	conn, ok := m.selectedConn()
 	if !ok {
-		return mutedStyle.Render("no environments declared in " + m.cfg.Source)
+		return facts(m.detail(comp.Block{
+			Text: "no environments declared in " + m.cfg.Source,
+		}))
 	}
 	probe := m.probes[conn.Name]
 
 	switch tab {
 	case 1: // Databases
 		if probe == nil || !probe.Reachable {
-			return m.unreachable(conn.Name, probe)
+			return facts(m.unreachable(conn.Name, probe))
 		}
 		rows := make([][]string, 0, len(probe.Databases))
 		for _, db := range probe.Databases {
 			rows = append(rows, []string{db.Name, engine.HumanBytes(db.Bytes)})
 		}
-		return renderTable(width, []string{"DATABASE", "SIZE"}, []int{0, 12}, rows)
+		return m.lineContent(renderTable(width, []string{"DATABASE", "SIZE"}, []int{0, 12}, rows))
 
 	case 2: // Config
-		var b strings.Builder
-		b.WriteString(field("name", conn.Name) + "\n")
-		b.WriteString(field("dsn", orDash(conn.DSN)) + "\n")
-		b.WriteString(field("guarded", yesNo(conn.Guarded)) + "\n")
-		b.WriteString(field("protected", yesNo(conn.Protected)) + "\n")
-		if conn.Jobs > 0 {
-			b.WriteString(field("jobs", fmt.Sprint(conn.Jobs)) + "\n")
+		cfg := []comp.Fact{
+			{Label: "name", Value: conn.Name},
+			{Label: "dsn", Value: orDash(conn.DSN)},
+			{Label: "guarded", Value: yesNo(conn.Guarded)},
+			{Label: "protected", Value: yesNo(conn.Protected)},
 		}
-		b.WriteString(field("maintenance", conn.MaintenanceDB) + "\n")
+		if conn.Jobs > 0 {
+			cfg = append(cfg, comp.Fact{Label: "jobs", Value: fmt.Sprint(conn.Jobs)})
+		}
+		cfg = append(cfg, comp.Fact{Label: "maintenance", Value: conn.MaintenanceDB})
 
-		b.WriteString(section("how this resolves"))
-		b.WriteString(mutedStyle.Render(
-			"The DSN is handed to libpq unchanged, so ~/.pg_service.conf,\n"+
-				"~/.pgpass and the PG* variables apply exactly as they do to psql.\n"+
-				"pgctl never stores a password.") + "\n")
-		b.WriteString(section("meaning"))
+		meaning := comp.Block{Heading: heading("meaning")}
 		switch {
 		case conn.Protected:
-			b.WriteString(dangerStyle.Render("This environment can never be an apply target.") + "\n")
-			b.WriteString(mutedStyle.Render("There is no flag that changes that.") + "\n")
+			meaning.Text = "This environment can never be an apply target. " +
+				"There is no flag that changes that."
 		case conn.Guarded:
-			b.WriteString(warnStyle.Render("An apply here needs the environment's name typed in full.") + "\n")
+			meaning.Text = "An apply here needs the environment's name typed in full."
 		default:
-			b.WriteString(mutedStyle.Render("An apply here needs only a confirmation.") + "\n")
+			meaning.Text = "An apply here needs only a confirmation."
 		}
-		return b.String()
+
+		return facts(m.detail(
+			comp.Block{Facts: cfg},
+			comp.Block{
+				Heading: heading("how this resolves"),
+				Text: "The DSN is handed to libpq unchanged, so ~/.pg_service.conf, " +
+					"~/.pgpass and the PG* variables apply exactly as they do to psql. " +
+					"pgctl never stores a password.",
+			},
+			meaning,
+		))
 
 	default: // Overview
-		var b strings.Builder
-		title := conn.Name
+		d := m.detail()
+		d.Title = conn.Name
 		switch {
 		case conn.Protected:
-			title += "  " + dangerStyle.Render("protected — never a target")
+			d.Subtitle = "protected — never a target"
+			d.SubtitleStyle = &dangerStyle
 		case conn.Guarded:
-			title += "  " + warnStyle.Render("guarded")
-		}
-		b.WriteString(titleStyle.Render(title) + "\n\n")
-
-		if probe == nil {
-			b.WriteString(mutedStyle.Render(spinner(m.now) + " probing…"))
-			return b.String()
-		}
-		if !probe.Reachable {
-			return b.String() + m.unreachable(conn.Name, probe)
+			d.Subtitle = "guarded"
+			d.SubtitleStyle = &warnStyle
 		}
 
-		b.WriteString(field("host", fmt.Sprintf("%s:%d", probe.Host, probe.Port)) + "\n")
-		b.WriteString(field("user", probe.User) + "\n")
-		b.WriteString(field("server", "PostgreSQL "+formatServerVersion(probe.ServerVersion)) + "\n")
-		b.WriteString(field("databases", fmt.Sprint(len(probe.Databases))) + "\n")
+		if probe == nil || !probe.Reachable {
+			u := m.unreachable(conn.Name, probe)
+			u.Title, u.Subtitle, u.SubtitleStyle = d.Title, d.Subtitle, d.SubtitleStyle
+			return facts(u)
+		}
 
 		var total int64
 		for _, db := range probe.Databases {
 			total += db.Bytes
 		}
-		b.WriteString(field("total size", engine.HumanBytes(total)) + "\n")
-		b.WriteString(field("checked", age(m.now.Sub(probe.ProbedAt))) + "\n")
+		d.Blocks = []comp.Block{{Facts: []comp.Fact{
+			{Label: "host", Value: fmt.Sprintf("%s:%d", probe.Host, probe.Port)},
+			{Label: "user", Value: probe.User},
+			{Label: "server", Value: "PostgreSQL " + formatServerVersion(probe.ServerVersion)},
+			{Label: "databases", Value: fmt.Sprint(len(probe.Databases))},
+			{Label: "total size", Value: engine.HumanBytes(total)},
+			{Label: "checked", Value: age(m.now.Sub(probe.ProbedAt))},
+		}}}
 
-		b.WriteString(section("snapshots"))
 		var newest *engine.Entry
 		count := 0
 		for _, entry := range m.entries {
-			if entry.Manifest.Connection == conn.Name {
-				count++
-				if newest == nil || entry.Manifest.StartedAt.After(newest.Manifest.StartedAt) {
-					newest = entry
-				}
+			if entry.Manifest.Connection != conn.Name {
+				continue
+			}
+			count++
+			if newest == nil || entry.Manifest.StartedAt.After(newest.Manifest.StartedAt) {
+				newest = entry
 			}
 		}
+		snaps := comp.Block{Heading: heading("snapshots")}
 		if newest == nil {
-			b.WriteString(mutedStyle.Render("none — press n to take one"))
+			snaps.Text = "none — press n to take one"
 		} else {
-			b.WriteString(field("count", fmt.Sprint(count)) + "\n")
-			b.WriteString(field("newest", age(m.now.Sub(newest.Manifest.StartedAt))+
-				mutedStyle.Render("  "+newest.Manifest.ID)))
+			snaps.Facts = []comp.Fact{
+				{Label: "count", Value: fmt.Sprint(count)},
+				{Label: "newest", Value: age(m.now.Sub(newest.Manifest.StartedAt)) +
+					"  " + newest.Manifest.ID},
+			}
 		}
-		return b.String()
+		d.Blocks = append(d.Blocks, snaps)
+		return facts(d)
 	}
 }
 
-func (m *Model) unreachable(name string, probe *engine.Probe) string {
+// heading is how pgctl writes a heading inside a pane: upper case.
+//
+// A function rather than upper-casing at each call site, because the twelve
+// tabs still to convert go through section(), which does the same thing — and
+// the two have to agree until the last of them is done, or the pane changes
+// style depending on which tab you are looking at.
+func heading(s string) string { return strings.ToUpper(s) }
+
+// detail is a comp.Detail wearing pgctl's styles, so no call site restates them.
+func (m *Model) detail(blocks ...comp.Block) comp.Detail {
+	return comp.Detail{
+		Blocks:        blocks,
+		TitleStyle:    &titleStyle,
+		SubtitleStyle: &mutedStyle,
+		HeadingStyle:  &headerStyle,
+		LabelStyle:    &mutedStyle,
+	}
+}
+
+// unreachable explains itself rather than rendering an empty form.
+//
+// A secrets file that will not decrypt, a firewall rule that does not list this
+// address, and a stopped server all look the same from here, so the error text
+// is the whole of what pgctl can offer and it is shown in full.
+func (m *Model) unreachable(name string, probe *engine.Probe) comp.Detail {
 	if probe == nil {
-		return mutedStyle.Render(spinner(m.now) + " probing…")
+		return m.detail(comp.Block{Text: spinner(m.now) + " probing…"})
 	}
-	var b strings.Builder
-	b.WriteString(dangerStyle.Render("cannot reach "+name) + "\n\n")
+	why := comp.Block{Heading: heading("cannot reach " + name)}
 	if probe.Err != nil {
-		b.WriteString(wrap(probe.Err.Error(), 70) + "\n")
+		why.Text = probe.Err.Error()
 	}
-	b.WriteString("\n" + mutedStyle.Render("r retries. A secrets file that will not decrypt, a firewall\n"+
-		"rule that does not list this address, and a stopped server all\n"+
-		"look the same from here."))
-	return b.String()
+	d := m.detail(why, comp.Block{
+		Text: "r retries. A secrets file that will not decrypt, a firewall rule that " +
+			"does not list this address, and a stopped server all look the same from here.",
+	})
+	d.HeadingStyle = &dangerStyle
+	return d
 }
 
 func (m *Model) viewDatabaseTab(tab, width int) string {

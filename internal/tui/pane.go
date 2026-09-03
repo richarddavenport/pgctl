@@ -102,25 +102,15 @@ func (m *Model) drawPane(c *comp.Canvas, r comp.Rect) {
 	// normal case, not an edge one. comp.List does the scrolling, keeps the
 	// cursor in view when it moves, and reports the position — all of which
 	// was hand-written arithmetic sharing a window() helper with the panels.
-	lines := strings.Split(m.paneBody(active, body.W), "\n")
+	content := m.paneBody(active, body.W)
+	if content.detail != nil {
+		content.detail.Draw(c, body, comp.Region(regBody))
+		return
+	}
+	lines := content.lines
 	m.paneList.Focused = m.paneFocus
 	m.paneList.DrawFunc(c, body, len(lines), func(i int) comp.Row {
-		// ansi.Strip is SCAFFOLDING, and the only reason the detail pane draws
-		// in one colour right now.
-		//
-		// The canvas draws clusters into cells, so an escape sequence handed to
-		// it is text, not styling — the first version of this port passed
-		// detail.go's styled strings straight through and the pane rendered
-		// blank rows. The real fix is for the tab renderers to emit
-		// []comp.Row with spans, the way rows.go now does, which is 528 lines
-		// of detail.go and its own commit.
-		//
-		// Stripping rather than passing through keeps the SHAPE exactly right
-		// — Strip does not change any width — so the layout, the scrolling and
-		// the goldens are all honest. What is missing is colour, and
-		// TestTheDetailPaneHasNoColourYet says so out loud, because the
-		// goldens are colour-stripped and could never notice.
-		return comp.Row{Text: ansi.Strip(lines[i])}
+		return lines[i]
 	})
 }
 
@@ -128,24 +118,63 @@ func (m *Model) drawPane(c *comp.Canvas, r comp.Rect) {
 func (m *Model) paneRowCount() int {
 	tabs := m.paneTabs()
 	active := clamp(m.tabs[m.focus], len(tabs)-1)
-	return len(strings.Split(m.paneBody(active, m.screenWidth()-leftWidth-5), "\n"))
+	// A detail pane does not scroll, so it has no rows to count: it is laid
+	// out to fit and clipped if it does not.
+	return len(m.paneBody(active, m.screenWidth()-leftWidth-5).lines)
 }
 
+// paneContent is what a tab has to say, in one of the two shapes a tab comes in.
+//
+// The distinction is real rather than a migration artefact. Overview, Config
+// and Manifest are a dozen facts and a note: they fit, and comp.Detail lays
+// them out — including the label column, which democtl and azctl both padded to
+// an arbitrary number and azctl's overflowed. Tables, Databases and Foreign
+// keys are 213 rows of a real manifest: they do not fit, and the thing they
+// need is a viewport.
+//
+// So a tab returns facts OR lines, and drawPane draws whichever it got. A
+// component that did both would have to decide, on the tool's behalf, when a
+// detail pane becomes a list.
+type paneContent struct {
+	// detail is drawn into the rect and clipped. Short by construction.
+	detail *comp.Detail
+	// lines scroll through comp.List. Long by construction.
+	lines []comp.Row
+}
+
+func facts(d comp.Detail) paneContent { return paneContent{detail: &d} }
+
 // paneBody dispatches to the renderer for the focused panel and tab.
-func (m *Model) paneBody(tab, width int) string {
+func (m *Model) paneBody(tab, width int) paneContent {
 	switch m.focus {
 	case panelConnections:
 		return m.viewConnectionTab(tab, width)
 	case panelDatabases:
-		return m.viewDatabaseTab(tab, width)
+		return m.lineContent(m.viewDatabaseTab(tab, width))
 	case panelSnapshots:
-		return m.viewSnapshotTab(tab, width)
+		return m.lineContent(m.viewSnapshotTab(tab, width))
 	case panelSets:
-		return m.viewSetTab(tab, width)
+		return m.lineContent(m.viewSetTab(tab, width))
 	case panelRuns:
-		return m.viewRunTab(width)
+		return m.lineContent(m.viewRunTab(width))
 	}
-	return ""
+	return paneContent{}
+}
+
+// lineContent wraps a tab that still builds a styled string.
+//
+// The remaining four panels' tabs do. ansi.Strip is why the detail pane draws
+// in one colour, and it goes as each of them moves to comp.Detail or comp.Table
+// — the canvas draws clusters into cells, so an escape sequence handed to it is
+// text rather than styling. See the Connections tabs for what the other end
+// looks like.
+func (m *Model) lineContent(body string) paneContent {
+	lines := strings.Split(body, "\n")
+	rows := make([]comp.Row, len(lines))
+	for i, line := range lines {
+		rows[i] = comp.Row{Text: ansi.Strip(line)}
+	}
+	return paneContent{lines: rows}
 }
 
 // field renders a label and value pair, aligned so a column of them reads as a

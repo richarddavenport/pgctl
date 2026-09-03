@@ -2,19 +2,19 @@ pgctl  pgctl.yaml
 ╭─ 1 Connections (3) ───────────╮ ╭────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ ● prd       protected         │ │ ‹ Overview · Databases · Config ›                                                              │
 │ ● qat       guarded           │ │                                                                                                │
-│ ✗ scratch                     │ │ prd  protected — never a target                                                                │
-│                          3/3  │ │                                                                                                │
-╰───────────────────────────────╯ │ host           prd.example:5432                                                                │
-╭─ 2 Databases (3) ─────────────╮ │ user           mbpiadmin                                                                       │
-│ product-development  11.0 GB  │ │ server         PostgreSQL 17.4                                                                 │
-│ claims               48.0 MB  │ │ databases      3                                                                               │
-│ quote                20.0 GB  │ │ total size     31.0 GB                                                                         │
-│                          3/3  │ │ checked        just now                                                                        │
+│ ✗ scratch                     │ │ prd                                                                                            │
+│                          3/3  │ │ protected — never a target                                                                     │
 ╰───────────────────────────────╯ │                                                                                                │
-╭─ 3 Snapshots (1) ─────────────╮ │ SNAPSHOTS                                                                                      │
-│ 08-27 22:00  1.9 GB l         │ │ count          1                                                                               │
-│                          1/1  │ │ newest         14h ago  prd/product-development/20260828T030000Z                               │
-╰───────────────────────────────╯ │                                                                                                │
+╭─ 2 Databases (3) ─────────────╮ │ host       prd.example:5432                                                                    │
+│ product-development  11.0 GB  │ │ user       mbpiadmin                                                                           │
+│ claims               48.0 MB  │ │ server     PostgreSQL 17.4                                                                     │
+│ quote                20.0 GB  │ │ databases  3                                                                                   │
+│                          3/3  │ │ total size 31.0 GB                                                                             │
+╰───────────────────────────────╯ │ checked    just now                                                                            │
+╭─ 3 Snapshots (1) ─────────────╮ │                                                                                                │
+│ 08-27 22:00  1.9 GB l         │ │ SNAPSHOTS                                                                                      │
+│                          1/1  │ │   count  1                                                                                     │
+╰───────────────────────────────╯ │   newest 14h ago  prd/product-development/20260828T030000Z                                     │
 ╭─ 4 Sets (1) ──────────────────╮ │                                                                                                │
 │ claims 2+2                    │ │                                                                                                │
 │                          1/1  │ │                                                                                                │
@@ -32,6 +32,6 @@ pgctl  pgctl.yaml
                                   │                                                                                                │
                                   │                                                                                                │
                                   │                                                                                                │
-                                  │                                                                                         12/12  │
+                                  │                                                                                                │
                                   ╰────────────────────────────────────────────────────────────────────────────────────────────────╯
 n snapshot · a apply · m move · p prune · / filter · tab pane · ? keys

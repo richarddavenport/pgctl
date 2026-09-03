@@ -2,22 +2,22 @@ pgctl  pgctl.yaml
 ╭─ 1 Connections (3) ──────────╮ ╭─────────────────────────────────────────────╮
 │ ● prd       protected        │ │ ‹ Overview · Databases · Config ›           │
 │ ● qat       guarded          │ │                                             │
-│                         2/3  │ │ prd  protected — never a target             │
+│                         2/3  │ │ prd                                         │
+╰──────────────────────────────╯ │ protected — never a target                  │
+╭─ 2 Databases (3) ────────────╮ │                                             │
+│ product-development  11.0 GB │ │ host       prd.example:5432                 │
+│                         1/3  │ │ user       mbpiadmin                        │
+╰──────────────────────────────╯ │ server     PostgreSQL 17.4                  │
+╭─ 3 Snapshots (1) ────────────╮ │ databases  3                                │
+│ 08-27 22:00  1.9 GB l        │ │ total size 31.0 GB                          │
+│                         1/1  │ │ checked    just now                         │
 ╰──────────────────────────────╯ │                                             │
-╭─ 2 Databases (3) ────────────╮ │ host           prd.example:5432             │
-│ product-development  11.0 GB │ │ user           mbpiadmin                    │
-│                         1/3  │ │ server         PostgreSQL 17.4              │
-╰──────────────────────────────╯ │ databases      3                            │
-╭─ 3 Snapshots (1) ────────────╮ │ total size     31.0 GB                      │
-│ 08-27 22:00  1.9 GB l        │ │ checked        just now                     │
-│                         1/1  │ │                                             │
-╰──────────────────────────────╯ │ SNAPSHOTS                                   │
-╭─ 4 Sets (1) ─────────────────╮ │ count          1                            │
-│ claims 2+2                   │ │ newest         14h ago  prd/product-develop │
-│                         1/1  │ │                                             │
+╭─ 4 Sets (1) ─────────────────╮ │ SNAPSHOTS                                   │
+│ claims 2+2                   │ │   count  1                                  │
+│                         1/1  │ │   newest 14h ago  prd/product-development/… │
 ╰──────────────────────────────╯ │                                             │
 ╭─ 5 Runs ─────────────────────╮ │                                             │
 │ nothing run yet              │ │                                             │
-│                              │ │                                      12/12  │
+│                              │ │                                             │
 ╰──────────────────────────────╯ ╰─────────────────────────────────────────────╯
 n snapshot · a apply · m move · p prune · / filter · tab pane · ? keys

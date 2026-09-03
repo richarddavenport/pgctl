@@ -13,11 +13,11 @@ pgctl  pgctl.yaml
 │  │   Databases             ○ claims  ● product-development  ○ quote   1 … │  │
 ╰──│   Upload to storage     —                                              │  │
 ╭─ │     storage.kind is local — there is nowhere to upload to              │  │
-│ c│                                                                        │p │
-│  │                                                                        │  │
+│ c│                                                                        │  │
+│  │                                                                        │… │
 ╰──╰────────────────────────────────────────────────────────────────────────╯  │
 ╭─ 5 Runs ─────────────────────╮ │                                             │
 │ nothing run yet              │ │                                             │
-│                              │ │                                      12/12  │
+│                              │ │                                             │
 ╰──────────────────────────────╯ ╰─────────────────────────────────────────────╯
 ← → change  ·  ↑↓ fields  ·  enter run  ·  esc cancel

@@ -4,20 +4,20 @@ pgctl  pgctl.yaml
 │ ✗ scratch                    │ │                                             │
 │                         3/3  │ │ scratch                                     │
 ╰──────────────────────────────╯ │                                             │
-╭─ 2 Databases ────────────────╮ │ cannot reach scratch                        │
-│ unreachable                  │ │                                             │
-│                              │ │ dial tcp 127.0.0.1:5432: connect: connectio │
+╭─ 2 Databases ────────────────╮ │ CANNOT REACH SCRATCH                        │
+│ unreachable                  │ │   dial tcp 127.0.0.1:5432: connect:         │
+│                              │ │   connection refused                        │
 ╰──────────────────────────────╯ │                                             │
-╭─ 3 Snapshots ────────────────╮ │ r retries. A secrets file that will not dec │
-│ none — press n               │ │ rule that does not list this address, and a │
-│                              │ │ look the same from here.                    │
-╰──────────────────────────────╯ │                                             │
+╭─ 3 Snapshots ────────────────╮ │ r retries. A secrets file that will not     │
+│ none — press n               │ │ decrypt, a firewall rule that does not list │
+│                              │ │ this address, and a stopped server all look │
+╰──────────────────────────────╯ │ the same from here.                         │
 ╭─ 4 Sets (1) ─────────────────╮ │                                             │
 │ claims ?                     │ │                                             │
 │                         1/1  │ │                                             │
 ╰──────────────────────────────╯ │                                             │
 ╭─ 5 Runs ─────────────────────╮ │                                             │
 │ nothing run yet              │ │                                             │
-│                              │ │                                        9/9  │
+│                              │ │                                             │
 ╰──────────────────────────────╯ ╰─────────────────────────────────────────────╯
 n snapshot · a apply · m move · p prune · / filter · tab pane · ? keys

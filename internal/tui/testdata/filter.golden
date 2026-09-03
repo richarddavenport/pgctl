@@ -2,18 +2,18 @@ pgctl  pgctl.yaml
 ╭─ 1 /q▏ ───────────────────────╮ ╭────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ ● qat       guarded           │ │ ‹ Overview · Databases · Config ›                                                              │
 │                          1/1  │ │                                                                                                │
-╰───────────────────────────────╯ │ qat  guarded                                                                                   │
-╭─ 2 Databases (1) ─────────────╮ │                                                                                                │
-│ product-development   9.0 GB  │ │ host           qat.example:5432                                                                │
-│                          1/1  │ │ user           mbpiadmin                                                                       │
-╰───────────────────────────────╯ │ server         PostgreSQL 17.4                                                                 │
-╭─ 3 Snapshots ─────────────────╮ │ databases      1                                                                               │
-│ none — press n                │ │ total size     9.0 GB                                                                          │
-│                               │ │ checked        1m ago                                                                          │
-╰───────────────────────────────╯ │                                                                                                │
-╭─ 4 Sets (1) ──────────────────╮ │ SNAPSHOTS                                                                                      │
-│ claims ?                      │ │ none — press n to take one                                                                     │
-│                          1/1  │ │                                                                                                │
+╰───────────────────────────────╯ │ qat                                                                                            │
+╭─ 2 Databases (1) ─────────────╮ │ guarded                                                                                        │
+│ product-development   9.0 GB  │ │                                                                                                │
+│                          1/1  │ │ host       qat.example:5432                                                                    │
+╰───────────────────────────────╯ │ user       mbpiadmin                                                                           │
+╭─ 3 Snapshots ─────────────────╮ │ server     PostgreSQL 17.4                                                                     │
+│ none — press n                │ │ databases  1                                                                                   │
+│                               │ │ total size 9.0 GB                                                                              │
+╰───────────────────────────────╯ │ checked    1m ago                                                                              │
+╭─ 4 Sets (1) ──────────────────╮ │                                                                                                │
+│ claims ?                      │ │ SNAPSHOTS                                                                                      │
+│                          1/1  │ │   none — press n to take one                                                                   │
 ╰───────────────────────────────╯ │                                                                                                │
 ╭─ 5 Runs ──────────────────────╮ │                                                                                                │
 │ nothing run yet               │ │                                                                                                │
@@ -32,6 +32,6 @@ pgctl  pgctl.yaml
                                   │                                                                                                │
                                   │                                                                                                │
                                   │                                                                                                │
-                                  │                                                                                         11/11  │
+                                  │                                                                                                │
                                   ╰────────────────────────────────────────────────────────────────────────────────────────────────╯
 filter: q▏enter accept · esc clear

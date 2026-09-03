@@ -13,11 +13,11 @@ pgctl  pgctl.yaml
 │  │   To                      qat  (guarded — needs its name typed)  (1/2) │  │
 ╰──│   Databases             ○ claims  ● product-development  ○ quote   1 … │  │
 ╭─ │   Keep the staged snapshotoff                                          │  │
-│ c│                                                                        │p │
-│  │                                                                        │  │
+│ c│                                                                        │  │
+│  │                                                                        │… │
 ╰──╰────────────────────────────────────────────────────────────────────────╯  │
 ╭─ 5 Runs ─────────────────────╮ │                                             │
 │ nothing run yet              │ │                                             │
-│                              │ │                                      12/12  │
+│                              │ │                                             │
 ╰──────────────────────────────╯ ╰─────────────────────────────────────────────╯
 ← → change  ·  ↑↓ fields  ·  enter run  ·  esc cancel
