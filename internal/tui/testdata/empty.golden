@@ -3,26 +3,26 @@ pgctl  pgctl.yaml
 │ ● prd       protected         │ │ ‹ Overview · Databases · Config ›                                                              │
 │ ● qat       guarded           │ │                                                                                                │
 │ ✗ scratch                     │ │ prd                                                                                            │
-│                          3/3  │ │ protected — never a target                                                                     │
+╰───────────────────────────────╯ │ protected — never a target                                                                     │
+╭─ 2 Databases (3) ─────────────╮ │                                                                                                │
+│ product-development  11.0 GB  │ │ host       prd.example:5432                                                                    │
+│ claims               48.0 MB  │ │ user       mbpiadmin                                                                           │
+│ quote                20.0 GB  │ │ server     PostgreSQL 17.4                                                                     │
+╰───────────────────────────────╯ │ databases  3                                                                                   │
+╭─ 3 Snapshots ─────────────────╮ │ total size 31.0 GB                                                                             │
+│ none — press n                │ │ checked    just now                                                                            │
 ╰───────────────────────────────╯ │                                                                                                │
-╭─ 2 Databases (3) ─────────────╮ │ host       prd.example:5432                                                                    │
-│ product-development  11.0 GB  │ │ user       mbpiadmin                                                                           │
-│ claims               48.0 MB  │ │ server     PostgreSQL 17.4                                                                     │
-│ quote                20.0 GB  │ │ databases  3                                                                                   │
-│                          3/3  │ │ total size 31.0 GB                                                                             │
-╰───────────────────────────────╯ │ checked    just now                                                                            │
-╭─ 3 Snapshots ─────────────────╮ │                                                                                                │
-│ none — press n                │ │ SNAPSHOTS                                                                                      │
-│                               │ │   none — press n to take one                                                                   │
-╰───────────────────────────────╯ │                                                                                                │
-╭─ 4 Sets (1) ──────────────────╮ │                                                                                                │
-│ claims 2+2                    │ │                                                                                                │
-│                          1/1  │ │                                                                                                │
+╭─ 4 Sets (1) ──────────────────╮ │ SNAPSHOTS                                                                                      │
+│ claims 2+2                    │ │   none — press n to take one                                                                   │
 ╰───────────────────────────────╯ │                                                                                                │
 ╭─ 5 Runs ──────────────────────╮ │                                                                                                │
 │ nothing run yet               │ │                                                                                                │
-│                               │ │                                                                                                │
 ╰───────────────────────────────╯ │                                                                                                │
+                                  │                                                                                                │
+                                  │                                                                                                │
+                                  │                                                                                                │
+                                  │                                                                                                │
+                                  │                                                                                                │
                                   │                                                                                                │
                                   │                                                                                                │
                                   │                                                                                                │

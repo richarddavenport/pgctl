@@ -154,6 +154,12 @@ func New(e *engine.Engine) *Model {
 			Unfocused:  &currentStyle,
 			Status:     &mutedStyle,
 			EmptyStyle: &mutedStyle,
+			// Five lists stacked in one column, so the status row is charged
+			// five times: at 80x24 that was five of about twenty-one body
+			// rows, a quarter of the column, on counters reading 3/3 and 1/1
+			// beside panel titles that already say the same number. It earns
+			// its row on one big list; it does not earn five. tuikit #46.
+			NoStatus: true,
 		}
 	}
 	m.paneList = comp.List{

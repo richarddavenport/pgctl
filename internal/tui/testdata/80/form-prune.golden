@@ -2,22 +2,22 @@ pgctl  pgctl.yaml
 ╭─ 1 Connections (3) ──────────╮ ╭─────────────────────────────────────────────╮
 │ ● prd       protected        │ │ ‹ Overview · Databases · Config ›           │
 │ ● qat       guarded          │ │                                             │
-│                         2/3  │ │ prd                                         │
+│ ✗ scratch                    │ │ prd                                         │
 ╰──╭────────────────────────────────────────────────────────────────────────╮  │
 ╭─ │                                                                        │  │
 │ p│ Prune snapshots                                                        │  │
-│  │ Retention: 7 daily, 4 weekly, 0 monthly. An incomplete snapshot is     │  │
-╰──│ never kept, and the newest always is.                                  │  │
-╭─ │                                                                        │  │
-│ 0│ ▸ Connection            ‹ all ›  (1/4)                                 │  │
-│  │     ← → to change                                                      │  │
+│ c│ Retention: 7 daily, 4 weekly, 0 monthly. An incomplete snapshot is     │  │
+│ q│ never kept, and the newest always is.                                  │  │
+╰──│                                                                        │  │
+╭─ │ ▸ Connection            ‹ all ›  (1/4)                                 │  │
+│ 0│     ← → to change                                                      │  │
 ╰──│   Delete them           off                                            │  │
 ╭─ │                                                                        │  │
 │ c│                                                                        │  │
-│  ╰────────────────────────────────────────────────────────────────────────╯… │
-╰──────────────────────────────╯ │                                             │
+╰──╰────────────────────────────────────────────────────────────────────────╯… │
 ╭─ 5 Runs ─────────────────────╮ │                                             │
 │ nothing run yet              │ │                                             │
-│                              │ │                                             │
-╰──────────────────────────────╯ ╰─────────────────────────────────────────────╯
+╰──────────────────────────────╯ │                                             │
+                                 │                                             │
+                                 ╰─────────────────────────────────────────────╯
 ← → change  ·  ↑↓ fields  ·  enter run  ·  esc cancel

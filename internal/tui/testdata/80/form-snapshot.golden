@@ -2,22 +2,22 @@ pgctl  pgctl.yaml
 ╭─ 1 Connections (3) ──────────╮ ╭─────────────────────────────────────────────╮
 │ ● prd       protected        │ │ ‹ Overview · Databases · Config ›           │
 │ ● qat       guarded          │ │                                             │
-│  ╭────────────────────────────────────────────────────────────────────────╮  │
+│ ✗╭────────────────────────────────────────────────────────────────────────╮  │
 ╰──│                                                                        │  │
 ╭─ │ Take a snapshot                                                        │  │
 │ p│ Reads the chosen databases and writes a compressed copy. Nothing is    │  │
-│  │ written to the source.                                                 │  │
-╰──│                                                                        │  │
-╭─ │ ▸ Connection            ‹ prd  PostgreSQL 17.4, 3 databases ›  (1/3)   │  │
-│ 0│     ← → to change                                                      │  │
-│  │   Databases             ○ claims  ● product-development  ○ quote   1 … │  │
+│ c│ written to the source.                                                 │  │
+│ q│                                                                        │  │
+╰──│ ▸ Connection            ‹ prd  PostgreSQL 17.4, 3 databases ›  (1/3)   │  │
+╭─ │     ← → to change                                                      │  │
+│ 0│   Databases             ○ claims  ● product-development  ○ quote   1 … │  │
 ╰──│   Upload to storage     —                                              │  │
 ╭─ │     storage.kind is local — there is nowhere to upload to              │  │
 │ c│                                                                        │  │
-│  │                                                                        │… │
-╰──╰────────────────────────────────────────────────────────────────────────╯  │
-╭─ 5 Runs ─────────────────────╮ │                                             │
+╰──│                                                                        │… │
+╭─ ╰────────────────────────────────────────────────────────────────────────╯  │
 │ nothing run yet              │ │                                             │
-│                              │ │                                             │
-╰──────────────────────────────╯ ╰─────────────────────────────────────────────╯
+╰──────────────────────────────╯ │                                             │
+                                 │                                             │
+                                 ╰─────────────────────────────────────────────╯
 ← → change  ·  ↑↓ fields  ·  enter run  ·  esc cancel

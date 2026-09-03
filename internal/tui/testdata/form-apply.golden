@@ -3,26 +3,26 @@ pgctl  pgctl.yaml
 │ ● prd       protected         │ │ ‹ Manifest · Tables · Warnings · Drift ›                                                       │
 │ ● qat       guarded           │ │                                                                                                │
 │ ✗ scratch                     │ │ prd/product-development/20260828T030000Z                                                       │
-│                          3/3  │ │                                                                                                │
-╰───────────────────────────────╯ │ taken       2026-08-27 22:00  14h ago                                                          │
-╭─ 2 Databases (3) ─────────────╮ │ took        3:22                                                                               │
-│ product-development  11.0 GB  │ │ size        1.9 GB                                                                             │
-│ claims               48.0 MB  │ │ tables      3                                                                                  │
-│ quote                20.0 GB  │ │ where       local                                                                              │
-│          ╭────────────────────────────────────────────────────────────────────────────────────────────────────────────╮          │
-╰──────────│                                                                                                            │          │
-╭─ 3 Snapsh│ Apply prd/product-development/20260828T030000Z                                                             │          │
-│ 08-27 22:│ Replaces data on the target. The plan is shown before anything is touched.                                 │          │
-│          │                                                                                                            │          │
+╰───────────────────────────────╯ │                                                                                                │
+╭─ 2 Databases (3) ─────────────╮ │ taken       2026-08-27 22:00  14h ago                                                          │
+│ product-development  11.0 GB  │ │ took        3:22                                                                               │
+│ claims               48.0 MB  │ │ size        1.9 GB                                                                             │
+│ quote                20.0 GB  │ │ tables      3                                                                                  │
+╰───────────────────────────────╯ │ where       local                                                                              │
+╭─ 3 Snapsh╭────────────────────────────────────────────────────────────────────────────────────────────────────────────╮          │
+│ 08-27 22:│                                                                                                            │          │
+╰──────────│ Apply prd/product-development/20260828T030000Z                                                             │          │
+╭─ 4 Sets (│ Replaces data on the target. The plan is shown before anything is touched.                                 │          │
+│ claims 2+│                                                                                                            │          │
 ╰──────────│ ▸ Target                ‹ qat  (guarded — needs its name typed) ›  (1/2)                                   │          │
-╭─ 4 Sets (│     ← → to change                                                                                          │          │
-│ claims 2+│   Scope                   whole database — drop and recreate it  (1/3)                                     │          │
-│          │   Tables                (none)                                                                             │          │
-╰──────────│     used only when the scope is `tables`                                                                   │          │
-╭─ 5 Runs ─│   Widen to closure      —                                                                                  │          │
-│ nothing r│     a whole-database apply replaces everything, so there is nothing to widen                               │          │
-│          │                                                                                                            │          │
-╰──────────│                                                                                                            │          │
+╭─ 5 Runs ─│     ← → to change                                                                                          │          │
+│ nothing r│   Scope                   whole database — drop and recreate it  (1/3)                                     │          │
+╰──────────│   Tables                (none)                                                                             │          │
+           │     used only when the scope is `tables`                                                                   │          │
+           │   Widen to closure      —                                                                                  │          │
+           │     a whole-database apply replaces everything, so there is nothing to widen                               │          │
+           │                                                                                                            │          │
+           │                                                                                                            │          │
            ╰────────────────────────────────────────────────────────────────────────────────────────────────────────────╯          │
                                   │                                                                                                │
                                   │                                                                                                │

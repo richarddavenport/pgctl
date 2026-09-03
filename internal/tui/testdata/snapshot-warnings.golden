@@ -3,26 +3,26 @@ pgctl  pgctl.yaml
 │ ● prd       protected         │ │ ‹ Manifest · Tables · Warnings · Drift ›                                                       │
 │ ● qat       guarded           │ │                                                                                                │
 │ ✗ scratch                     │ │ ! rule "operations.gone" matches no table in this database                                     │
-│                          3/3  │ │                                                                                                │
 ╰───────────────────────────────╯ │                                                                                                │
 ╭─ 2 Databases (3) ─────────────╮ │                                                                                                │
 │ product-development  11.0 GB  │ │                                                                                                │
 │ claims               48.0 MB  │ │                                                                                                │
 │ quote                20.0 GB  │ │                                                                                                │
-│                          3/3  │ │                                                                                                │
 ╰───────────────────────────────╯ │                                                                                                │
 ╭─ 3 Snapshots (1) ─────────────╮ │                                                                                                │
 │ 08-27 22:00  1.9 GB l         │ │                                                                                                │
-│                          1/1  │ │                                                                                                │
 ╰───────────────────────────────╯ │                                                                                                │
 ╭─ 4 Sets (1) ──────────────────╮ │                                                                                                │
 │ claims 2+2                    │ │                                                                                                │
-│                          1/1  │ │                                                                                                │
 ╰───────────────────────────────╯ │                                                                                                │
 ╭─ 5 Runs ──────────────────────╮ │                                                                                                │
 │ nothing run yet               │ │                                                                                                │
-│                               │ │                                                                                                │
 ╰───────────────────────────────╯ │                                                                                                │
+                                  │                                                                                                │
+                                  │                                                                                                │
+                                  │                                                                                                │
+                                  │                                                                                                │
+                                  │                                                                                                │
                                   │                                                                                                │
                                   │                                                                                                │
                                   │                                                                                                │

@@ -58,7 +58,7 @@ func TestTheWheelScrollsWithoutSelecting(t *testing.T) {
 	_ = r.View()
 
 	before := m.cursor(panelConnections)
-	harness.Wheel(t, r, "connections.row", 2)
+	harness.Wheel(t, r, "connections.row[0]", 2)
 	if got := m.cursor(panelConnections); got != before {
 		t.Errorf("the wheel moved the cursor from %d to %d", before, got)
 	}
@@ -95,10 +95,21 @@ func TestTheNamedRegionsAreDrawn(t *testing.T) {
 	for _, name := range []comp.Name{
 		regHeader, regFooter, regSplit, regPane, regTabs, regBody,
 		regConnections, regDatabases, regSnapshots, regSets, regRuns,
-		regConnectionsRow, regDatabasesRow, regSnapshotsRow, regSetsRow,
 	} {
 		if _, ok := r.Canvas().Region(comp.Region(name)); !ok {
 			t.Errorf("region %q is named but never drawn", name)
+		}
+	}
+
+	// A list's rows are only ever INDEXED — connections.row[0] — because the
+	// index is the row's place in the list rather than on the screen. The
+	// un-indexed name used to be drawn too, by the status row; NoStatus
+	// removed it, and nothing should be addressing it.
+	for _, name := range []comp.Name{
+		regConnectionsRow, regDatabasesRow, regSnapshotsRow, regSetsRow,
+	} {
+		if _, ok := r.Canvas().Region(comp.Region(name).At(0)); !ok {
+			t.Errorf("region %q[0] is named but never drawn", name)
 		}
 	}
 }

@@ -1,23 +1,23 @@
 pgctl  pgctl.yaml
 ╭─ 1 /q▏ ──────────────────────╮ ╭─────────────────────────────────────────────╮
 │ ● qat       guarded          │ │ ‹ Overview · Databases · Config ›           │
-│                         1/1  │ │                                             │
-╰──────────────────────────────╯ │ qat                                         │
-╭─ 2 Databases (1) ────────────╮ │ guarded                                     │
-│ product-development   9.0 GB │ │                                             │
-│                         1/1  │ │ host       qat.example:5432                 │
-╰──────────────────────────────╯ │ user       mbpiadmin                        │
-╭─ 3 Snapshots ────────────────╮ │ server     PostgreSQL 17.4                  │
-│ none — press n               │ │ databases  1                                │
-│                              │ │ total size 9.0 GB                           │
+╰──────────────────────────────╯ │                                             │
+╭─ 2 Databases (1) ────────────╮ │ qat                                         │
+│ product-development   9.0 GB │ │ guarded                                     │
+╰──────────────────────────────╯ │                                             │
+╭─ 3 Snapshots ────────────────╮ │ host       qat.example:5432                 │
+│ none — press n               │ │ user       mbpiadmin                        │
+╰──────────────────────────────╯ │ server     PostgreSQL 17.4                  │
+╭─ 4 Sets (1) ─────────────────╮ │ databases  1                                │
+│ claims ?                     │ │ total size 9.0 GB                           │
 ╰──────────────────────────────╯ │ checked    1m ago                           │
-╭─ 4 Sets (1) ─────────────────╮ │                                             │
-│ claims ?                     │ │ SNAPSHOTS                                   │
-│                         1/1  │ │   none — press n to take one                │
-╰──────────────────────────────╯ │                                             │
 ╭─ 5 Runs ─────────────────────╮ │                                             │
-│ nothing run yet              │ │                                             │
-│                              │ │                                             │
-╰──────────────────────────────╯ │                                             │
+│ nothing run yet              │ │ SNAPSHOTS                                   │
+╰──────────────────────────────╯ │   none — press n to take one                │
+                                 │                                             │
+                                 │                                             │
+                                 │                                             │
+                                 │                                             │
+                                 │                                             │
                                  ╰─────────────────────────────────────────────╯
 filter: q▏enter accept · esc clear

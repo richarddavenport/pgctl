@@ -2,22 +2,22 @@ pgctl  pgctl.yaml
 ╭─ 1 Connections (3) ──────────╮ ╭─────────────────────────────────────────────╮
 │ ● prd       protected        │ │ ‹ Manifest · Tables · Warnings · Drift ›    │
 │ ●╭────────────────────────────────────────────────────────────────────────╮  │
-│  │                                                                        │  │
+│ ✗│                                                                        │  │
 ╰──│ Apply prd/product-development/20260828T030000Z                         │  │
 ╭─ │ Replaces data on the target. The plan is shown before anything is      │  │
 │ p│ touched.                                                               │  │
-│  │                                                                        │  │
-╰──│ ▸ Target                ‹ qat  (guarded — needs its name typed) ›  (1… │  │
-╭─ │     ← → to change                                                      │  │
-│ 0│   Scope                   whole database — drop and recreate it  (1/3) │  │
-│  │   Tables                (none)                                         │  │
+│ c│                                                                        │  │
+│ q│ ▸ Target                ‹ qat  (guarded — needs its name typed) ›  (1… │  │
+╰──│     ← → to change                                                      │  │
+╭─ │   Scope                   whole database — drop and recreate it  (1/3) │  │
+│ 0│   Tables                (none)                                         │  │
 ╰──│     used only when the scope is `tables`                               │  │
 ╭─ │   Widen to closure      —                                              │  │
 │ c│     a whole-database apply replaces everything, so there is nothing t… │  │
-│  │                                                                        │  │
 ╰──│                                                                        │  │
-╭─ ╰────────────────────────────────────────────────────────────────────────╯  │
-│ nothing run yet              │ │   foreign keys 0                            │
-│                              │ │                                             │
-╰──────────────────────────────╯ ╰─────────────────────────────────────────────╯
+╭─ │                                                                        │  │
+│ n╰────────────────────────────────────────────────────────────────────────╯  │
+╰──────────────────────────────╯ │   foreign keys 0                            │
+                                 │                                             │
+                                 ╰─────────────────────────────────────────────╯
 ← → change  ·  ↑↓ fields  ·  enter run  ·  esc cancel

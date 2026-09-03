@@ -63,16 +63,22 @@ func (m *Model) connectionRows() []comp.Row {
 		// The marker answers "can I reach it" before the name answers "which
 		// is it", because an unreachable environment changes what every panel
 		// below is showing.
-		mark, note := span("○", &mutedStyle), comp.Segment{}
+		// The reachability glyph is the row's LEAD, not its first span, so it
+		// keeps its own colour when the row is selected. As a span it came out
+		// bold black on white under the highlight — the one row a reader is
+		// looking at was the one row whose status they could not read, which is
+		// what tuikit #44 was about and Row.LeadStyle is the answer to.
+		mark, markStyle := "○", &mutedStyle
+		note := comp.Segment{}
 		switch {
 		case m.probing[conn.Name]:
-			mark = span(spinner(m.now), &mutedStyle)
+			mark = spinner(m.now)
 		case m.probes[conn.Name] == nil:
 		case m.probes[conn.Name].Reachable:
-			mark = span("●", &okStyle)
+			mark, markStyle = "●", &okStyle
 			note = span(" "+formatServerVersion(m.probes[conn.Name].ServerVersion), &mutedStyle)
 		default:
-			mark = span("✗", &dangerStyle)
+			mark, markStyle = "✗", &dangerStyle
 		}
 
 		switch {
@@ -81,7 +87,10 @@ func (m *Model) connectionRows() []comp.Row {
 		case conn.Guarded:
 			note = span(" guarded", &warnStyle)
 		}
-		out = append(out, row(mark, span(fmt.Sprintf(" %-9s", comp.Truncate(conn.Name, 9)), nil), note))
+
+		r := row(span(fmt.Sprintf("%-9s", comp.Truncate(conn.Name, 9)), nil), note)
+		r.Lead, r.LeadStyle = mark+" ", markStyle
+		out = append(out, r)
 	}
 	return out
 }
@@ -162,18 +171,24 @@ func (m *Model) runRows() []comp.Row {
 	runs := m.runList()
 	out := make([]comp.Row, 0, len(runs))
 	for _, r := range runs {
-		mark := span("✓", &okStyle)
+		// The lead again: whether a run failed is state, and a run you have
+		// selected is exactly the one you want that about.
+		mark, markStyle := "✓", &okStyle
 		switch {
 		case r.running:
-			mark = span(spinner(m.now), &accentStyle)
+			mark, markStyle = spinner(m.now), &accentStyle
 		case r.err != nil:
-			mark = span("✗", &dangerStyle)
+			mark, markStyle = "✗", &dangerStyle
 		}
-		out = append(out, row(
-			mark,
-			span(" "+comp.Pad(r.kind, panelInner-9)+" ", nil),
-			span(elapsed(r.duration(m.now)), &mutedStyle),
-		))
+		out = append(out, comp.Row{
+			Lead:      mark + " ",
+			LeadStyle: markStyle,
+			Text:      comp.Pad(r.kind, panelInner-9) + " " + elapsed(r.duration(m.now)),
+			Spans: []comp.Segment{
+				span(comp.Pad(r.kind, panelInner-9)+" ", nil),
+				span(elapsed(r.duration(m.now)), &mutedStyle),
+			},
+		})
 	}
 	return out
 }

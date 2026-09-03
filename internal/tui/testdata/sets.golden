@@ -3,26 +3,26 @@ pgctl  pgctl.yaml
 │ ● prd       protected         │ │ ‹ Members · Closure · Load order ›                                                             │
 │ ● qat       guarded           │ │                                                                                                │
 │ ✗ scratch                     │ │ claims                                                                                         │
-│                          3/3  │ │ claims and everything a claim points at                                                        │
+╰───────────────────────────────╯ │ claims and everything a claim points at                                                        │
+╭─ 2 Databases (3) ─────────────╮ │                                                                                                │
+│ product-development  11.0 GB  │ │ patterns      claims.*                                                                         │
+│ claims               48.0 MB  │ │ matches       2 tables on prd                                                                  │
+│ quote                20.0 GB  │ │ closure       +2 more — see Closure                                                            │
 ╰───────────────────────────────╯ │                                                                                                │
-╭─ 2 Databases (3) ─────────────╮ │ patterns      claims.*                                                                         │
-│ product-development  11.0 GB  │ │ matches       2 tables on prd                                                                  │
-│ claims               48.0 MB  │ │ closure       +2 more — see Closure                                                            │
-│ quote                20.0 GB  │ │                                                                                                │
-│                          3/3  │ │ MEMBERS                                                                                        │
-╰───────────────────────────────╯ │ TABLE                                                                                     SIZE │
-╭─ 3 Snapshots (1) ─────────────╮ │ claims.policy_claim                                                                   180.0 MB │
-│ 08-27 22:00  1.9 GB l         │ │ claims.claim_detail                                                                          - │
-│                          1/1  │ │                                                                                                │
-╰───────────────────────────────╯ │                                                                                                │
-╭─ 4 Sets (1) ──────────────────╮ │                                                                                                │
+╭─ 3 Snapshots (1) ─────────────╮ │ MEMBERS                                                                                        │
+│ 08-27 22:00  1.9 GB l         │ │ TABLE                                                                                     SIZE │
+╰───────────────────────────────╯ │ claims.policy_claim                                                                   180.0 MB │
+╭─ 4 Sets (1) ──────────────────╮ │ claims.claim_detail                                                                          - │
 │ claims 2+2                    │ │                                                                                                │
-│                          1/1  │ │                                                                                                │
 ╰───────────────────────────────╯ │                                                                                                │
 ╭─ 5 Runs ──────────────────────╮ │                                                                                                │
 │ nothing run yet               │ │                                                                                                │
-│                               │ │                                                                                                │
 ╰───────────────────────────────╯ │                                                                                                │
+                                  │                                                                                                │
+                                  │                                                                                                │
+                                  │                                                                                                │
+                                  │                                                                                                │
+                                  │                                                                                                │
                                   │                                                                                                │
                                   │                                                                                                │
                                   │                                                                                                │

@@ -199,16 +199,16 @@ func (m *Model) drawPanels(c *comp.Canvas, r comp.Rect) {
 
 // panelBands divides the column between the panels.
 func (m *Model) panelBands(r comp.Rect) []comp.Rect {
-	// Three rows of chrome per panel that a row cannot use: the two borders,
-	// and the row comp.List keeps for its position counter.
-	const chrome = 3
-	// A title and one row is the least a panel can usefully be.
-	const minBand = 1 + chrome
-
 	cs := make([]comp.Constraint, panelCount)
 	for panel := range cs {
+		// The two borders, plus whatever the list spends on itself — which is
+		// nothing now that NoStatus is set, and is asked for rather than
+		// assumed. This was `const chrome = 3`, a number that goes silently
+		// wrong the moment the answer changes.
+		chrome := 2 + m.lists[panel].Overhead()
 		want := max(m.panelLen(panel), 1) + chrome
-		cs[panel] = comp.Fill(want).Min(minBand).Max(want)
+		// A title and one row is the least a panel can usefully be.
+		cs[panel] = comp.Fill(want).Min(1 + chrome).Max(want)
 	}
 	return comp.Layout{Constraints: cs}.Rows(r)
 }

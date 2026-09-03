@@ -3,26 +3,26 @@ pgctl  pgctl.yaml
 │ ● prd       protected         │ │ ‹ Overview · Databases · Config ›                                                              │
 │ ● qat       guarded           │ │                                                                                                │
 │ ✗ scratch                     │ │ prd                                                                                            │
-│                          3/3  │ │ protected — never a target                                                                     │
-╰───────────────────────────────╯ │                                                                                                │
-╭─ 2 Databases (3) ─────────────╮ │ host       prd.example:5432                                                                    │
-│ product-development  11.0 GB  │ │ user       mbpiadmin                                                                           │
-│ claims               48.0 MB  │ │ server     PostgreSQL 17.4                                                                     │
-│ quote                20.0 GB  │ │ databases  3                                                                                   │
-│                          3/3  │ │ total size 31.0 GB                                                                             │
-╰───────────────────────────────╯ │ checked    just now                                                                            │
-╭─ 3 Snapsh╭────────────────────────────────────────────────────────────────────────────────────────────────────────────╮          │
-│ 08-27 22:│                                                                                                            │          │
-│          │ Prune snapshots                                                                                            │          │
-╰──────────│ Retention: 7 daily, 4 weekly, 0 monthly. An incomplete snapshot is never kept, and the newest always is.   │          │
+╰───────────────────────────────╯ │ protected — never a target                                                                     │
+╭─ 2 Databases (3) ─────────────╮ │                                                                                                │
+│ product-development  11.0 GB  │ │ host       prd.example:5432                                                                    │
+│ claims               48.0 MB  │ │ user       mbpiadmin                                                                           │
+│ quote                20.0 GB  │ │ server     PostgreSQL 17.4                                                                     │
+╰───────────────────────────────╯ │ databases  3                                                                                   │
+╭─ 3 Snapshots (1) ─────────────╮ │ total size 31.0 GB                                                                             │
+│ 08-27 22:00  1.9 GB l         │ │ checked    just now                                                                            │
+╰──────────╭────────────────────────────────────────────────────────────────────────────────────────────────────────────╮          │
 ╭─ 4 Sets (│                                                                                                            │          │
-│ claims 2+│ ▸ Connection            ‹ all ›  (1/4)                                                                     │          │
-│          │     ← → to change                                                                                          │          │
-╰──────────│   Delete them           off                                                                                │          │
+│ claims 2+│ Prune snapshots                                                                                            │          │
+╰──────────│ Retention: 7 daily, 4 weekly, 0 monthly. An incomplete snapshot is never kept, and the newest always is.   │          │
 ╭─ 5 Runs ─│                                                                                                            │          │
-│ nothing r│                                                                                                            │          │
-│          ╰────────────────────────────────────────────────────────────────────────────────────────────────────────────╯          │
-╰───────────────────────────────╯ │                                                                                                │
+│ nothing r│ ▸ Connection            ‹ all ›  (1/4)                                                                     │          │
+╰──────────│     ← → to change                                                                                          │          │
+           │   Delete them           off                                                                                │          │
+           │                                                                                                            │          │
+           │                                                                                                            │          │
+           ╰────────────────────────────────────────────────────────────────────────────────────────────────────────────╯          │
+                                  │                                                                                                │
                                   │                                                                                                │
                                   │                                                                                                │
                                   │                                                                                                │
