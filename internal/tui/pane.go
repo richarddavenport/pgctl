@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/x/ansi"
 
 	"github.com/richarddavenport/tuikit/comp"
@@ -150,11 +149,11 @@ func (m *Model) paneBody(tab, width int) paneContent {
 	case panelConnections:
 		return m.viewConnectionTab(tab, width)
 	case panelDatabases:
-		return m.lineContent(m.viewDatabaseTab(tab, width))
+		return m.viewDatabaseTab(tab, width)
 	case panelSnapshots:
-		return m.lineContent(m.viewSnapshotTab(tab, width))
+		return m.viewSnapshotTab(tab, width)
 	case panelSets:
-		return m.lineContent(m.viewSetTab(tab, width))
+		return m.viewSetTab(tab, width)
 	case panelRuns:
 		return m.lineContent(m.viewRunTab(width))
 	}
@@ -190,49 +189,68 @@ func section(title string) string {
 
 // table renders aligned columns, truncating the widest flexible column rather
 // than wrapping — a wrapped row in a list of 213 is unreadable.
-func renderTable(width int, headers []string, widths []int, rows [][]string) string {
-	var b strings.Builder
+// tableRows lays out aligned columns as rows a comp.List can scroll.
+//
+// comp.Table does the widths, including the flexible column — which pgctl was
+// computing itself with a loop that summed every OTHER column and subtracted,
+// and a floor of 8 to stop it going negative. A Column with Fill says the same
+// thing declaratively, and at most one column may have it: "a table with two
+// greedy columns has no answer and silently picking one hides the mistake."
+//
+// Rows rather than a string, because comp.Table strings out rather than drawing
+// so the result can be scrolled — which is the whole reason the table tabs are
+// lines and not a comp.Detail. A 213-table manifest is the normal case here.
+//
+// Numbers are right-aligned, which pgctl never did: a column of sizes that ends
+// ragged is a column you cannot compare down.
+func tableRows(width int, headers []string, cols []comp.Column, rows [][]string) []comp.Row {
+	t := comp.Table{Columns: cols, Gap: 1}
+	lines := t.Rows(width, append([][]string{headers}, rows...))
 
-	line := func(cells []string, style lipgloss.Style) string {
-		var parts []string
-		for i, cell := range cells {
-			if i >= len(widths) {
-				break
-			}
-			w := widths[i]
-			if w == 0 {
-				// The flexible column takes what is left.
-				used := 0
-				for j, ww := range widths {
-					if j != i {
-						used += ww + 1
-					}
-				}
-				w = width - used
-				if w < 8 {
-					w = 8
-				}
-			}
-			parts = append(parts, padTo(truncate(cell, w), w))
+	out := make([]comp.Row, 0, len(lines))
+	for i, line := range lines {
+		if i == 0 {
+			out = append(out, comp.Row{Text: line, Style: &headerStyle})
+			continue
 		}
-		return style.Render(strings.Join(parts, " "))
+		out = append(out, comp.Row{Text: line})
 	}
+	return out
+}
 
-	b.WriteString(line(headers, headerStyle))
-	for _, row := range rows {
-		b.WriteString("\n" + line(row, lipgloss.NewStyle()))
+// mixedContent is prose that still comes from a strings.Builder, above a table
+// that does not.
+//
+// The prefix goes through ansi.Strip like any unconverted tab; the table rows
+// are built properly. Both halves of these tabs move together when the prose
+// becomes a comp.Detail — see viewConnectionTab.
+func mixedContent(prefix string, rows []comp.Row) paneContent {
+	var out []comp.Row
+	for _, line := range strings.Split(strings.TrimRight(prefix, "\n"), "\n") {
+		out = append(out, comp.Row{Text: ansi.Strip(line)})
 	}
-	return b.String()
+	return paneContent{lines: append(out, rows...)}
 }
 
 // dataMode renders a table's rule for a listing.
+// dataMode is what a rule does to a table's data, as PLAIN text.
+//
+// Plain because it is a table cell, and comp.Table takes plain strings: it
+// measures them ANSI-aware, so a styled cell lays out correctly and then hands
+// escape sequences to a canvas that draws clusters into cells — which drops the
+// cell entirely. TestColourDoesNotChangeTheShape caught exactly that here, on
+// the last column of the Tables tab, for the second time this migration.
+//
+// The colour is not lost so much as not yet expressible: comp.Table returns
+// whole lines, so a per-cell style has nowhere to live. The words carry it —
+// "none" and "filtered" say what amber was saying.
 func dataMode(rule config.Rule) string {
 	switch rule.Data {
 	case config.DataNone:
-		return warnStyle.Render("none")
+		return "none"
 	case config.DataFiltered:
-		return warnStyle.Render("filtered")
+		return "filtered"
 	default:
-		return mutedStyle.Render("all")
+		return "all"
 	}
 }

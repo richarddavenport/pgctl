@@ -36,7 +36,9 @@ func (m *Model) viewConnectionTab(tab, width int) paneContent {
 		for _, db := range probe.Databases {
 			rows = append(rows, []string{db.Name, engine.HumanBytes(db.Bytes)})
 		}
-		return m.lineContent(renderTable(width, []string{"DATABASE", "SIZE"}, []int{0, 12}, rows))
+		return paneContent{lines: tableRows(width,
+			[]string{"DATABASE", "SIZE"},
+			[]comp.Column{{Fill: true}, {Width: 12, Right: true}}, rows)}
 
 	case 2: // Config
 		cfg := []comp.Fact{
@@ -169,30 +171,37 @@ func (m *Model) unreachable(name string, probe *engine.Probe) comp.Detail {
 	return d
 }
 
-func (m *Model) viewDatabaseTab(tab, width int) string {
+func (m *Model) viewDatabaseTab(tab, width int) paneContent {
 	conn, hasEnv := m.selectedConn()
 	db, hasDB := m.selectedDatabase()
 	if !hasEnv || !hasDB {
-		return mutedStyle.Render("no database selected")
+		return facts(m.detail(comp.Block{Text: "no database selected"}))
 	}
 	key := liveKey(conn.Name, db.Name)
 
 	switch tab {
 	case 1: // Rules
-		return m.viewRules(key)
+		return m.lineContent(m.viewRules(key))
 	case 2: // Foreign keys
-		return mutedStyle.Render("Foreign keys are read as part of a plan.\n" +
-			"Select a set and open its Load order tab, or press a to plan an apply.")
+		return facts(m.detail(comp.Block{
+			Text: "Foreign keys are read as part of a plan. Select a set and open " +
+				"its Load order tab, or press a to plan an apply.",
+		}))
 	default: // Tables
 		if err := m.liveErr[key]; err != nil {
-			return dangerStyle.Render("could not read "+db.Name) + "\n\n" + wrap(err.Error(), 70)
+			d := m.detail(comp.Block{
+				Heading: heading("could not read " + db.Name),
+				Text:    err.Error(),
+			})
+			d.HeadingStyle = &dangerStyle
+			return facts(d)
 		}
 		tables := m.liveTable[key]
 		if tables == nil {
-			return mutedStyle.Render(spinner(m.now) + " reading " + db.Name + "…")
+			return facts(m.detail(comp.Block{Text: spinner(m.now) + " reading " + db.Name + "…"}))
 		}
 		if len(tables) == 0 {
-			return mutedStyle.Render("no tables")
+			return facts(m.detail(comp.Block{Text: "no tables"}))
 		}
 
 		rows := make([][]string, 0, len(tables))
@@ -208,8 +217,10 @@ func (m *Model) viewDatabaseTab(tab, width int) string {
 		}
 		header := field("tables", fmt.Sprint(len(tables))) + "   " +
 			field("total", engine.HumanBytes(total)) + "\n\n"
-		return header + renderTable(width, []string{"TABLE", "SIZE", "ROWS", "SNAPSHOT"},
-			[]int{0, 9, 8, 9}, rows)
+		return mixedContent(header, tableRows(width,
+			[]string{"TABLE", "SIZE", "ROWS", "SNAPSHOT"},
+			[]comp.Column{{Fill: true}, {Width: 9, Right: true},
+				{Width: 8, Right: true}, {Width: 9}}, rows))
 	}
 }
 
@@ -251,10 +262,10 @@ func (m *Model) viewRules(key string) string {
 	return strings.TrimRight(b.String(), "\n")
 }
 
-func (m *Model) viewSnapshotTab(tab, width int) string {
+func (m *Model) viewSnapshotTab(tab, width int) paneContent {
 	entry, ok := m.selectedSnapshot()
 	if !ok {
-		return mutedStyle.Render("no snapshot selected.\n\nPress n to take one.")
+		return facts(m.detail(comp.Block{Text: "no snapshot selected. Press n to take one."}))
 	}
 	man := entry.Manifest
 
@@ -262,33 +273,37 @@ func (m *Model) viewSnapshotTab(tab, width int) string {
 	case 1: // Tables
 		rows := make([][]string, 0, len(man.Tables))
 		for _, t := range man.Tables {
-			detail := mutedStyle.Render("all")
+			detail := "all"
 			switch t.Data {
 			case config.DataNone:
-				detail = warnStyle.Render("none")
+				detail = "none"
 			case config.DataFiltered:
-				detail = warnStyle.Render(fmt.Sprintf("%s rows", compactCount(t.Rows)))
+				detail = fmt.Sprintf("%s rows", compactCount(t.Rows))
 			}
 			rows = append(rows, []string{
 				t.Name, engine.HumanBytes(t.SourceBytes), compactCount(t.SourceRows), detail,
 			})
 		}
 		sort.Slice(rows, func(i, j int) bool { return rows[i][0] < rows[j][0] })
-		return renderTable(width, []string{"TABLE", "SOURCE SIZE", "ROWS", "CARRIED"},
-			[]int{0, 12, 8, 12}, rows)
+		return paneContent{lines: tableRows(width,
+			[]string{"TABLE", "SOURCE SIZE", "ROWS", "CARRIED"},
+			[]comp.Column{{Fill: true}, {Width: 12, Right: true},
+				{Width: 8, Right: true}, {Width: 12}}, rows)}
 
 	case 2: // Warnings
 		if len(man.Warnings) == 0 {
-			return okStyle.Render("no warnings")
+			d := m.detail(comp.Block{Text: "no warnings"})
+			d.LabelStyle = &okStyle
+			return facts(d)
 		}
 		var b strings.Builder
 		for _, w := range man.Warnings {
 			b.WriteString(warnStyle.Render("! ") + wrap(w, 72) + "\n\n")
 		}
-		return strings.TrimRight(b.String(), "\n")
+		return m.lineContent(strings.TrimRight(b.String(), "\n"))
 
 	case 3: // Drift
-		return m.viewDrift(man)
+		return m.lineContent(m.viewDrift(man))
 
 	default: // Manifest
 		var b strings.Builder
@@ -339,7 +354,7 @@ func (m *Model) viewSnapshotTab(tab, width int) string {
 		if len(man.Warnings) > 0 {
 			b.WriteString("\n" + warnStyle.Render(fmt.Sprintf("! %d warnings — see the Warnings tab", len(man.Warnings))))
 		}
-		return b.String()
+		return m.lineContent(b.String())
 	}
 }
 
@@ -407,11 +422,11 @@ func (m *Model) viewDrift(man *snapshot.Manifest) string {
 	return b.String()
 }
 
-func (m *Model) viewSetTab(tab, width int) string {
+func (m *Model) viewSetTab(tab, width int) paneContent {
 	set, ok := m.selectedSet()
 	if !ok {
-		return mutedStyle.Render("no sets declared for this database.\n\n" +
-			"A set is a named group of tables that move together — declare one in " + m.cfg.Source + ".")
+		return m.lineContent(mutedStyle.Render("no sets declared for this database.\n\n" +
+			"A set is a named group of tables that move together — declare one in " + m.cfg.Source + "."))
 	}
 	conn, _ := m.selectedConn()
 	db, _ := m.selectedDatabase()
@@ -425,10 +440,10 @@ func (m *Model) viewSetTab(tab, width int) string {
 	b.WriteString("\n")
 
 	if info == nil || info.loading {
-		return b.String() + mutedStyle.Render(spinner(m.now)+" resolving against "+conn.Name+"…")
+		return m.lineContent(b.String() + mutedStyle.Render(spinner(m.now)+" resolving against "+conn.Name+"…"))
 	}
 	if info.err != nil {
-		return b.String() + dangerStyle.Render("could not resolve") + "\n\n" + wrap(info.err.Error(), 70)
+		return m.lineContent(b.String() + dangerStyle.Render("could not resolve") + "\n\n" + wrap(info.err.Error(), 70))
 	}
 
 	switch tab {
@@ -437,7 +452,7 @@ func (m *Model) viewSetTab(tab, width int) string {
 			b.WriteString(okStyle.Render("This set is referentially closed.") + "\n\n")
 			b.WriteString(mutedStyle.Render("Every foreign key its tables have points at another table in\n" +
 				"the set, so it can be applied on its own."))
-			return b.String()
+			return m.lineContent(b.String())
 		}
 		b.WriteString(warnStyle.Render(fmt.Sprintf(
 			"This set is not closed: %d tables reference %d others.", len(info.members), len(info.added))) + "\n")
@@ -446,13 +461,13 @@ func (m *Model) viewSetTab(tab, width int) string {
 		for _, n := range info.added {
 			b.WriteString("  " + n + "\n")
 		}
-		return b.String()
+		return m.lineContent(b.String())
 
 	case 2: // Load order
-		return b.String() + mutedStyle.Render(
+		return m.lineContent(b.String() + mutedStyle.Render(
 			"The load order is computed against the target when you plan an apply,\n"+
 				"because the target's foreign keys are the ones a load has to satisfy.\n\n") +
-			mutedStyle.Render("Press a to plan one.")
+			mutedStyle.Render("Press a to plan one."))
 
 	default: // Members
 		b.WriteString(field("patterns", strings.Join(set.Include, ", ")) + "\n")
@@ -471,13 +486,15 @@ func (m *Model) viewSetTab(tab, width int) string {
 		}
 		rows := make([][]string, 0, len(info.members))
 		for _, n := range info.members {
-			size := mutedStyle.Render("-")
+			size := "-"
 			if b, ok := sizes[n]; ok {
 				size = engine.HumanBytes(b)
 			}
 			rows = append(rows, []string{n, size})
 		}
-		return b.String() + renderTable(width, []string{"TABLE", "SIZE"}, []int{0, 10}, rows)
+		return mixedContent(b.String(), tableRows(width,
+			[]string{"TABLE", "SIZE"},
+			[]comp.Column{{Fill: true}, {Width: 10, Right: true}}, rows))
 	}
 }
 

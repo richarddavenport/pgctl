@@ -333,21 +333,21 @@ func TestSnapshotDetailShowsWhatIsInIt(t *testing.T) {
 	m.focus = panelSnapshots
 	m.now = time.Now()
 
-	manifest := m.viewSnapshotTab(0, 90)
+	manifest := paneText(m.viewSnapshotTab(0, 90), 90)
 	for _, want := range []string{"1.9 GB", "zstd:3", "PostgreSQL", "filtered", "no data"} {
 		if !strings.Contains(manifest, want) {
 			t.Errorf("the manifest tab does not mention %q:\n%s", want, manifest)
 		}
 	}
 
-	tables := m.viewSnapshotTab(1, 90)
+	tables := paneText(m.viewSnapshotTab(1, 90), 90)
 	for _, want := range []string{"quotes.quote", "20.0 GB", "4k rows", "audit.logged_actions", "none"} {
 		if !strings.Contains(tables, want) {
 			t.Errorf("the tables tab does not mention %q:\n%s", want, tables)
 		}
 	}
 
-	warnings := m.viewSnapshotTab(2, 90)
+	warnings := paneText(m.viewSnapshotTab(2, 90), 90)
 	if !strings.Contains(warnings, "matches no table") {
 		t.Errorf("the warnings tab hides the warning:\n%s", warnings)
 	}

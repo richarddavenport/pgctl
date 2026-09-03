@@ -10,9 +10,9 @@ pgctl  pgctl.yaml
 ╰──────────────────────────────╯ │ closure        +2 more — see Closure        │
 ╭─ 3 Snapshots (1) ────────────╮ │                                             │
 │ 08-27 22:00  1.9 GB l        │ │ MEMBERS                                     │
-│                         1/1  │ │ TABLE                            SIZE       │
-╰──────────────────────────────╯ │ claims.policy_claim              180.0 MB   │
-╭─ 4 Sets (1) ─────────────────╮ │ claims.claim_detail              -          │
+│                         1/1  │ │ TABLE                                  SIZE │
+╰──────────────────────────────╯ │ claims.policy_claim                180.0 MB │
+╭─ 4 Sets (1) ─────────────────╮ │ claims.claim_detail                       - │
 │ claims 2+2                   │ │                                             │
 │                         1/1  │ │                                             │
 ╰──────────────────────────────╯ │                                             │

@@ -3,6 +3,8 @@ package tui
 import (
 	"strings"
 	"testing"
+
+	"github.com/richarddavenport/tuikit/comp"
 )
 
 // TestWhichTabsStillBuildStrings records what the canvas port has not finished.
@@ -34,7 +36,7 @@ func TestWhichTabsStillBuildStrings(t *testing.T) {
 		{panelRuns, "runs", []string{"Log"}},
 	}
 
-	var pending, done []string
+	var detail, table, flat []string
 	for _, p := range panels {
 		for i, tab := range p.tabs {
 			m := fixtureModel(t)
@@ -43,19 +45,40 @@ func TestWhichTabsStillBuildStrings(t *testing.T) {
 			m.tabs[p.panel] = i
 
 			label := p.name + "/" + tab
-			if m.paneBody(i, 76).detail != nil {
-				done = append(done, label)
-				continue
+			content := m.paneBody(i, 76)
+			switch {
+			case content.detail != nil:
+				detail = append(detail, label)
+			case styled(content.lines):
+				// A comp.Table tab. It returns lines by design, because 213
+				// rows of a manifest need a viewport rather than a layout, so
+				// this is converted and not pending.
+				table = append(table, label)
+			default:
+				flat = append(flat, label)
 			}
-			pending = append(pending, label)
 		}
 	}
 
-	t.Logf("converted (%d): %s", len(done), strings.Join(done, ", "))
-	if len(pending) == 0 {
-		t.Log("every tab draws in colour — delete this probe and lineContent's ansi.Strip")
+	t.Logf("comp.Detail (%d): %s", len(detail), strings.Join(detail, ", "))
+	t.Logf("comp.Table  (%d): %s", len(table), strings.Join(table, ", "))
+	if len(flat) == 0 {
+		t.Log("every tab is a component — delete this probe and lineContent's ansi.Strip")
 		return
 	}
 	t.Logf("still a styled string, so drawn in one colour (%d): %s",
-		len(pending), strings.Join(pending, ", "))
+		len(flat), strings.Join(flat, ", "))
+	t.Log("note: a comp.Table tab reached through mixedContent still has a flat " +
+		"prose prefix above its table — see viewDatabaseTab's Tables branch")
+}
+
+// styled reports whether any row carries a style of its own, which is what a
+// table built through tableRows has and a stripped string does not.
+func styled(rows []comp.Row) bool {
+	for _, r := range rows {
+		if r.Style != nil {
+			return true
+		}
+	}
+	return false
 }

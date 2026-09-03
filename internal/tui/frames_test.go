@@ -1,9 +1,11 @@
 package tui
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/richarddavenport/tuikit/app"
+	"github.com/richarddavenport/tuikit/comp"
 	"github.com/richarddavenport/tuikit/harness"
 )
 
@@ -156,4 +158,23 @@ func TestCaptureFrames(t *testing.T) {
 		s.Shot(st.name, st.build(132, 38))
 	}
 	s.Done()
+}
+
+// paneText flattens a tab's content to plain text, for a test that wants to
+// assert on what a tab SAYS rather than where it lands.
+//
+// The two shapes have to be rendered differently — a comp.Detail lays itself
+// out into a rect, lines are already lines — which is exactly why the seam
+// exists, so a helper is the honest way for a test to ignore it.
+func paneText(content paneContent, width int) string {
+	if content.detail != nil {
+		c := comp.NewCanvas(width, 200)
+		content.detail.Draw(c, c.Bounds(), comp.Region(regBody))
+		return harness.Strip(c.String())
+	}
+	var b strings.Builder
+	for _, row := range content.lines {
+		b.WriteString(harness.Strip(row.Text) + "\n")
+	}
+	return b.String()
 }
