@@ -3,21 +3,20 @@ pgctl  pgctl.yaml
 │ ● prd       protected        │ │ ‹ Overview · Databases · Config ›           │
 │ ● qat       guarded          │ │                                             │
 │ ✗╭────────────────────────────────────────────────────────────────────────╮  │
-╰──│                                                                        │  │
-╭─ │ Take a snapshot                                                        │  │
-│ p│ Reads the chosen databases and writes a compressed copy. Nothing is    │  │
-│ c│ written to the source.                                                 │  │
-│ q│                                                                        │  │
-╰──│ ▸ Connection            ‹ prd  PostgreSQL 17.4, 3 databases ›  (1/3)   │  │
-╭─ │     ← → to change                                                      │  │
-│ 0│   Databases             ○ claims  ● product-development  ○ quote   1 … │  │
-╰──│   Upload to storage     —                                              │  │
-╭─ │     storage.kind is local — there is nowhere to upload to              │  │
+╰──│ Take a snapshot                                                        │  │
+╭─ │ Reads the chosen databases and writes a compressed copy. Nothing is    │  │
+│ p│ written to the source.                                                 │  │
 │ c│                                                                        │  │
-╰──│                                                                        │… │
-╭─ ╰────────────────────────────────────────────────────────────────────────╯  │
-│ nothing run yet              │ │                                             │
+│ q│ ▸ Connection         ‹ prd  PostgreSQL 17.4, 3 databases ›  (1/3)      │  │
+╰──│   Databases          1 of 3                                            │  │
+╭─ │       ○ claims                                                         │  │
+│ 0│       ● product-development                                            │  │
+╰──│       ○ quote                                                          │  │
+╭─ │   Upload to storage  no                                                │  │
+│ c│                                                                        │  │
+╰──│ ← → to change                                                          │… │
+╭─ │ ← → change · ↑↓ fields · enter run · esc cancel                        │  │
+│ n╰────────────────────────────────────────────────────────────────────────╯  │
 ╰──────────────────────────────╯ │                                             │
                                  │                                             │
                                  ╰─────────────────────────────────────────────╯
-← → change  ·  ↑↓ fields  ·  enter run  ·  esc cancel

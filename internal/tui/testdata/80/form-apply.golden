@@ -1,23 +1,22 @@
 pgctl  pgctl.yaml
 ╭─ 1 Connections (3) ──────────╮ ╭─────────────────────────────────────────────╮
 │ ● prd       protected        │ │ ‹ Manifest · Tables · Warnings · Drift ›    │
-│ ●╭────────────────────────────────────────────────────────────────────────╮  │
-│ ✗│                                                                        │  │
-╰──│ Apply prd/product-development/20260828T030000Z                         │  │
-╭─ │ Replaces data on the target. The plan is shown before anything is      │  │
-│ p│ touched.                                                               │  │
-│ c│                                                                        │  │
-│ q│ ▸ Target                ‹ qat  (guarded — needs its name typed) ›  (1… │  │
-╰──│     ← → to change                                                      │  │
-╭─ │   Scope                   whole database — drop and recreate it  (1/3) │  │
-│ 0│   Tables                (none)                                         │  │
-╰──│     used only when the scope is `tables`                               │  │
-╭─ │   Widen to closure      —                                              │  │
-│ c│     a whole-database apply replaces everything, so there is nothing t… │  │
-╰──│                                                                        │  │
+│ ● qat       guarded          │ │                                             │
+│ ✗ scratch                    │ │ prd/product-development/20260828T030000Z    │
+╰──╭────────────────────────────────────────────────────────────────────────╮  │
+╭─ │ Apply prd/product-development/20260828T030000Z                         │  │
+│ p│ Replaces data on the target. The plan is shown before anything is      │  │
+│ c│ touched.                                                               │  │
+│ q│                                                                        │  │
+╰──│ ▸ Target            ‹ qat  (guarded — needs its name typed) ›  (1/2)   │  │
+╭─ │   Scope             ‹ whole database — drop and recreate it ›  (1/3)   │  │
+│ 0│   Tables            nothing yet                                        │  │
+╰──│   Widen to closure  no                                                 │  │
 ╭─ │                                                                        │  │
-│ n╰────────────────────────────────────────────────────────────────────────╯  │
+│ c│ ← → to change                                                          │  │
+╰──│ ← → change · ↑↓ fields · enter run · esc cancel                        │  │
+╭─ ╰────────────────────────────────────────────────────────────────────────╯  │
+│ nothing run yet              │ │   no data      1                            │
 ╰──────────────────────────────╯ │   foreign keys 0                            │
                                  │                                             │
                                  ╰─────────────────────────────────────────────╯
-← → change  ·  ↑↓ fields  ·  enter run  ·  esc cancel

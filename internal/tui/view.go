@@ -243,8 +243,11 @@ func (m *Model) drawFooter(c *comp.Canvas, r comp.Rect) {
 		}}}.Draw(c, r, id)
 		return
 	}
+	// A modal carries its own keys, on its own bottom row. Repeating them down
+	// here would put the same answer in two places and make the reader choose
+	// which one to trust — and the one outside the box is the one that used to
+	// be the only one, which is what made the forms hard to act on.
 	if m.action != nil {
-		comp.Bar{Left: []comp.Segment{{Text: m.actionFooter(), Style: &footerStyle}}}.Draw(c, r, id)
 		return
 	}
 	comp.Bar{Left: []comp.Segment{
@@ -340,9 +343,6 @@ func fitHints(hints []comp.Hint, width int) string {
 // real width; and a rendered line contains escape sequences, so cutting between
 // runes can end a line in the middle of one and leave the rest of the frame
 // wearing whatever colour it was setting. comp counts columns and is ANSI-aware.
-
-// truncate shortens to width columns with an ellipsis when it had to cut.
-func truncate(s string, width int) string { return comp.Truncate(s, width) }
 
 // clip returns the first width columns, with no ellipsis.
 //

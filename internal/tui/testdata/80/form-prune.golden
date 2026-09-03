@@ -3,21 +3,20 @@ pgctl  pgctl.yaml
 │ ● prd       protected        │ │ ‹ Overview · Databases · Config ›           │
 │ ● qat       guarded          │ │                                             │
 │ ✗ scratch                    │ │ prd                                         │
-╰──╭────────────────────────────────────────────────────────────────────────╮  │
-╭─ │                                                                        │  │
+╰──────────────────────────────╯ │ protected — never a target                  │
+╭─ ╭────────────────────────────────────────────────────────────────────────╮  │
 │ p│ Prune snapshots                                                        │  │
 │ c│ Retention: 7 daily, 4 weekly, 0 monthly. An incomplete snapshot is     │  │
 │ q│ never kept, and the newest always is.                                  │  │
 ╰──│                                                                        │  │
-╭─ │ ▸ Connection            ‹ all ›  (1/4)                                 │  │
-│ 0│     ← → to change                                                      │  │
-╰──│   Delete them           off                                            │  │
-╭─ │                                                                        │  │
-│ c│                                                                        │  │
+╭─ │ ▸ Connection   ‹ all ›  (1/4)                                          │  │
+│ 0│   Delete them  no                                                      │  │
+╰──│                                                                        │  │
+╭─ │ ← → to change                                                          │  │
+│ c│ ← → change · ↑↓ fields · enter run · esc cancel                        │  │
 ╰──╰────────────────────────────────────────────────────────────────────────╯… │
 ╭─ 5 Runs ─────────────────────╮ │                                             │
 │ nothing run yet              │ │                                             │
 ╰──────────────────────────────╯ │                                             │
                                  │                                             │
                                  ╰─────────────────────────────────────────────╯
-← → change  ·  ↑↓ fields  ·  enter run  ·  esc cancel

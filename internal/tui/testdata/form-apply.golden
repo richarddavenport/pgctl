@@ -9,20 +9,18 @@ pgctl  pgctl.yaml
 │ claims               48.0 MB  │ │ size        1.9 GB                                                                             │
 │ quote                20.0 GB  │ │ tables      3                                                                                  │
 ╰───────────────────────────────╯ │ where       local                                                                              │
-╭─ 3 Snapsh╭────────────────────────────────────────────────────────────────────────────────────────────────────────────╮          │
-│ 08-27 22:│                                                                                                            │          │
+╭─ 3 Snapshots (1) ─────────────╮ │ server      PostgreSQL    pg_dump                                                              │
+│ 08-27 22:╭────────────────────────────────────────────────────────────────────────────────────────────────────────────╮          │
 ╰──────────│ Apply prd/product-development/20260828T030000Z                                                             │          │
 ╭─ 4 Sets (│ Replaces data on the target. The plan is shown before anything is touched.                                 │          │
 │ claims 2+│                                                                                                            │          │
-╰──────────│ ▸ Target                ‹ qat  (guarded — needs its name typed) ›  (1/2)                                   │          │
-╭─ 5 Runs ─│     ← → to change                                                                                          │          │
-│ nothing r│   Scope                   whole database — drop and recreate it  (1/3)                                     │          │
-╰──────────│   Tables                (none)                                                                             │          │
-           │     used only when the scope is `tables`                                                                   │          │
-           │   Widen to closure      —                                                                                  │          │
-           │     a whole-database apply replaces everything, so there is nothing to widen                               │          │
+╰──────────│ ▸ Target            ‹ qat  (guarded — needs its name typed) ›  (1/2)                                       │          │
+╭─ 5 Runs ─│   Scope             ‹ whole database — drop and recreate it ›  (1/3)                                       │          │
+│ nothing r│   Tables            nothing yet                                                                            │          │
+╰──────────│   Widen to closure  no                                                                                     │          │
            │                                                                                                            │          │
-           │                                                                                                            │          │
+           │ ← → to change                                                                                              │          │
+           │ ← → change · ↑↓ fields · enter run · esc cancel                                                            │          │
            ╰────────────────────────────────────────────────────────────────────────────────────────────────────────────╯          │
                                   │                                                                                                │
                                   │                                                                                                │
@@ -33,5 +31,6 @@ pgctl  pgctl.yaml
                                   │                                                                                                │
                                   │                                                                                                │
                                   │                                                                                                │
+                                  │                                                                                                │
+                                  │                                                                                                │
                                   ╰────────────────────────────────────────────────────────────────────────────────────────────────╯
-← → change  ·  ↑↓ fields  ·  enter run  ·  esc cancel

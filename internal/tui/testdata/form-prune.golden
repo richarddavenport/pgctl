@@ -12,15 +12,14 @@ pgctl  pgctl.yaml
 ╭─ 3 Snapshots (1) ─────────────╮ │ total size 31.0 GB                                                                             │
 │ 08-27 22:00  1.9 GB l         │ │ checked    just now                                                                            │
 ╰──────────╭────────────────────────────────────────────────────────────────────────────────────────────────────────────╮          │
-╭─ 4 Sets (│                                                                                                            │          │
-│ claims 2+│ Prune snapshots                                                                                            │          │
-╰──────────│ Retention: 7 daily, 4 weekly, 0 monthly. An incomplete snapshot is never kept, and the newest always is.   │          │
-╭─ 5 Runs ─│                                                                                                            │          │
-│ nothing r│ ▸ Connection            ‹ all ›  (1/4)                                                                     │          │
-╰──────────│     ← → to change                                                                                          │          │
-           │   Delete them           off                                                                                │          │
-           │                                                                                                            │          │
-           │                                                                                                            │          │
+╭─ 4 Sets (│ Prune snapshots                                                                                            │          │
+│ claims 2+│ Retention: 7 daily, 4 weekly, 0 monthly. An incomplete snapshot is never kept, and the newest always is.   │          │
+╰──────────│                                                                                                            │          │
+╭─ 5 Runs ─│ ▸ Connection   ‹ all ›  (1/4)                                                                              │          │
+│ nothing r│   Delete them  no                                                                                          │          │
+╰──────────│                                                                                                            │          │
+           │ ← → to change                                                                                              │          │
+           │ ← → change · ↑↓ fields · enter run · esc cancel                                                            │          │
            ╰────────────────────────────────────────────────────────────────────────────────────────────────────────────╯          │
                                   │                                                                                                │
                                   │                                                                                                │
@@ -33,5 +32,5 @@ pgctl  pgctl.yaml
                                   │                                                                                                │
                                   │                                                                                                │
                                   │                                                                                                │
+                                  │                                                                                                │
                                   ╰────────────────────────────────────────────────────────────────────────────────────────────────╯
-← → change  ·  ↑↓ fields  ·  enter run  ·  esc cancel
