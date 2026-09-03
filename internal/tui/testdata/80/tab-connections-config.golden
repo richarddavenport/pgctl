@@ -1,0 +1,23 @@
+pgctl  pgctl.yaml
+╭─ 1 Connections (3) ──────────╮ ╭─────────────────────────────────────────────╮
+│ ● prd       protected        │ │ ‹ Overview · Databases · Config ›           │
+│ ● qat       guarded          │ │                                             │
+│ ✗ scratch                    │ │ name        prd                             │
+╰──────────────────────────────╯ │ dsn         service=prd                     │
+╭─ 2 Databases (3) ────────────╮ │ guarded     no                              │
+│ product-development  11.0 GB │ │ protected   yes                             │
+│ claims               48.0 MB │ │ maintenance postgres                        │
+│ quote                20.0 GB │ │                                             │
+╰──────────────────────────────╯ │ HOW THIS RESOLVES                           │
+╭─ 3 Snapshots (1) ────────────╮ │   The DSN is handed to libpq unchanged, so  │
+│ 08-27 22:00  1.9 GB l        │ │   ~/.pg_service.conf, ~/.pgpass and the PG* │
+╰──────────────────────────────╯ │   variables apply exactly as they do to     │
+╭─ 4 Sets (1) ─────────────────╮ │   psql. pgctl never stores a password.      │
+│ claims 2+2                   │ │                                             │
+╰──────────────────────────────╯ │ MEANING                                     │
+╭─ 5 Runs ─────────────────────╮ │   This environment can never be an apply    │
+│ nothing run yet              │ │   target. There is no flag that changes     │
+╰──────────────────────────────╯ │   that.                                     │
+                                 │                                             │
+                                 ╰─────────────────────────────────────────────╯
+n snapshot · a apply · m move · p prune · / filter · tab pane · ? keys

@@ -18,10 +18,13 @@ import (
 // The build funcs reach the state by pressing keys rather than by setting
 // fields, wherever a person could: a frame reachable only by reaching into the
 // model is a frame that may not be reachable at all.
-func states(t *testing.T) []struct {
+// state is one thing pgctl can be showing.
+type state struct {
 	name  string
 	build func(w, h int) *app.Runner
-} {
+}
+
+func states(t *testing.T) []state {
 	// The size is set BEFORE the keys are pressed, and that is not a detail: a
 	// state reached at 132x38 and then resized to 80x24 is not the state a
 	// person on an eighty-column terminal reaches. The help overlay is the case
@@ -42,22 +45,12 @@ func states(t *testing.T) []struct {
 		harness.Press(r, k...)
 		return r
 	}
-	return []struct {
-		name  string
-		build func(w, h int) *app.Runner
-	}{
+	states := []state{
 		{"connections", loaded},
 		{"databases", func(w, h int) *app.Runner { return keys(loaded(w, h), "2") }},
 		{"snapshots", func(w, h int) *app.Runner { return keys(loaded(w, h), "3") }},
 		{"sets", func(w, h int) *app.Runner { return keys(loaded(w, h), "4") }},
 		{"runs", func(w, h int) *app.Runner { return keys(loaded(w, h), "5") }},
-
-		// The right pane with the keys, and its tabs. Remembered per panel, so
-		// the tab strip is part of what a panel means.
-		{"detail-pane", func(w, h int) *app.Runner { return keys(loaded(w, h), "right") }},
-		{"snapshot-tables", func(w, h int) *app.Runner { return keys(loaded(w, h), "3", "right", "tab") }},
-		{"snapshot-warnings", func(w, h int) *app.Runner { return keys(loaded(w, h), "3", "right", "tab", "tab") }},
-		{"snapshot-drift", func(w, h int) *app.Runner { return keys(loaded(w, h), "3", "right", "tab", "tab", "tab") }},
 
 		// An environment pgctl could not reach. The detail pane has to explain
 		// itself rather than render an empty form.
@@ -88,6 +81,32 @@ func states(t *testing.T) []struct {
 		// user sees and the last thing anybody looks at.
 		{"empty", func(w, h int) *app.Runner { return run(fixtureModel(t), w, h) }},
 	}
+
+	// Every tab body, generated from the panels rather than listed.
+	//
+	// Listed, four of the fourteen had a frame and the other ten did not — and
+	// this list's own comment claimed otherwise. A tab added to paneTabs now
+	// gets a frame without anybody adding one, which is the only arrangement
+	// in which "a screen added without a frame is a screen added without any
+	// of them" is true rather than aspirational.
+	for panel := 0; panel < panelCount; panel++ {
+		probe := fixtureModel(t)
+		probe.focus = panel
+		for tab, name := range probe.paneTabs() {
+			states = append(states, state{
+				name: "tab-" + strings.ToLower(panelTitles[panel]) + "-" +
+					strings.ToLower(strings.ReplaceAll(name, " ", "-")),
+				build: func(w, h int) *app.Runner {
+					m := fixtureModel(t)
+					fixtureSnapshot(t, m)
+					m.focus, m.paneFocus = panel, true
+					m.tabs[panel] = tab
+					return run(m, w, h)
+				},
+			})
+		}
+	}
+	return states
 }
 
 // run wraps a model so the harness can drive it.

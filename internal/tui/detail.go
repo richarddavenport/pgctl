@@ -43,11 +43,21 @@ func (m *Model) viewConnectionTab(tab, width int) paneContent {
 			[]comp.Column{{Fill: true}, {Width: 12, Right: true}}, rows)}
 
 	case 2: // Config
+		// A flag that is OFF is muted, so a column of them reads as "these two
+		// are set" rather than as four equal facts. The style is the Fact's,
+		// which is the only place it can be: a Value reaches the canvas as
+		// characters, so a pre-styled one draws as nothing at all.
+		off := func(b bool) *lipgloss.Style {
+			if b {
+				return nil
+			}
+			return &mutedStyle
+		}
 		cfg := []comp.Fact{
 			{Label: "name", Value: conn.Name},
-			{Label: "dsn", Value: orDash(conn.DSN)},
-			{Label: "guarded", Value: yesNo(conn.Guarded)},
-			{Label: "protected", Value: yesNo(conn.Protected)},
+			{Label: "dsn", Value: orDash(conn.DSN), Style: off(conn.DSN != "")},
+			{Label: "guarded", Value: yesNo(conn.Guarded), Style: off(conn.Guarded)},
+			{Label: "protected", Value: yesNo(conn.Protected), Style: off(conn.Protected)},
 		}
 		if conn.Jobs > 0 {
 			cfg = append(cfg, comp.Fact{Label: "jobs", Value: fmt.Sprint(conn.Jobs)})
@@ -694,18 +704,25 @@ func wrapped(text string, width int, style *lipgloss.Style) []comp.Row {
 	return out
 }
 
+// orDash is a value or an em dash, in PLAIN text.
+//
+// Plain because these go into a comp.Fact, and a Fact's Value reaches the
+// canvas as characters — a styled string is escape sequences, which the canvas
+// draws as nothing and the goldens cannot see because they are colour
+// stripped. Fact.Style is where a value's colour lives now.
 func orDash(s string) string {
 	if s == "" {
-		return mutedStyle.Render("—")
+		return "—"
 	}
 	return s
 }
 
+// yesNo is a flag as a word. Plain, for the reason orDash gives.
 func yesNo(b bool) string {
 	if b {
 		return "yes"
 	}
-	return mutedStyle.Render("no")
+	return "no"
 }
 
 // compactCount renders 1479891 as "1.5M": exact counts of millions are noise in
