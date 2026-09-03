@@ -2,7 +2,7 @@ pgctl  pgctl.yaml
 ╭─ 1 Connections (3) ──────────╮ ╭─────────────────────────────────────────────╮
 │ ● prd       protected        │ │ ‹ Manifest · Tables · Warnings · Drift ›    │
 │ ● qat       guarded          │ │                                             │
-│                         2/3  │ │ ! rule "operations.gone" matches no table i │
+│                         2/3  │ │ ! rule "operations.gone" matches no table … │
 ╰──────────────────────────────╯ │                                             │
 ╭─ 2 Databases (3) ────────────╮ │                                             │
 │ product-development  11.0 GB │ │                                             │
@@ -18,6 +18,6 @@ pgctl  pgctl.yaml
 ╰──────────────────────────────╯ │                                             │
 ╭─ 5 Runs ─────────────────────╮ │                                             │
 │ nothing run yet              │ │                                             │
-│                              │ │                                        1/1  │
+│                              │ │                                             │
 ╰──────────────────────────────╯ ╰─────────────────────────────────────────────╯
 n snapshot · a apply · m move · p prune · x delete · / filter · ? keys

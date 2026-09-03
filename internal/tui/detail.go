@@ -181,7 +181,7 @@ func (m *Model) viewDatabaseTab(tab, width int) paneContent {
 
 	switch tab {
 	case 1: // Rules
-		return m.lineContent(m.viewRules(key))
+		return facts(m.viewRules(key))
 	case 2: // Foreign keys
 		return facts(m.detail(comp.Block{
 			Text: "Foreign keys are read as part of a plan. Select a set and open " +
@@ -226,13 +226,19 @@ func (m *Model) viewDatabaseTab(tab, width int) paneContent {
 
 // viewRules shows what each rule does and, crucially, whether it matches
 // anything — a rule naming a renamed table silently stops filtering it.
-func (m *Model) viewRules(key string) string {
+// viewRules is the row filters, one block each.
+//
+// A rule that matches nothing is the interesting case and it is the one worth
+// colouring: `hdb_catalog.*log*` once matched hdb_source_catalog_version —
+// "cata·log" — and blanking that left Hasura unable to find its metadata. A
+// rule silently matching nothing is the same mistake with the sign flipped.
+func (m *Model) viewRules(key string) comp.Detail {
 	if len(m.cfg.Rules) == 0 {
-		return mutedStyle.Render("no rules declared.\n\nEvery table is dumped whole.")
+		return m.detail(comp.Block{Text: "no rules declared. Every table is dumped whole."})
 	}
 	tables := m.liveTable[key]
 
-	var b strings.Builder
+	blocks := make([]comp.Block, 0, len(m.cfg.Rules))
 	for _, rule := range m.cfg.Rules {
 		matched := 0
 		for _, t := range tables {
@@ -241,25 +247,32 @@ func (m *Model) viewRules(key string) string {
 			}
 		}
 
-		b.WriteString(accentStyle.Render(rule.Table) + "  " + dataMode(m.cfg.RuleFor(rule.Table)))
+		match := comp.Fact{Label: "matches"}
 		switch {
 		case tables == nil:
-			b.WriteString(mutedStyle.Render("  ?"))
+			match.Value = "not read yet"
+			match.Style = &mutedStyle
 		case matched == 0:
-			b.WriteString(dangerStyle.Render("  matches nothing"))
+			match.Value = "nothing"
+			match.Style = &dangerStyle
 		default:
-			b.WriteString(mutedStyle.Render(fmt.Sprintf("  %d tables", matched)))
+			match.Value = fmt.Sprintf("%d tables", matched)
 		}
-		b.WriteString("\n")
+
+		facts := []comp.Fact{{Label: "data", Value: dataMode(m.cfg.RuleFor(rule.Table))}, match}
 		if rule.Where != "" {
-			b.WriteString("  " + mutedStyle.Render("where ") + rule.Where + "\n")
+			facts = append(facts, comp.Fact{Label: "where", Value: rule.Where})
 		}
 		if rule.Why != "" {
-			b.WriteString("  " + mutedStyle.Render(rule.Why) + "\n")
+			facts = append(facts, comp.Fact{Label: "why", Value: rule.Why, Style: &mutedStyle})
 		}
-		b.WriteString("\n")
+		blocks = append(blocks, comp.Block{Heading: rule.Table, Facts: facts})
 	}
-	return strings.TrimRight(b.String(), "\n")
+	d := m.detail(blocks...)
+	// The pattern, not an upper-cased heading: it is a table name, and
+	// upper-casing `quotes.quote` makes it look like something else.
+	d.HeadingStyle = &accentStyle
+	return d
 }
 
 func (m *Model) viewSnapshotTab(tab, width int) paneContent {
@@ -296,11 +309,16 @@ func (m *Model) viewSnapshotTab(tab, width int) paneContent {
 			d.LabelStyle = &okStyle
 			return facts(d)
 		}
-		var b strings.Builder
+		// One block of facts labelled "!", not a heading each: a heading names
+		// what is UNDER it, and "!" names nothing — it marks the line it is on.
+		// As a label it stays on that line, and the amber is the label's.
+		warnings := make([]comp.Fact, 0, len(man.Warnings))
 		for _, w := range man.Warnings {
-			b.WriteString(warnStyle.Render("! ") + wrap(w, 72) + "\n\n")
+			warnings = append(warnings, comp.Fact{Label: "!", Value: w})
 		}
-		return m.lineContent(strings.TrimRight(b.String(), "\n"))
+		d := m.detail(comp.Block{Facts: warnings})
+		d.LabelStyle = &warnStyle
+		return facts(d)
 
 	case 3: // Drift
 		return m.lineContent(m.viewDrift(man))
@@ -449,25 +467,35 @@ func (m *Model) viewSetTab(tab, width int) paneContent {
 	switch tab {
 	case 1: // Closure
 		if len(info.added) == 0 {
-			b.WriteString(okStyle.Render("This set is referentially closed.") + "\n\n")
-			b.WriteString(mutedStyle.Render("Every foreign key its tables have points at another table in\n" +
-				"the set, so it can be applied on its own."))
-			return m.lineContent(b.String())
+			d := m.detail(comp.Block{
+				Heading: heading("referentially closed"),
+				Text: "Every foreign key its tables have points at another table in the " +
+					"set, so it can be applied on its own.",
+			})
+			d.HeadingStyle = &okStyle
+			return facts(d)
 		}
-		b.WriteString(warnStyle.Render(fmt.Sprintf(
-			"This set is not closed: %d tables reference %d others.", len(info.members), len(info.added))) + "\n")
-		b.WriteString(mutedStyle.Render("An apply is refused unless you widen it to include these.") + "\n")
-		b.WriteString(section("would be added by --widen"))
+		added := make([]comp.Fact, 0, len(info.added))
 		for _, n := range info.added {
-			b.WriteString("  " + n + "\n")
+			added = append(added, comp.Fact{Value: n})
 		}
-		return m.lineContent(b.String())
+		d := m.detail(
+			comp.Block{
+				Heading: heading("not closed"),
+				Text: fmt.Sprintf("%d tables reference %d others. An apply is refused "+
+					"unless you widen it to include these.", len(info.members), len(info.added)),
+			},
+			comp.Block{Heading: heading("would be added by --widen"), Facts: added},
+		)
+		d.HeadingStyle = &warnStyle
+		return facts(d)
 
 	case 2: // Load order
-		return m.lineContent(b.String() + mutedStyle.Render(
-			"The load order is computed against the target when you plan an apply,\n"+
-				"because the target's foreign keys are the ones a load has to satisfy.\n\n") +
-			mutedStyle.Render("Press a to plan one."))
+		return facts(m.detail(comp.Block{
+			Text: "The load order is computed against the target when you plan an apply, " +
+				"because the target's foreign keys are the ones a load has to satisfy. " +
+				"Press a to plan one.",
+		}))
 
 	default: // Members
 		b.WriteString(field("patterns", strings.Join(set.Include, ", ")) + "\n")
