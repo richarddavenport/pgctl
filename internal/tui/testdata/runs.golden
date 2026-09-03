@@ -2,9 +2,9 @@ pgctl  pgctl.yaml
 ╭─ 1 Connections (3) ───────────╮ ╭────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ ● prd       protected         │ │ ‹ Log ›                                                                                        │
 │ ● qat       guarded           │ │                                                                                                │
-│ ✗ scratch                     │ │ Nothing has run yet.                                                                           │
+│ ✗ scratch                     │ │ Nothing has run yet. n takes a snapshot, a applies one, m moves between environments.          │
 │                          3/3  │ │                                                                                                │
-╰───────────────────────────────╯ │ n takes a snapshot, a applies one, m moves between environments.                               │
+╰───────────────────────────────╯ │                                                                                                │
 ╭─ 2 Databases (3) ─────────────╮ │                                                                                                │
 │ product-development  11.0 GB  │ │                                                                                                │
 │ claims               48.0 MB  │ │                                                                                                │
@@ -32,6 +32,6 @@ pgctl  pgctl.yaml
                                   │                                                                                                │
                                   │                                                                                                │
                                   │                                                                                                │
-                                  │                                                                                           3/3  │
+                                  │                                                                                                │
                                   ╰────────────────────────────────────────────────────────────────────────────────────────────────╯
 n snapshot · a apply · m move · p prune · / filter · tab pane · ? keys

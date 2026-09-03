@@ -5,6 +5,8 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/charmbracelet/lipgloss"
+
 	"github.com/richarddavenport/tuikit/comp"
 
 	"github.com/richarddavenport/pgctl/internal/config"
@@ -215,12 +217,17 @@ func (m *Model) viewDatabaseTab(tab, width int) paneContent {
 				dataMode(m.ruleFor(t.Name)),
 			})
 		}
-		header := field("tables", fmt.Sprint(len(tables))) + "   " +
-			field("total", engine.HumanBytes(total)) + "\n\n"
-		return mixedContent(header, tableRows(width,
+		head := make([]comp.Row, 0, 2)
+		head = append(head,
+			row(span(comp.Pad("tables", 14), &mutedStyle),
+				span(fmt.Sprint(len(tables)), nil),
+				span("   "+comp.Pad("total", 8), &mutedStyle),
+				span(engine.HumanBytes(total), nil)),
+			comp.Row{})
+		return paneContent{lines: append(head, tableRows(width,
 			[]string{"TABLE", "SIZE", "ROWS", "SNAPSHOT"},
 			[]comp.Column{{Fill: true}, {Width: 9, Right: true},
-				{Width: 8, Right: true}, {Width: 9}}, rows))
+				{Width: 8, Right: true}, {Width: 9}}, rows)...)}
 	}
 }
 
@@ -321,24 +328,24 @@ func (m *Model) viewSnapshotTab(tab, width int) paneContent {
 		return facts(d)
 
 	case 3: // Drift
-		return m.lineContent(m.viewDrift(man))
+		return facts(m.viewDrift(man))
 
 	default: // Manifest
-		var b strings.Builder
-		b.WriteString(titleStyle.Render(man.ID) + "\n\n")
-		b.WriteString(field("taken", man.StartedAt.Local().Format("2006-01-02 15:04")+
-			mutedStyle.Render("  "+age(m.now.Sub(man.StartedAt)))) + "\n")
-		if man.Complete() {
-			b.WriteString(field("took", elapsed(man.FinishedAt.Sub(man.StartedAt))) + "\n")
-		} else {
-			b.WriteString(field("state", dangerStyle.Render("did not finish — cannot be applied")) + "\n")
+		taken := comp.Fact{
+			Label: "taken",
+			Value: man.StartedAt.Local().Format("2006-01-02 15:04") +
+				"  " + age(m.now.Sub(man.StartedAt)),
 		}
-		b.WriteString(field("size", engine.HumanBytes(man.Bytes)) + "\n")
-		b.WriteString(field("tables", fmt.Sprint(len(man.Tables))) + "\n")
-		b.WriteString(field("where", entry.Location()) + "\n")
-		b.WriteString(field("server", "PostgreSQL "+formatServerVersion(man.ServerVersion)+
-			mutedStyle.Render("   pg_dump "+man.PgDumpVersion)) + "\n")
-		b.WriteString(field("compression", man.Compression+mutedStyle.Render(fmt.Sprintf("   %d jobs", man.Jobs))) + "\n")
+		state := comp.Fact{Label: "took", Value: elapsed(man.FinishedAt.Sub(man.StartedAt))}
+		if !man.Complete() {
+			// The one fact on this tab that decides whether the snapshot is
+			// usable at all, so it is the one that is red.
+			state = comp.Fact{
+				Label: "state",
+				Value: "did not finish — cannot be applied",
+				Style: &dangerStyle,
+			}
+		}
 
 		var source int64
 		filtered, empty := 0, 0
@@ -351,45 +358,91 @@ func (m *Model) viewSnapshotTab(tab, width int) paneContent {
 				empty++
 			}
 		}
-		b.WriteString(field("source size", engine.HumanBytes(source)) + "\n")
 
-		b.WriteString(section("contents"))
-		b.WriteString(field("whole", fmt.Sprint(len(man.Tables)-filtered-empty)) + "\n")
+		contents := []comp.Fact{
+			{Label: "whole", Value: fmt.Sprint(len(man.Tables) - filtered - empty)},
+		}
 		if filtered > 0 {
-			b.WriteString(field("filtered", warnStyle.Render(fmt.Sprint(filtered))) + "\n")
+			contents = append(contents, comp.Fact{
+				Label: "filtered", Value: fmt.Sprint(filtered), Style: &warnStyle,
+			})
 		}
 		if empty > 0 {
-			b.WriteString(field("no data", warnStyle.Render(fmt.Sprint(empty))) + "\n")
+			contents = append(contents, comp.Fact{
+				Label: "no data", Value: fmt.Sprint(empty), Style: &warnStyle,
+			})
 		}
-		b.WriteString(field("foreign keys", fmt.Sprint(len(man.ForeignKeys))) + "\n")
+		contents = append(contents, comp.Fact{
+			Label: "foreign keys", Value: fmt.Sprint(len(man.ForeignKeys)),
+		})
 		if len(man.Extensions) > 0 {
 			names := make([]string, 0, len(man.Extensions))
 			for _, e := range man.Extensions {
 				names = append(names, e.Name)
 			}
-			b.WriteString(field("extensions", truncate(strings.Join(names, ", "), width-16)) + "\n")
+			// Not truncated here. comp.Detail wraps a value to the pane, which
+			// is what this wanted: the old version cut the list at width-16 and
+			// a target that cannot install an extension is exactly the failure
+			// the list exists to warn about.
+			contents = append(contents, comp.Fact{
+				Label: "extensions", Value: strings.Join(names, ", "),
+			})
 		}
-		if len(man.Warnings) > 0 {
-			b.WriteString("\n" + warnStyle.Render(fmt.Sprintf("! %d warnings — see the Warnings tab", len(man.Warnings))))
+
+		d := m.detail(
+			comp.Block{Facts: []comp.Fact{
+				taken,
+				state,
+				{Label: "size", Value: engine.HumanBytes(man.Bytes)},
+				{Label: "tables", Value: fmt.Sprint(len(man.Tables))},
+				{Label: "where", Value: entry.Location()},
+				{Label: "server", Value: "PostgreSQL " +
+					formatServerVersion(man.ServerVersion) + "   pg_dump " + man.PgDumpVersion},
+				{Label: "compression", Value: man.Compression +
+					fmt.Sprintf("   %d jobs", man.Jobs)},
+				{Label: "source size", Value: engine.HumanBytes(source)},
+			}},
+			comp.Block{Heading: heading("contents"), Facts: contents},
+		)
+		d.Title = man.ID
+		if n := len(man.Warnings); n > 0 {
+			d.Blocks = append(d.Blocks, comp.Block{Facts: []comp.Fact{{
+				Label: "!",
+				Value: fmt.Sprintf("%d warnings — see the Warnings tab", n),
+				Style: &warnStyle,
+			}}})
 		}
-		return m.lineContent(b.String())
+		return facts(d)
 	}
 }
 
 // viewDrift compares the snapshot's source structure with a live environment's,
 // which is the question "will this restore cleanly" asked before it is tried.
-func (m *Model) viewDrift(man *snapshot.Manifest) string {
+// viewDrift compares a snapshot's tables against the target's.
+//
+// The asymmetry is the point, and it is why the two lists are separate blocks
+// with separate warnings rather than one diff. A table in the snapshot and not
+// on the target is a migration having dropped it. A table on the target and not
+// in the snapshot is the dangerous one: a whole-database apply drops it, and a
+// set-level apply leaves it holding rows that reference data about to be
+// replaced.
+func (m *Model) viewDrift(man *snapshot.Manifest) comp.Detail {
 	conn, ok := m.selectedConn()
 	if !ok {
-		return mutedStyle.Render("select an environment to compare against")
+		return m.detail(comp.Block{Text: "select an environment to compare against"})
 	}
 	key := liveKey(conn.Name, man.Database)
 	tables := m.liveTable[key]
 	if tables == nil {
-		return mutedStyle.Render(fmt.Sprintf(
-			"Comparing %s against %s.\n\n%s reading %s…\n\n%s",
-			man.ID, conn.Name, spinner(m.now), conn.Name,
-			mutedStyle.Render("Open the Databases panel's Tables tab to load it.")))
+		return m.detail(comp.Block{
+			Facts: []comp.Fact{
+				{Label: "snapshot", Value: man.ID},
+				{Label: "compared to", Value: conn.Name},
+			},
+		}, comp.Block{
+			Text: spinner(m.now) + " reading " + conn.Name + "… open the Databases " +
+				"panel's Tables tab to load it.",
+		})
 	}
 
 	inSnapshot := map[string]bool{}
@@ -415,53 +468,82 @@ func (m *Model) viewDrift(man *snapshot.Manifest) string {
 	sort.Strings(onlyLive)
 	sort.Strings(onlySnapshot)
 
-	var b strings.Builder
-	b.WriteString(field("snapshot", man.ID) + "\n")
-	b.WriteString(field("compared to", conn.Name) + "\n")
+	blocks := []comp.Block{{Facts: []comp.Fact{
+		{Label: "snapshot", Value: man.ID},
+		{Label: "compared to", Value: conn.Name},
+	}}}
+
 	if len(onlyLive) == 0 && len(onlySnapshot) == 0 {
-		b.WriteString("\n" + okStyle.Render("The same tables exist on both sides."))
-		return b.String()
+		d := m.detail(append(blocks, comp.Block{
+			Heading: heading("no drift"),
+			Text:    "The same tables exist on both sides.",
+		})...)
+		d.HeadingStyle = &okStyle
+		return d
+	}
+
+	named := func(names []string) []comp.Fact {
+		out := make([]comp.Fact, 0, len(names))
+		for _, n := range names {
+			out = append(out, comp.Fact{Value: n})
+		}
+		return out
 	}
 	if len(onlySnapshot) > 0 {
-		b.WriteString(section(fmt.Sprintf("in the snapshot, not on %s (%d)", conn.Name, len(onlySnapshot))))
-		b.WriteString(mutedStyle.Render("A migration dropped these, or the snapshot is newer.\n"))
-		for _, n := range onlySnapshot {
-			b.WriteString("  " + n + "\n")
-		}
+		blocks = append(blocks, comp.Block{
+			Heading: heading(fmt.Sprintf("in the snapshot, not on %s (%d)",
+				conn.Name, len(onlySnapshot))),
+			Text: "A migration dropped these, or the snapshot is newer.",
+		}, comp.Block{Indent: 1, Facts: named(onlySnapshot)})
 	}
 	if len(onlyLive) > 0 {
-		b.WriteString(section(fmt.Sprintf("on %s, not in the snapshot (%d)", conn.Name, len(onlyLive))))
-		b.WriteString(warnStyle.Render("A whole-database apply drops these. A set-level apply leaves them,\n" +
-			"holding rows that reference data about to be replaced.\n"))
-		for _, n := range onlyLive {
-			b.WriteString("  " + n + "\n")
-		}
+		blocks = append(blocks, comp.Block{
+			Heading: heading(fmt.Sprintf("on %s, not in the snapshot (%d)",
+				conn.Name, len(onlyLive))),
+			Text: "A whole-database apply drops these. A set-level apply leaves them, " +
+				"holding rows that reference data about to be replaced.",
+		}, comp.Block{Indent: 1, Facts: named(onlyLive)})
 	}
-	return b.String()
+	return m.detail(blocks...)
 }
 
 func (m *Model) viewSetTab(tab, width int) paneContent {
 	set, ok := m.selectedSet()
 	if !ok {
-		return m.lineContent(mutedStyle.Render("no sets declared for this database.\n\n" +
-			"A set is a named group of tables that move together — declare one in " + m.cfg.Source + "."))
+		return facts(m.detail(comp.Block{
+			Text: "no sets declared for this database. A set is a named group of tables " +
+				"that move together — declare one in " + m.cfg.Source + ".",
+		}))
 	}
 	conn, _ := m.selectedConn()
 	db, _ := m.selectedDatabase()
 	info := m.setInfo[setKey(conn.Name, db.Name, set.Name)]
 
-	var b strings.Builder
-	b.WriteString(titleStyle.Render(set.Name) + "\n")
+	// The heading every branch of this tab shares: the set's name and what it
+	// is for. Rows rather than a builder, so the branches that end in a table
+	// can put them above it and the ones that do not can hand them to
+	// comp.Detail as a Title.
+	head := []comp.Row{{Text: set.Name, Style: &titleStyle}}
 	if set.Description != "" {
-		b.WriteString(mutedStyle.Render(set.Description) + "\n")
+		head = append(head, comp.Row{Text: set.Description, Style: &mutedStyle})
 	}
-	b.WriteString("\n")
+	head = append(head, comp.Row{})
 
 	if info == nil || info.loading {
-		return m.lineContent(b.String() + mutedStyle.Render(spinner(m.now)+" resolving against "+conn.Name+"…"))
+		d := m.detail(comp.Block{
+			Text: spinner(m.now) + " resolving against " + conn.Name + "…",
+		})
+		d.Title, d.Subtitle = set.Name, set.Description
+		return facts(d)
 	}
 	if info.err != nil {
-		return m.lineContent(b.String() + dangerStyle.Render("could not resolve") + "\n\n" + wrap(info.err.Error(), 70))
+		d := m.detail(comp.Block{
+			Heading: heading("could not resolve"),
+			Text:    info.err.Error(),
+		})
+		d.Title, d.Subtitle = set.Name, set.Description
+		d.HeadingStyle = &dangerStyle
+		return facts(d)
 	}
 
 	switch tab {
@@ -498,15 +580,23 @@ func (m *Model) viewSetTab(tab, width int) paneContent {
 		}))
 
 	default: // Members
-		b.WriteString(field("patterns", strings.Join(set.Include, ", ")) + "\n")
+		head = append(head,
+			row(span(comp.Pad("patterns", 14), &mutedStyle),
+				span(strings.Join(set.Include, ", "), nil)))
 		if len(set.Exclude) > 0 {
-			b.WriteString(field("excluding", strings.Join(set.Exclude, ", ")) + "\n")
+			head = append(head,
+				row(span(comp.Pad("excluding", 14), &mutedStyle),
+					span(strings.Join(set.Exclude, ", "), nil)))
 		}
-		b.WriteString(field("matches", fmt.Sprintf("%d tables on %s", len(info.members), conn.Name)) + "\n")
+		head = append(head,
+			row(span(comp.Pad("matches", 14), &mutedStyle),
+				span(fmt.Sprintf("%d tables on %s", len(info.members), conn.Name), nil)))
 		if len(info.added) > 0 {
-			b.WriteString(field("closure", warnStyle.Render(fmt.Sprintf("+%d more — see Closure", len(info.added)))) + "\n")
+			head = append(head,
+				row(span(comp.Pad("closure", 14), &mutedStyle),
+					span(fmt.Sprintf("+%d more — see Closure", len(info.added)), &warnStyle)))
 		}
-		b.WriteString(section("members"))
+		head = append(head, comp.Row{}, comp.Row{Text: heading("members"), Style: &headerStyle})
 
 		sizes := map[string]int64{}
 		for _, t := range m.liveTable[liveKey(conn.Name, db.Name)] {
@@ -520,56 +610,88 @@ func (m *Model) viewSetTab(tab, width int) paneContent {
 			}
 			rows = append(rows, []string{n, size})
 		}
-		return mixedContent(b.String(), tableRows(width,
+		return paneContent{lines: append(head, tableRows(width,
 			[]string{"TABLE", "SIZE"},
-			[]comp.Column{{Fill: true}, {Width: 10, Right: true}}, rows))
+			[]comp.Column{{Fill: true}, {Width: 10, Right: true}}, rows)...)}
 	}
 }
 
-func (m *Model) viewRunTab(width int) string {
+// viewRunTab is one operation's log, newest last.
+//
+// Rows with a style each rather than comp.LogPane, and the reason is the event
+// kinds. LogPane distinguishes a line from stdout from a line from stderr, and
+// nothing else — deliberately: its doc says most programs write ordinary
+// progress to stderr, so colouring that as a failure "would make every run look
+// broken". pgctl's engine reports six kinds, and step, table, warning, done and
+// failed are five different things a reader needs to tell apart at a glance.
+// Mapping them onto stderr-or-not would throw away the distinction the engine
+// went to the trouble of making.
+//
+// It still scrolls, because these are lines through comp.List — a set-level
+// apply of 38 tables logs a few hundred of them.
+func (m *Model) viewRunTab(width int) paneContent {
 	r, ok := m.selectedRun()
 	if !ok {
-		return mutedStyle.Render("Nothing has run yet.\n\n" +
-			"n takes a snapshot, a applies one, m moves between environments.")
+		return facts(m.detail(comp.Block{
+			Text: "Nothing has run yet. n takes a snapshot, a applies one, " +
+				"m moves between environments.",
+		}))
 	}
 
-	var b strings.Builder
-	b.WriteString(titleStyle.Render(r.kind) + "  " + mutedStyle.Render(elapsed(r.duration(m.now))))
+	state, stateStyle := "ok", &okStyle
 	switch {
 	case r.running:
-		b.WriteString("  " + accentStyle.Render(spinner(m.now)+" running"))
+		state, stateStyle = spinner(m.now)+" running", &accentStyle
 	case r.err != nil:
-		b.WriteString("  " + dangerStyle.Render("failed"))
-	default:
-		b.WriteString("  " + okStyle.Render("ok"))
+		state, stateStyle = "failed", &dangerStyle
 	}
-	b.WriteString("\n")
+
+	rows := []comp.Row{row(
+		span(r.kind, &titleStyle),
+		span("  "+elapsed(r.duration(m.now))+"  ", &mutedStyle),
+		span(state, stateStyle),
+	)}
 	if r.explain != "" {
-		b.WriteString(mutedStyle.Render(wrap(r.explain, width-2)) + "\n")
+		for _, line := range comp.Wrap(r.explain, width) {
+			rows = append(rows, comp.Row{Text: line, Style: &mutedStyle})
+		}
 	}
-	b.WriteString("\n")
+	rows = append(rows, comp.Row{})
 
 	for _, ev := range r.log() {
 		switch ev.Kind {
 		case engine.EventStep:
-			b.WriteString(mutedStyle.Render("· ") + ev.Message + "\n")
+			rows = append(rows, row(span("· ", &mutedStyle), span(ev.Message, nil)))
 		case engine.EventTable:
-			b.WriteString("  " + ev.Table + " " + mutedStyle.Render(ev.Message) + "\n")
+			rows = append(rows, row(
+				span("  "+ev.Table+" ", nil), span(ev.Message, &mutedStyle)))
 		case engine.EventWarning:
-			b.WriteString(warnStyle.Render("! "+wrap(ev.Message, width-2)) + "\n")
+			rows = append(rows, wrapped("! "+ev.Message, width, &warnStyle)...)
 		case engine.EventDone:
-			b.WriteString(okStyle.Render("✓ "+ev.Message) + "\n")
+			rows = append(rows, comp.Row{Text: "✓ " + ev.Message, Style: &okStyle})
 		case engine.EventFailed:
-			b.WriteString(dangerStyle.Render("✗ "+wrap(ev.Message, width-2)) + "\n")
+			rows = append(rows, wrapped("✗ "+ev.Message, width, &dangerStyle)...)
 		}
 	}
 	if p := r.latestProgress(); r.running && p.Message != "" {
-		b.WriteString("\n" + accentStyle.Render(spinner(m.now)) + " " + p.Message + "\n")
+		rows = append(rows, comp.Row{},
+			row(span(spinner(m.now)+" ", &accentStyle), span(p.Message, nil)))
 	}
 	if r.err != nil {
-		b.WriteString("\n" + dangerStyle.Render(wrap(r.err.Error(), width-2)) + "\n")
+		rows = append(rows, comp.Row{})
+		rows = append(rows, wrapped(r.err.Error(), width, &dangerStyle)...)
 	}
-	return b.String()
+	return paneContent{lines: rows}
+}
+
+// wrapped is one message over as many rows as it needs, all in one style.
+func wrapped(text string, width int, style *lipgloss.Style) []comp.Row {
+	lines := comp.Wrap(text, width)
+	out := make([]comp.Row, 0, len(lines))
+	for _, line := range lines {
+		out = append(out, comp.Row{Text: line, Style: style})
+	}
+	return out
 }
 
 func orDash(s string) string {

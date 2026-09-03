@@ -1,11 +1,7 @@
 package tui
 
 import (
-	"fmt"
-	"strings"
-
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/x/ansi"
 
 	"github.com/richarddavenport/tuikit/comp"
 
@@ -155,36 +151,9 @@ func (m *Model) paneBody(tab, width int) paneContent {
 	case panelSets:
 		return m.viewSetTab(tab, width)
 	case panelRuns:
-		return m.lineContent(m.viewRunTab(width))
+		return m.viewRunTab(width)
 	}
 	return paneContent{}
-}
-
-// lineContent wraps a tab that still builds a styled string.
-//
-// The remaining four panels' tabs do. ansi.Strip is why the detail pane draws
-// in one colour, and it goes as each of them moves to comp.Detail or comp.Table
-// — the canvas draws clusters into cells, so an escape sequence handed to it is
-// text rather than styling. See the Connections tabs for what the other end
-// looks like.
-func (m *Model) lineContent(body string) paneContent {
-	lines := strings.Split(body, "\n")
-	rows := make([]comp.Row, len(lines))
-	for i, line := range lines {
-		rows[i] = comp.Row{Text: ansi.Strip(line)}
-	}
-	return paneContent{lines: rows}
-}
-
-// field renders a label and value pair, aligned so a column of them reads as a
-// table rather than as prose.
-func field(label, value string) string {
-	return fmt.Sprintf("%s %s", mutedStyle.Render(fmt.Sprintf("%-14s", label)), value)
-}
-
-// section is a heading inside a pane body.
-func section(title string) string {
-	return "\n" + headerStyle.Render(strings.ToUpper(title)) + "\n"
 }
 
 // table renders aligned columns, truncating the widest flexible column rather
@@ -216,20 +185,6 @@ func tableRows(width int, headers []string, cols []comp.Column, rows [][]string)
 		out = append(out, comp.Row{Text: line})
 	}
 	return out
-}
-
-// mixedContent is prose that still comes from a strings.Builder, above a table
-// that does not.
-//
-// The prefix goes through ansi.Strip like any unconverted tab; the table rows
-// are built properly. Both halves of these tabs move together when the prose
-// becomes a comp.Detail — see viewConnectionTab.
-func mixedContent(prefix string, rows []comp.Row) paneContent {
-	var out []comp.Row
-	for _, line := range strings.Split(strings.TrimRight(prefix, "\n"), "\n") {
-		out = append(out, comp.Row{Text: ansi.Strip(line)})
-	}
-	return paneContent{lines: append(out, rows...)}
 }
 
 // dataMode renders a table's rule for a listing.

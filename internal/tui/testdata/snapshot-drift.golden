@@ -2,11 +2,11 @@ pgctl  pgctl.yaml
 ╭─ 1 Connections (3) ───────────╮ ╭────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ ● prd       protected         │ │ ‹ Manifest · Tables · Warnings · Drift ›                                                       │
 │ ● qat       guarded           │ │                                                                                                │
-│ ✗ scratch                     │ │ snapshot       prd/product-development/20260828T030000Z                                        │
-│                          3/3  │ │ compared to    prd                                                                             │
+│ ✗ scratch                     │ │ snapshot    prd/product-development/20260828T030000Z                                           │
+│                          3/3  │ │ compared to prd                                                                                │
 ╰───────────────────────────────╯ │                                                                                                │
-╭─ 2 Databases (3) ─────────────╮ │ The same tables exist on both sides.                                                           │
-│ product-development  11.0 GB  │ │                                                                                                │
+╭─ 2 Databases (3) ─────────────╮ │ NO DRIFT                                                                                       │
+│ product-development  11.0 GB  │ │   The same tables exist on both sides.                                                         │
 │ claims               48.0 MB  │ │                                                                                                │
 │ quote                20.0 GB  │ │                                                                                                │
 │                          3/3  │ │                                                                                                │
@@ -32,6 +32,6 @@ pgctl  pgctl.yaml
                                   │                                                                                                │
                                   │                                                                                                │
                                   │                                                                                                │
-                                  │                                                                                           4/4  │
+                                  │                                                                                                │
                                   ╰────────────────────────────────────────────────────────────────────────────────────────────────╯
 n snapshot · a apply · m move · p prune · x delete · / filter · tab pane · ? keys

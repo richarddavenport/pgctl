@@ -2,12 +2,12 @@ pgctl  pgctl.yaml
 ╭─ 1 Connections (3) ──────────╮ ╭─────────────────────────────────────────────╮
 │ ● prd       protected        │ │ ‹ Tables · Rules · Foreign keys ›           │
 │ ● qat       guarded          │ │                                             │
-│                         2/3  │ │ tables         3   total          24.2 GB   │
-╰──────────────────────────────╯ │ TABLE               SIZE     ROWS SNAPSHOT  │
-╭─ 2 Databases (3) ────────────╮ │ claims.policy…  180.0 MB     483k all       │
-│ product-development  11.0 GB │ │ quotes.quote     20.0 GB     147k filtered  │
-│                         1/3  │ │ audit.logged_…    4.0 GB     9.1M all       │
+│                         2/3  │ │ tables        3   total   24.2 GB           │
 ╰──────────────────────────────╯ │                                             │
+╭─ 2 Databases (3) ────────────╮ │ TABLE               SIZE     ROWS SNAPSHOT  │
+│ product-development  11.0 GB │ │ claims.policy…  180.0 MB     483k all       │
+│                         1/3  │ │ quotes.quote     20.0 GB     147k filtered  │
+╰──────────────────────────────╯ │ audit.logged_…    4.0 GB     9.1M all       │
 ╭─ 3 Snapshots (1) ────────────╮ │                                             │
 │ 08-27 22:00  1.9 GB l        │ │                                             │
 │                         1/1  │ │                                             │
@@ -18,6 +18,6 @@ pgctl  pgctl.yaml
 ╰──────────────────────────────╯ │                                             │
 ╭─ 5 Runs ─────────────────────╮ │                                             │
 │ nothing run yet              │ │                                             │
-│                              │ │                                        5/5  │
+│                              │ │                                        6/6  │
 ╰──────────────────────────────╯ ╰─────────────────────────────────────────────╯
 n snapshot · a apply · m move · p prune · / filter · tab pane · ? keys

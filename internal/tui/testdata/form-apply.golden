@@ -4,11 +4,11 @@ pgctl  pgctl.yaml
 │ ● qat       guarded           │ │                                                                                                │
 │ ✗ scratch                     │ │ prd/product-development/20260828T030000Z                                                       │
 │                          3/3  │ │                                                                                                │
-╰───────────────────────────────╯ │ taken          2026-08-27 22:00  14h ago                                                       │
-╭─ 2 Databases (3) ─────────────╮ │ took           3:22                                                                            │
-│ product-development  11.0 GB  │ │ size           1.9 GB                                                                          │
-│ claims               48.0 MB  │ │ tables         3                                                                               │
-│ quote                20.0 GB  │ │ where          local                                                                           │
+╰───────────────────────────────╯ │ taken       2026-08-27 22:00  14h ago                                                          │
+╭─ 2 Databases (3) ─────────────╮ │ took        3:22                                                                               │
+│ product-development  11.0 GB  │ │ size        1.9 GB                                                                             │
+│ claims               48.0 MB  │ │ tables      3                                                                                  │
+│ quote                20.0 GB  │ │ where       local                                                                              │
 │          ╭────────────────────────────────────────────────────────────────────────────────────────────────────────────╮          │
 ╰──────────│                                                                                                            │          │
 ╭─ 3 Snapsh│ Apply prd/product-development/20260828T030000Z                                                             │          │
@@ -32,6 +32,6 @@ pgctl  pgctl.yaml
                                   │                                                                                                │
                                   │                                                                                                │
                                   │                                                                                                │
-                                  │                                                                                         18/18  │
+                                  │                                                                                                │
                                   ╰────────────────────────────────────────────────────────────────────────────────────────────────╯
 ← → change  ·  ↑↓ fields  ·  enter run  ·  esc cancel
