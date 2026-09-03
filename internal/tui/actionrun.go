@@ -163,7 +163,7 @@ func (m *Model) submitAction() tea.Cmd {
 			a.err = fmt.Errorf("choose at least one database")
 			return nil
 		}
-		connection := a.value("connection")
+		connection := a.conn
 		noPush := !a.enabled("push")
 		m.action = nil
 		e := m.engine
@@ -190,11 +190,9 @@ func (m *Model) submitAction() tea.Cmd {
 			a.err = fmt.Errorf("choose at least one database")
 			return nil
 		}
-		from, to := a.value("from"), a.value("to")
-		if from == to {
-			a.err = fmt.Errorf("%s is both the source and the target", from)
-			return nil
-		}
+		// The source is where the panel is, and the target list excludes it,
+		// so "both the source and the target" is no longer reachable.
+		from, to := a.conn, a.value("to")
 		keep := a.enabled("keep")
 		m.action = nil
 		e := m.engine

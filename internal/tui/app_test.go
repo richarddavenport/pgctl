@@ -265,12 +265,24 @@ func TestSnapshotFormDefaultsToTheDatabaseInFocus(t *testing.T) {
 		t.Errorf("databases = %v, want just claims", got)
 	}
 
+	// The connection is NOT a field: the panel already said which server this
+	// is about, and a form that asked again could disagree with it — the
+	// database list was built from the panel's connection and nothing
+	// recomputed it, so choosing a different server offered it the previous
+	// one's database names.
+	if f := m.action.field("connection"); f != nil {
+		t.Error("the snapshot form asks for a connection; the panel selection is that")
+	}
+	if m.action.conn == "" {
+		t.Error("the form did not record which connection it was opened on")
+	}
+
 	// And every database is still reachable from the form.
 	f := m.action.field("databases")
 	if len(f.options) != 2 {
 		t.Errorf("the form offers %d databases, want both declared ones", len(f.options))
 	}
-	m.action.cursor = 1
+	m.action.cursor = 0
 	press(t, m, "a")
 	if got := m.action.chosenDatabases(); len(got) != 2 {
 		t.Errorf("`a` selected %d databases, want all of them", len(got))

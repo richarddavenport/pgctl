@@ -3,20 +3,20 @@ pgctl  pgctl.yaml
 │ ● prd       protected        │ │ ‹ Overview · Databases · Config ›           │
 │ ● qat       guarded          │ │                                             │
 │ ✗╭────────────────────────────────────────────────────────────────────────╮  │
-╰──│ Take a snapshot                                                        │  │
+╰──│ Take a snapshot of prd                                                 │  │
 ╭─ │ Reads the chosen databases and writes a compressed copy. Nothing is    │  │
-│ p│ written to the source.                                                 │  │
+│ p│ written to prd.                                                        │  │
 │ c│                                                                        │  │
-│ q│ ▸ Connection         ‹ prd  PostgreSQL 17.4, 3 databases ›  (1/3)      │  │
-╰──│   Databases          1 of 3                                            │  │
-╭─ │       ○ claims                                                         │  │
-│ 0│       ● product-development                                            │  │
-╰──│       ○ quote                                                          │  │
-╭─ │   Upload to storage  no                                                │  │
-│ c│                                                                        │  │
-╰──│ ← → to change                                                          │… │
-╭─ │ ← → change · ↑↓ fields · enter run · esc cancel                        │  │
-│ n╰────────────────────────────────────────────────────────────────────────╯  │
+│ q│ ▸ Databases          1 of 3                                            │  │
+╰──│       ○ claims                                                         │  │
+╭─ │       ● product-development                                            │  │
+│ 0│       ○ quote                                                          │  │
+╰──│   Upload to storage  no                                                │  │
+╭─ │                                                                        │  │
+│ c│ defaults to the one you were looking at; a takes all of them           │  │
+╰──│ space toggle · a all · n none · ↑↓ fields · enter run · esc cancel     │… │
+╭─ ╰────────────────────────────────────────────────────────────────────────╯  │
+│ nothing run yet              │ │                                             │
 ╰──────────────────────────────╯ │                                             │
                                  │                                             │
                                  ╰─────────────────────────────────────────────╯

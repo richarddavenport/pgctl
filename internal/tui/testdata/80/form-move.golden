@@ -2,12 +2,12 @@ pgctl  pgctl.yaml
 ╭─ 1 Connections (3) ──────────╮ ╭─────────────────────────────────────────────╮
 │ ● prd       protected        │ │ ‹ Overview · Databases · Config ›           │
 │ ●╭────────────────────────────────────────────────────────────────────────╮  │
-│ ✗│ Move between environments                                              │  │
+│ ✗│ Move prd into another environment                                      │  │
 ╰──│ Takes a snapshot into a temporary directory, applies it, and deletes   │  │
-╭─ │ it. Nothing is catalogued or uploaded.                                 │  │
-│ p│                                                                        │  │
-│ c│ ▸ From                      ‹ prd  PostgreSQL 17.4, 3 databases ›  (1/ │  │
-│ q│   To                        ‹ qat  (guarded — needs its name typed) ›  │  │
+╭─ │ it. Nothing is catalogued or uploaded, and nothing is written to       │  │
+│ p│ prd.                                                                   │  │
+│ c│                                                                        │  │
+│ q│ ▸ To                        ‹ qat  (guarded — needs its name typed) ›  │  │
 ╰──│   Databases                 1 of 3                                     │  │
 ╭─ │       ○ claims                                                         │  │
 │ 0│       ● product-development                                            │  │

@@ -2,6 +2,7 @@ package tui
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/richarddavenport/pgctl/internal/config"
@@ -63,6 +64,17 @@ type actionModel struct {
 	kind    actionKind
 	title   string
 	explain string
+
+	// conn is the connection the form was opened on, and it is NOT a field.
+	//
+	// The panels are a hierarchy: being on a row of Connections, with a
+	// database selected under it, is already a statement of which server this
+	// is about. A form that asked again would be a second way to say the same
+	// thing — and the two could disagree, which they did. The Databases
+	// multi-select is built from the panel's connection at open, and nothing
+	// recomputed it when a Connection field changed, so choosing a different
+	// server left you offering that server the previous one's database names.
+	conn string
 
 	fields []formField
 	cursor int
@@ -162,23 +174,18 @@ func newText(key, label, help string) formField {
 // openSnapshot builds the snapshot form: which environment, which databases,
 // and whether to upload.
 func (m *Model) openSnapshot() {
-	names := connectionNames(m.cfg.All())
-	if len(names) == 0 {
+	conn, ok := m.selectedConn()
+	if !ok {
 		m.err = fmt.Errorf("no connections declared in %s", m.cfg.Source)
 		return
 	}
-	current := 0
-	if conn, ok := m.selectedConn(); ok {
-		for i, name := range names {
-			if name == conn.Name {
-				current = i
-			}
-		}
-	}
 
 	databases := m.databaseNames()
+	// The help says what the field is FOR, not which keys work it — the keys
+	// are on the modal's own bottom row now, and saying them twice made the
+	// last two rows of the box the same sentence.
 	dbField := newMulti("databases", "Databases", databases,
-		"space toggles · a all · n none")
+		"defaults to the one you were looking at; a takes all of them")
 	// Default to the database in focus rather than all of them: the panel
 	// selection is a statement of intent, and six databases is rarely what
 	// someone means when they were looking at one.
@@ -193,9 +200,6 @@ func (m *Model) openSnapshot() {
 		}
 	}
 
-	connField := newChoice("connection", "Connection", names, m.connectionLabels(names))
-	connField.choice = current
-
 	push := newToggle("push", "Upload to storage", m.cfg.Storage.Kind != config.StorageLocal,
 		"off keeps the snapshot on this machine only")
 	if m.cfg.Storage.Kind == config.StorageLocal {
@@ -205,9 +209,10 @@ func (m *Model) openSnapshot() {
 
 	m.action = &actionModel{
 		kind:    actionSnapshot,
-		title:   "Take a snapshot",
-		explain: "Reads the chosen databases and writes a compressed copy. Nothing is written to the source.",
-		fields:  []formField{connField, dbField, push},
+		conn:    conn.Name,
+		title:   "Take a snapshot of " + conn.Name,
+		explain: "Reads the chosen databases and writes a compressed copy. Nothing is written to " + conn.Name + ".",
+		fields:  []formField{dbField, push},
 	}
 }
 
@@ -266,24 +271,16 @@ func (m *Model) openApply() {
 
 // openMove builds the move form.
 func (m *Model) openMove() {
-	names := connectionNames(m.cfg.All())
-	targets, targetLabels := m.applyTargets()
-	if len(names) == 0 || len(targets) == 0 {
-		m.err = fmt.Errorf("move needs a source and an unprotected target")
+	from, ok := m.selectedConn()
+	targets, targetLabels := m.applyTargets(from.Name)
+	if !ok || len(targets) == 0 {
+		m.err = fmt.Errorf("move needs a source and an unprotected target that is not itself")
 		return
 	}
 
-	source := newChoice("from", "From", names, m.connectionLabels(names))
-	if conn, ok := m.selectedConn(); ok {
-		for i, name := range names {
-			if name == conn.Name {
-				source.choice = i
-			}
-		}
-	}
-
 	databases := m.databaseNames()
-	dbField := newMulti("databases", "Databases", databases, "space toggles · a all · n none")
+	dbField := newMulti("databases", "Databases", databases,
+		"defaults to the one you were looking at; a takes all of them")
 	if db, ok := m.selectedDatabase(); ok {
 		for i := range dbField.selected {
 			dbField.selected[i] = false
@@ -297,11 +294,11 @@ func (m *Model) openMove() {
 
 	m.action = &actionModel{
 		kind:  actionMove,
-		title: "Move between environments",
+		conn:  from.Name,
+		title: "Move " + from.Name + " into another environment",
 		explain: "Takes a snapshot into a temporary directory, applies it, and deletes it. " +
-			"Nothing is catalogued or uploaded.",
+			"Nothing is catalogued or uploaded, and nothing is written to " + from.Name + ".",
 		fields: []formField{
-			source,
 			newChoice("to", "To", targets, targetLabels),
 			dbField,
 			newToggle("keep", "Keep the staged snapshot", false,
@@ -350,9 +347,18 @@ func (m *Model) openDelete() {
 
 // applyTargets is every environment that may be written to, with protected ones
 // left out rather than shown and refused.
-func (m *Model) applyTargets() (names, labels []string) {
+// applyTargets is every connection an apply may write to.
+//
+// except names a connection to leave out — the move form's source, which
+// cannot also be its target. It used to be offered, and the form then refused
+// at submit with "prd is both the source and the target": a choice that is
+// always wrong is better not offered than caught.
+func (m *Model) applyTargets(except ...string) (names, labels []string) {
 	for _, conn := range m.cfg.All() {
 		if conn.Protected {
+			continue
+		}
+		if slices.Contains(except, conn.Name) {
 			continue
 		}
 		names = append(names, conn.Name)
@@ -363,21 +369,6 @@ func (m *Model) applyTargets() (names, labels []string) {
 		labels = append(labels, label)
 	}
 	return names, labels
-}
-
-func (m *Model) connectionLabels(names []string) []string {
-	labels := make([]string, 0, len(names))
-	for _, name := range names {
-		label := name
-		if p := m.probes[name]; p != nil && p.Reachable {
-			label += fmt.Sprintf("  PostgreSQL %s, %d databases",
-				formatServerVersion(p.ServerVersion), len(p.Databases))
-		} else if p != nil {
-			label += "  unreachable"
-		}
-		labels = append(labels, label)
-	}
-	return labels
 }
 
 func connectionNames(conns []config.Connection) []string {
