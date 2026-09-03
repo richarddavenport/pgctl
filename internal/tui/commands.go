@@ -53,8 +53,52 @@ type (
 	}
 )
 
+// probeSelected probes the environment under the cursor, and only if pgctl has
+// not already talked to it.
+//
+// This is what opening the interface does, rather than probeAll. Probing
+// everything on startup meant that opening the TUI opened a session to
+// PRODUCTION, unasked — a real login against every declared server, audited,
+// against a connection limit, on every launch. prd is protected at the engine
+// level precisely so pgctl cannot touch it casually, and then startup connected
+// to it anyway.
+//
+// The panel was already built for this: a connection with no probe draws ○,
+// "not reached yet", and one in flight draws the spinner. Both states existed
+// and ○ was nearly unreachable, because everything was probed at once before a
+// reader could see it. The design was lazy; only the implementation was eager.
+//
+// What it costs is the at-a-glance view of which environments are up. That was
+// never really on offer — it arrived several seconds into a launch, one
+// environment at a time — and `r` still asks for all of them.
+func (m *Model) probeSelected() tea.Cmd {
+	conn, ok := m.selectedConn()
+	if !ok || m.probes[conn.Name] != nil {
+		return nil
+	}
+	return m.probe(conn.Name)
+}
+
+// reprobeKnown refreshes the environments pgctl has already talked to.
+//
+// For after an operation, which makes a probe stale: the target's databases and
+// their sizes have just changed. It deliberately does not reach anywhere new —
+// finishing a snapshot of prd is not a reason to go and log in to qat.
+func (m *Model) reprobeKnown() tea.Cmd {
+	cmds := make([]tea.Cmd, 0, len(m.probes))
+	for name := range m.probes {
+		if cmd := m.probe(name); cmd != nil {
+			cmds = append(cmds, cmd)
+		}
+	}
+	return tea.Batch(cmds...)
+}
+
 // probeAll starts a probe of every environment at once. They are independent,
 // and one unreachable environment must not delay the rest.
+//
+// Only `r` asks for this now — an explicit "tell me about everything", which is
+// a reasonable thing to ask for and an unreasonable thing to do unasked.
 func (m *Model) probeAll() tea.Cmd {
 	var cmds []tea.Cmd
 	for _, env := range m.cfg.All() {
@@ -256,6 +300,7 @@ func (m *Model) finishRun(res runDoneMsg) tea.Cmd {
 	}
 
 	// An operation changes what is on disk and what is in the target, so both
-	// the snapshot list and the probes are stale the moment it ends.
-	return tea.Batch(m.loadSnapshots(), m.probeAll())
+	// the snapshot list and the probes pgctl already has are stale the moment
+	// it ends. Only the ones it already has — see reprobeKnown.
+	return tea.Batch(m.loadSnapshots(), m.reprobeKnown())
 }

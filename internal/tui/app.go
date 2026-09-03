@@ -199,7 +199,7 @@ func (m *Model) Now(t time.Time) {
 // Init loads what can be loaded without a network round trip, and starts
 // probing environments in the background.
 func (m *Model) Init() tea.Cmd {
-	return tea.Batch(m.loadSnapshots(), m.probeAll(), tick())
+	return tea.Batch(m.loadSnapshots(), m.probeSelected(), tick())
 }
 
 // Update handles a message.
@@ -217,7 +217,18 @@ func (m *Model) Update(msg tea.Msg) (app.Model, tea.Cmd) {
 		return m, nil
 
 	case tickMsg:
-		return m, tick()
+		// The tick is also where a lazy probe starts, and it has to be:
+		// comp.List records a Move and resolves it when it DRAWS, so a command
+		// launched in the same Update as the keystroke reads the cursor from
+		// before the key. onSelectionChanged covers a mouse click, because
+		// Select is immediate, and misses every arrow key.
+		//
+		// probeSelected is a map lookup when there is nothing to do, so asking
+		// every frame costs nothing and is a clearer statement of the rule than
+		// "on change" was: whatever is selected gets reached, however it came
+		// to be selected — a key, a click, a filter, or a list clamping itself
+		// when the rows moved underneath.
+		return m, tea.Batch(tick(), m.probeSelected())
 
 	case probeMsg:
 		delete(m.probing, msg.probe.Connection)
@@ -463,7 +474,11 @@ func (m *Model) cursor(panel int) int { return m.lists[panel].Cursor() }
 // Clamping here was worse than redundant: it went through Select, and Select
 // cancels a pending Move — so every arrow key was applied and then immediately
 // undone, and the cursor never left the first row.
-func (m *Model) onSelectionChanged() tea.Cmd { return m.paneLoad() }
+func (m *Model) onSelectionChanged() tea.Cmd {
+	// Moving to an environment is what asks pgctl to reach it. Probing is
+	// lazy — see probeSelected — so this is where all but the first one happen.
+	return tea.Batch(m.probeSelected(), m.paneLoad())
+}
 
 func (m *Model) quit() tea.Cmd {
 	if m.active != nil && m.active.running {
