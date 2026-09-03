@@ -505,17 +505,25 @@ func clamp(v, hi int) int {
 	}
 }
 
-// Run opens the UI against a config.
-func Run(configPath string) error {
+// Open builds the model against a config, without showing it.
+//
+// Separate from Run because the caller may want to CAPTURE it instead — see
+// the browse command's --snapshot. The model is the same either way, which is
+// the point: a captured frame is the interface, not a rendering of it.
+func Open(configPath string) (*Model, error) {
 	cfg, err := config.Load(configPath)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	model := New(engine.New(cfg))
+	m := New(engine.New(cfg))
 	for _, w := range cfg.Warnings {
-		model.status = w
+		m.status = w
 	}
+	return m, nil
+}
 
+// Run shows the interface.
+func Run(model *Model) error {
 	// The runner owns the canvas, its size and its chrome — it is the only
 	// place comp.NewCanvas is called, because those are decisions with one
 	// right answer per program and a tool that made them itself would make

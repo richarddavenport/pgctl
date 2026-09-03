@@ -64,3 +64,15 @@ var panelRowRegions = [panelCount]comp.Name{
 	panelSets:        regSetsRow,
 	panelRuns:        regRunsRow,
 }
+
+// The regions named from outside this package: internal/cli declares commands
+// that target a row, and a command's Target is the region whose context menu it
+// appears in.
+//
+// Exported rather than duplicated. A string constant copied into the other
+// package is a region name that goes stale silently, and the failure is a menu
+// that is simply empty.
+const (
+	RegConnectionsRow = regConnectionsRow
+	RegSnapshotsRow   = regSnapshotsRow
+)

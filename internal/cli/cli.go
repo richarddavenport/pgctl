@@ -1,72 +1,65 @@
-// Package cli is pgctl's headless front end: the same engine the TUI drives,
-// with flags instead of keystrokes, so that a nightly CI job and a person at a
-// terminal perform the same operation and report it the same way.
+// Package cli is pgctl's command tree, declared ONCE.
+//
+// The headless front end, the TUI screen a command opens, the entry an agent
+// reads in `pgctl describe --json`, the shell completions and the context menu
+// for a region all come from this one declaration. Not five descriptions kept
+// in step — one, read five ways.
+//
+// It is a PEER of the interface over the same engine rather than a wrapper
+// around it, so a nightly CI job and a person at a terminal perform the same
+// operation, and a refusal comes from the engine and reads the same in both.
 package cli
 
 import (
 	"context"
 	"errors"
-	"flag"
 	"fmt"
 	"os"
 	"os/signal"
 	"strings"
 	"syscall"
 
+	"github.com/richarddavenport/tuikit/spec"
+
 	"github.com/richarddavenport/pgctl/internal/config"
 	"github.com/richarddavenport/pgctl/internal/engine"
 )
 
-// Version is stamped by main.
-var Version = "dev"
+// do adapts a command body to spec's exit-code contract.
+//
+// One place, so that every command reports a refusal the same way and none of
+// them has to remember. Interrupt cancels the operation rather than killing the
+// process, so the failure hooks that bring an environment back up still run.
+func do(fn func(context.Context, spec.Call) error) func(spec.Call) int {
+	return func(c spec.Call) int {
+		ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+		defer stop()
 
-// Commands are the subcommand names main routes here.
-var Commands = map[string]bool{
-	"snapshot": true,
-	"ls":       true,
-	"plan":     true,
-	"apply":    true,
-	"prune":    true,
-	"move":     true,
-}
+		err := fn(ctx, c)
+		if err == nil {
+			return spec.OK
+		}
 
-// Run dispatches a headless command and returns a process exit code.
-func Run(args []string) int {
-	// Interrupt cancels the operation rather than killing the process, so that
-	// the failure hooks that bring an environment back up still run.
-	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
-	defer stop()
-
-	var err error
-	switch args[0] {
-	case "snapshot":
-		err = runSnapshot(ctx, args[1:])
-	case "ls":
-		err = runList(ctx, args[1:])
-	case "plan":
-		err = runPlan(ctx, args[1:])
-	case "apply":
-		err = runApply(ctx, args[1:])
-	case "prune":
-		err = runPrune(ctx, args[1:])
-	case "move":
-		err = runMove(ctx, args[1:])
-	default:
-		err = fmt.Errorf("unknown command %q", args[0])
-	}
-
-	if err != nil {
 		var refusal *engine.RefusalError
 		if errors.As(err, &refusal) {
-			// A refusal is a considered decision, not a crash. Say it without
+			// A refusal is a considered decision, not a crash. Said without
 			// the "pgctl:" prefix that makes a deliberate stop look like a bug.
-			fmt.Fprintln(os.Stderr, refusal.Reason)
-			return 2
+			//
+			// spec.Drift, and the reading is deliberate rather than a
+			// coincidence of numbers: its contract calls 2 "a dry run that
+			// found something — a finding, not a failure", and a refusal is
+			// exactly that. pgctl looked, and what it found is a reason not to
+			// proceed. `pgctl plan` is a dry run by definition, and an apply
+			// refuses before it has touched anything, so both are findings and
+			// neither is a failure to look.
+			// Nothing useful to do if stderr will not take it: the exit code
+			// carries the refusal too, which is the half a script reads.
+			fmt.Fprintln(c.Err, refusal.Reason) //nolint:errcheck // see above
+			return spec.Drift
 		}
-		fmt.Fprintln(os.Stderr, "pgctl:", err)
-		return 1
+		fmt.Fprintln(c.Err, "pgctl:", err) //nolint:errcheck // as above
+		return spec.Fail
 	}
-	return 0
 }
 
 // load finds the config and builds an engine.
@@ -124,34 +117,3 @@ func splitList(s string) []string {
 
 // Permute moves flags ahead of positional arguments so that `pgctl apply ID
 // --to qat` works as well as `pgctl apply --to qat ID`. flag.Parse stops at the
-// first non-flag, and an operator should not have to know that.
-func Permute(fs *flag.FlagSet, args []string) []string {
-	var flags, positional []string
-	for i := 0; i < len(args); i++ {
-		a := args[i]
-		if !strings.HasPrefix(a, "-") {
-			positional = append(positional, a)
-			continue
-		}
-		flags = append(flags, a)
-		name := strings.TrimLeft(strings.SplitN(a, "=", 2)[0], "-")
-		// A flag that takes a value and was not written as --flag=value
-		// consumes the next argument.
-		if !strings.Contains(a, "=") && i+1 < len(args) && takesValue(fs, name) {
-			i++
-			flags = append(flags, args[i])
-		}
-	}
-	return append(flags, positional...)
-}
-
-func takesValue(fs *flag.FlagSet, name string) bool {
-	f := fs.Lookup(name)
-	if f == nil {
-		return false
-	}
-	if b, ok := f.Value.(interface{ IsBoolFlag() bool }); ok && b.IsBoolFlag() {
-		return false
-	}
-	return true
-}

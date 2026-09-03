@@ -3,40 +3,38 @@ package cli
 import (
 	"bufio"
 	"context"
-	"flag"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 	"text/tabwriter"
 	"time"
 
+	"github.com/richarddavenport/tuikit/app"
+	"github.com/richarddavenport/tuikit/harness"
+	"github.com/richarddavenport/tuikit/spec"
+
 	"github.com/richarddavenport/pgctl/internal/config"
 	"github.com/richarddavenport/pgctl/internal/engine"
 	"github.com/richarddavenport/pgctl/internal/snapshot"
+	"github.com/richarddavenport/pgctl/internal/tui"
 )
 
-func runSnapshot(ctx context.Context, args []string) error {
-	fs := flag.NewFlagSet("snapshot", flag.ExitOnError)
-	configPath := fs.String("config", "", "path to a pgctl config")
-	from := fs.String("from", "", "connection to snapshot")
-	database := fs.String("db", "", "database to snapshot (default: every declared database)")
-	verbose := fs.Bool("v", false, "report every table")
-	noPush := fs.Bool("no-push", false, "keep the snapshot local even when remote storage is configured")
-	_ = fs.Parse(Permute(fs, args))
-
-	if *from == "" {
+func runSnapshot(ctx context.Context, c spec.Call) error {
+	from, database := c.Flag("from"), c.Flag("db")
+	if from == "" {
 		return fmt.Errorf("--from is required")
 	}
-	e, err := load(*configPath)
+	e, err := load(c.Flag("config"))
 	if err != nil {
 		return err
 	}
 
-	databases := []string{*database}
-	if *database == "" {
+	databases := []string{database}
+	if database == "" {
 		// Every database the server has, since the config no longer claims to
 		// know which exist.
-		if databases, err = e.DatabaseNames(ctx, *from); err != nil {
+		if databases, err = e.DatabaseNames(ctx, from); err != nil {
 			return err
 		}
 	}
@@ -44,13 +42,13 @@ func runSnapshot(ctx context.Context, args []string) error {
 	// One timestamp for every database in the run, so that a nightly of six
 	// databases is one snapshot set rather than six unrelated ones.
 	at := time.Now()
-	report := printer(*verbose)
+	report := printer(c.Bool("verbose"))
 	for _, db := range databases {
 		if _, err := e.Dump(ctx, engine.DumpRequest{
-			Connection: *from,
+			Connection: from,
 			Database:   db,
 			At:         at,
-			NoPush:     *noPush,
+			NoPush:     c.Bool("no-push"),
 		}, report); err != nil {
 			return err
 		}
@@ -58,13 +56,9 @@ func runSnapshot(ctx context.Context, args []string) error {
 	return nil
 }
 
-func runList(ctx context.Context, args []string) error {
-	fs := flag.NewFlagSet("ls", flag.ExitOnError)
-	configPath := fs.String("config", "", "path to a pgctl config")
-	from := fs.String("from", "", "only this connection")
-	_ = fs.Parse(Permute(fs, args))
-
-	e, err := load(*configPath)
+func runList(ctx context.Context, c spec.Call) error {
+	from := c.Flag("from")
+	e, err := load(c.Flag("config"))
 	if err != nil {
 		return err
 	}
@@ -73,12 +67,12 @@ func runList(ctx context.Context, args []string) error {
 		return err
 	}
 
-	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
+	w := tabwriter.NewWriter(c.Out, 0, 0, 2, ' ', 0)
 	fmt.Fprintln(w, "SNAPSHOT\tTAKEN\tTABLES\tSIZE\tWHERE\tSTATE") //nolint:errcheck // a tabwriter error surfaces on Flush
 	for i := len(entries) - 1; i >= 0; i-- {
 		entry := entries[i]
 		m := entry.Manifest
-		if *from != "" && m.Connection != *from {
+		if from != "" && m.Connection != from {
 			continue
 		}
 		state := "complete"
@@ -92,8 +86,8 @@ func runList(ctx context.Context, args []string) error {
 	return w.Flush()
 }
 
-// applyFlags are shared by plan and apply, since a plan is the first half of an
-// apply and taking different flags would make the preview a different question.
+// applyFlags is what plan and apply were given, read off the Call once so the
+// rest of each command reads a struct rather than a map.
 type applyFlags struct {
 	config   string
 	to       string
@@ -106,16 +100,21 @@ type applyFlags struct {
 	snapshot string
 }
 
-func (a *applyFlags) bind(fs *flag.FlagSet) {
-	fs.StringVar(&a.config, "config", "", "path to a pgctl config")
-	fs.StringVar(&a.to, "to", "", "connection to apply to")
-	fs.StringVar(&a.set, "set", "", "restore only this table set")
-	fs.StringVar(&a.tables, "tables", "", "restore only these tables (comma separated, schema-qualified)")
-	fs.BoolVar(&a.widen, "widen", false, "include tables the selection references but does not name")
-	fs.BoolVar(&a.verbose, "v", false, "report every table")
-	fs.BoolVar(&a.yes, "yes", false, "skip the confirmation prompt")
-	fs.StringVar(&a.confirm, "confirm", "",
-		"name of the connection being written to, required for a guarded one")
+// applyFlagsOf reads plan's and apply's shared flags. Their declaration is in
+// tree.go — applyFlagSet — and the two have to name the same things, which is
+// what having one declaration and one reader is for.
+func applyFlagsOf(c spec.Call) applyFlags {
+	return applyFlags{
+		config:   c.Flag("config"),
+		to:       c.Flag("to"),
+		set:      c.Flag("set"),
+		tables:   c.Flag("tables"),
+		widen:    c.Bool("widen"),
+		verbose:  c.Bool("verbose"),
+		yes:      c.Bool("yes"),
+		confirm:  c.Flag("confirm"),
+		snapshot: c.Arg("snapshot"),
+	}
 }
 
 func (a *applyFlags) request() engine.ApplyRequest {
@@ -128,13 +127,8 @@ func (a *applyFlags) request() engine.ApplyRequest {
 	}
 }
 
-func runPlan(ctx context.Context, args []string) error {
-	var f applyFlags
-	fs := flag.NewFlagSet("plan", flag.ExitOnError)
-	f.bind(fs)
-	_ = fs.Parse(Permute(fs, args))
-	f.snapshot = fs.Arg(0)
-
+func runPlan(ctx context.Context, c spec.Call) error {
+	f := applyFlagsOf(c)
 	e, err := load(f.config)
 	if err != nil {
 		return err
@@ -147,17 +141,12 @@ func runPlan(ctx context.Context, args []string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Print(plan.Describe())
+	fmt.Fprint(c.Out, plan.Describe()) //nolint:errcheck // a closed stdout is the caller's business
 	return nil
 }
 
-func runApply(ctx context.Context, args []string) error {
-	var f applyFlags
-	fs := flag.NewFlagSet("apply", flag.ExitOnError)
-	f.bind(fs)
-	_ = fs.Parse(Permute(fs, args))
-	f.snapshot = fs.Arg(0)
-
+func runApply(ctx context.Context, c spec.Call) error {
+	f := applyFlagsOf(c)
 	e, err := load(f.config)
 	if err != nil {
 		return err
@@ -171,7 +160,7 @@ func runApply(ctx context.Context, args []string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Print(plan.Describe())
+	fmt.Fprint(c.Out, plan.Describe()) //nolint:errcheck // as in runPlan
 
 	if err := confirm(plan, f); err != nil {
 		return err
@@ -242,14 +231,9 @@ func interactive() bool {
 	return err == nil && info.Mode()&os.ModeCharDevice != 0
 }
 
-func runPrune(ctx context.Context, args []string) error {
-	fs := flag.NewFlagSet("prune", flag.ExitOnError)
-	configPath := fs.String("config", "", "path to a pgctl config")
-	from := fs.String("from", "", "only this connection")
-	apply := fs.Bool("apply", false, "actually delete; without it, prune only reports")
-	_ = fs.Parse(Permute(fs, args))
-
-	e, err := load(*configPath)
+func runPrune(ctx context.Context, c spec.Call) error {
+	from, apply := c.Flag("from"), c.Bool("apply")
+	e, err := load(c.Flag("config"))
 	if err != nil {
 		return err
 	}
@@ -262,7 +246,7 @@ func runPrune(ctx context.Context, args []string) error {
 		return fmt.Errorf("no storage.retention configured, so there is nothing to prune")
 	}
 
-	groups, err := e.SnapshotGroups(ctx, *from, printer(false))
+	groups, err := e.SnapshotGroups(ctx, from, printer(false))
 	if err != nil {
 		return err
 	}
@@ -279,7 +263,7 @@ func runPrune(ctx context.Context, args []string) error {
 				m.StartedAt.Local().Format("2006-01-02 15:04"), engine.HumanBytes(m.Bytes))
 			freed += m.Bytes
 			deleted++
-			if *apply {
+			if apply {
 				if err := e.DeleteSnapshotEverywhere(ctx, m.ID); err != nil {
 					return err
 				}
@@ -290,7 +274,7 @@ func runPrune(ctx context.Context, args []string) error {
 	switch {
 	case deleted == 0:
 		fmt.Println("nothing to prune")
-	case *apply:
+	case apply:
 		fmt.Printf("removed %d snapshot(s), %s freed\n", deleted, engine.HumanBytes(freed))
 	default:
 		// Reporting by default rather than deleting by default: a retention
@@ -301,26 +285,15 @@ func runPrune(ctx context.Context, args []string) error {
 	return nil
 }
 
-func runMove(ctx context.Context, args []string) error {
-	fs := flag.NewFlagSet("move", flag.ExitOnError)
-	configPath := fs.String("config", "", "path to a pgctl config")
-	source := fs.String("from", "", "connection to read")
-	to := fs.String("to", "", "connection to write")
-	database := fs.String("db", "", "database to move (default: every declared database)")
-	set := fs.String("set", "", "move only this table set")
-	tables := fs.String("tables", "", "move only these tables (comma separated, schema-qualified)")
-	widen := fs.Bool("widen", false, "include tables the selection references but does not name")
-	keep := fs.Bool("keep", false, "keep the staged snapshot instead of deleting it")
-	verbose := fs.Bool("v", false, "report every table")
-	yes := fs.Bool("yes", false, "skip the confirmation prompt")
-	confirmName := fs.String("confirm", "",
-		"name of the connection being written to, required for a guarded one")
-	_ = fs.Parse(Permute(fs, args))
+func runMove(ctx context.Context, c spec.Call) error {
+	source, to := c.Flag("from"), c.Flag("to")
+	database, set, tables := c.Flag("db"), c.Flag("set"), c.Flag("tables")
+	widen, keep, verbose := c.Bool("widen"), c.Bool("keep"), c.Bool("verbose")
 
-	if *source == "" || *to == "" {
+	if source == "" || to == "" {
 		return fmt.Errorf("--from and --to are both required")
 	}
-	e, err := load(*configPath)
+	e, err := load(c.Flag("config"))
 	if err != nil {
 		return err
 	}
@@ -328,35 +301,71 @@ func runMove(ctx context.Context, args []string) error {
 	// A guarded target is confirmed once, before any work: a move takes a
 	// snapshot first, and asking after that has spent the time is asking too
 	// late to be a choice.
-	conn, ok := e.Config().Lookup(*to)
+	conn, ok := e.Config().Lookup(to)
 	if !ok {
-		return fmt.Errorf("unknown connection %q", *to)
+		return fmt.Errorf("unknown connection %q", to)
 	}
-	if err := confirmConn(conn, *confirmName, *yes,
-		fmt.Sprintf("Refresh %s from %s?", *to, *source)); err != nil {
+	if err := confirmConn(conn, c.Flag("confirm"), c.Bool("yes"),
+		fmt.Sprintf("Refresh %s from %s?", to, source)); err != nil {
 		return err
 	}
 
-	databases := []string{*database}
-	if *database == "" {
-		if databases, err = e.DatabaseNames(ctx, *source); err != nil {
+	databases := []string{database}
+	if database == "" {
+		if databases, err = e.DatabaseNames(ctx, source); err != nil {
 			return err
 		}
 	}
 
-	report := printer(*verbose)
+	report := printer(verbose)
 	for _, db := range databases {
 		if err := e.Move(ctx, engine.MoveRequest{
-			From:     *source,
-			To:       *to,
+			From:     source,
+			To:       to,
 			Database: db,
-			Set:      *set,
-			Tables:   splitList(*tables),
-			Widen:    *widen,
-			Keep:     *keep,
+			Set:      set,
+			Tables:   splitList(tables),
+			Widen:    widen,
+			Keep:     keep,
 		}, report); err != nil {
 			return err
 		}
+	}
+	return nil
+}
+
+// runBrowse opens the interface, or captures it.
+//
+// The whole of what pgctl writes to get --snapshot and --script. Decision 10:
+// two capture mechanisms, deliberately — the test helper reaches any state at
+// all because it can touch unexported fields, and this reaches what a keystroke
+// reaches and needs no test. The difference that matters is that an agent finds
+// this one from --help.
+func runBrowse(_ context.Context, c spec.Call) error {
+	m, err := tui.Open(c.Flag("config"))
+	if err != nil {
+		return err
+	}
+
+	dir := c.Flag("snapshot")
+	if dir == "" {
+		return tui.Run(m)
+	}
+
+	script, err := harness.ScriptFile(c.Flag("script"))
+	if err != nil {
+		return err
+	}
+	// Wrapped in a runner because the model has no View: the runner owns the
+	// canvas, so it is what the harness drives. No pixel layer — a snapshot is
+	// capturing frames for documentation and must record the characters,
+	// whatever terminal it was started from.
+	frames, err := harness.Snapshot(app.New(m, app.WithChrome(tui.Chrome)), dir, script)
+	if err != nil {
+		return err
+	}
+	for _, f := range frames {
+		fmt.Fprintln(c.Out, filepath.Join(dir, f.File)) //nolint:errcheck // as above
 	}
 	return nil
 }
