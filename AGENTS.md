@@ -55,6 +55,27 @@ PGCTL_FRAMES=/tmp/pgctl-frames go test ./internal/tui -run CaptureFrames
 tuikit frames /tmp/pgctl-frames -out /tmp/frames.html -title pgctl
 ```
 
+## Keeping up with tuikit
+
+tuikit is resolved through `replace => ../tuikit`, so it has no version: a pull
+there changes this tool's behaviour with nothing to bump and nothing to read.
+Two commands close that gap, and **both are worth running before you build any
+interface**.
+
+```sh
+tuikit news           # what tuikit decided since this tool last looked
+tuikit gallery -list  # everything comp already has, so you do not rebuild it
+```
+
+`news` needs no arguments from inside this repo — it finds tuikit through the
+`go.mod` replace directive and reads the marker below. When you have read what
+it prints, move the number.
+
+Do not hand-write a list of tuikit features here. The one that used to be in
+this file said "One thing" and named two of the nine that had landed since.
+
+Reconciled with tuikit through decision 34.
+
 ## When comp cannot do something
 
 You will hit this. The rule is **not** to work around it quietly.
