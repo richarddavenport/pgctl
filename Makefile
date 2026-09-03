@@ -11,12 +11,14 @@ LDFLAGS  = -s -w -X main.version=$(VERSION) -X main.commit=$(COMMIT)
 # Where captured frames land. Outside the repo: they are an intermediate, and
 # docs/screens is the committed output.
 FRAMES ?= /tmp/pgctl-frames
+# A page of every screen, for looking at rather than for committing.
+REVIEW ?= /tmp/pgctl-review.html
 
 LAB_IMAGE ?= postgres:17
 LAB_PORT  ?= 55432
 LAB_NAME  ?= pgctl-lab
 
-.PHONY: install build test test-all lint check frames watch lab-up lab-down help
+.PHONY: install build test test-all lint check frames review watch lab-up lab-down help
 
 ## install: build the working tree and replace the pgctl on your PATH
 install:
@@ -50,6 +52,14 @@ frames:
 	@PGCTL_FRAMES=$(FRAMES) go test ./internal/tui/ -run CaptureFrames -count=1 >/dev/null
 	@tuikit frames $(FRAMES) -md -out docs/screens.md -title "pgctl screens"
 	@echo "$$(ls docs/screens | wc -l | tr -d ' ') frames -> docs/screens.md"
+
+## review: build a page of every screen, in colour, and open it
+review:
+	@rm -rf $(FRAMES)
+	@PGCTL_FRAMES=$(FRAMES) go test ./internal/tui/ -run CaptureFrames -count=1 >/dev/null
+	@tuikit frames $(FRAMES) -out $(REVIEW) -title "pgctl — every screen"
+	@echo "$(REVIEW)"
+	@open $(REVIEW) 2>/dev/null || echo "open it yourself: $(REVIEW)"
 
 ## watch: recapture on save and reload a browser, for building a screen
 watch:
