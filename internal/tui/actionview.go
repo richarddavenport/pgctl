@@ -117,6 +117,21 @@ func (m *Model) drawAction(c *comp.Canvas, r comp.Rect) {
 	draw(head)
 	y++
 	for _, b := range blocks {
+		if b.list {
+			// A viewport over the options, so ten databases fit under a form on
+			// a short terminal. Select rather than Move: the multi-select's
+			// cursor is pgctl's, moved by its own keys, and the list is only
+			// showing it.
+			h := min(len(b.rows)+1, content.Bottom()-y+1)
+			if h < 2 {
+				continue
+			}
+			m.multiList.Select(b.cursor)
+			m.multiList.Focused = true
+			m.multiList.Draw(c, comp.Rect{X: content.X, Y: y, W: content.W, H: h}, b.rows)
+			y += h
+			continue
+		}
 		if b.rows != nil {
 			draw(b.rows)
 			continue
@@ -180,9 +195,21 @@ func (m *Model) actionHead() []comp.Row {
 type formBlock struct {
 	form comp.Form
 	rows []comp.Row
+
+	// list draws rows through the model's multiList, which scrolls and shows a
+	// position. prd has ten databases and a 24-row terminal cannot show them
+	// under a form; without a viewport the options below the fold are simply
+	// gone, with the count on the field row saying "1 of 10" and no way to
+	// reach the other nine.
+	list   bool
+	cursor int
 }
 
 func (b formBlock) height() int {
+	if b.list {
+		// The rows plus the position line comp.List keeps for itself.
+		return len(b.rows) + 1
+	}
 	if b.rows != nil {
 		return len(b.rows)
 	}
@@ -217,6 +244,7 @@ func (m *Model) actionForm() []formBlock {
 	base := form
 	var blocks []formBlock
 	first := 0
+	multiCursor := 0
 	flush := func(upto int, rows []comp.Row) {
 		run := base
 		run.Fields = form.Fields[first:upto]
@@ -226,7 +254,7 @@ func (m *Model) actionForm() []formBlock {
 			blocks = append(blocks, formBlock{form: run})
 		}
 		if rows != nil {
-			blocks = append(blocks, formBlock{rows: rows})
+			blocks = append(blocks, formBlock{rows: rows, list: true, cursor: multiCursor})
 		}
 		first = upto
 	}
@@ -266,7 +294,8 @@ func (m *Model) actionForm() []formBlock {
 			field.Choices = []string{m.multiSummary(f)}
 			form.Fields = append(form.Fields, field)
 			// Its options go directly underneath, so the run ends here.
-			flush(len(form.Fields), m.multiRows(f))
+			multiCursor = f.choice
+			flush(len(form.Fields), m.multiRows(f, len(form.Fields)-1 == a.cursor))
 			continue
 		}
 		form.Fields = append(form.Fields, field)
@@ -313,7 +342,18 @@ func (m *Model) multiSummary(f formField) string {
 }
 
 // multiRows are the options under a multi-select, indented under its label.
-func (m *Model) multiRows(f formField) []comp.Row {
+//
+// The row under the multi-select's OWN cursor is marked, and that is not a
+// nicety: space toggles whatever that cursor is on, and the port onto comp.Form
+// dropped the marking while keeping the cursor. Moving it changed nothing on
+// screen and space toggled a row you could not identify — "I can't choose the
+// databases very well, it's difficult", which is the correct reaction to an
+// invisible cursor.
+//
+// Lead rather than a highlight on the whole row, so the ●/○ keeps its own
+// colour: whether an option is IN is the state, and the cursor is where you
+// are. comp.List learned this in tuikit #44 and the reasoning is the same here.
+func (m *Model) multiRows(f formField, focused bool) []comp.Row {
 	out := make([]comp.Row, 0, len(f.options))
 	for i, opt := range f.options {
 		// The same filled/hollow pair the Connections panel marks reachability
@@ -323,7 +363,16 @@ func (m *Model) multiRows(f formField) []comp.Row {
 		if f.selected[i] {
 			mark, style = "●", &okStyle
 		}
-		out = append(out, comp.Row{Text: "      " + mark + " " + opt, Style: style})
+		row := comp.Row{
+			Lead:      "    " + mark + " ",
+			LeadStyle: style,
+			Text:      opt,
+		}
+		if focused && i == f.choice {
+			row.Lead = "  ▸ " + mark + " "
+			row.Style = &selectedStyle
+		}
+		out = append(out, row)
 	}
 	return out
 }

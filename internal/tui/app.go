@@ -52,8 +52,9 @@ type Model struct {
 	// of ints here, plus the window arithmetic that kept them in step — a
 	// comp.List will not let a caller assign either, because the invariant
 	// between them is the whole component.
-	lists    [panelCount]comp.List
-	paneList comp.List
+	lists     [panelCount]comp.List
+	paneList  comp.List
+	multiList comp.List
 
 	// split divides the panel column from the detail pane, and is draggable.
 	split comp.Split
@@ -161,6 +162,15 @@ func New(e *engine.Engine) *Model {
 			// its row on one big list; it does not earn five. tuikit #46.
 			NoStatus: true,
 		}
+	}
+	// The options under a multi-select field in a modal. Its cursor is the
+	// form field's, so this list is only ever Selected, never Moved.
+	m.multiList = comp.List{
+		Name:       regModalOptions,
+		Selected:   &selectedStyle,
+		Unfocused:  &selectedStyle,
+		Status:     &mutedStyle,
+		EmptyStyle: &mutedStyle,
 	}
 	m.paneList = comp.List{
 		Name:       regBody,

@@ -9,14 +9,14 @@ pgctl  pgctl.yaml
 │ c│                                                                        │  │
 │ q│ ▸ To                        ‹ qat  (guarded — needs its name typed) ›  │  │
 ╰──│   Databases                 1 of 3                                     │  │
-╭─ │       ○ claims                                                         │  │
-│ 0│       ● product-development                                            │  │
-╰──│       ○ quote                                                          │  │
-╭─ │   Keep the staged snapshot  no                                         │  │
-│ c│                                                                        │  │
-╰──│ ← → to change                                                          │… │
-╭─ │ ← → change · ↑↓ fields · enter run · esc cancel                        │  │
-│ n╰────────────────────────────────────────────────────────────────────────╯  │
-╰──────────────────────────────╯ │                                             │
+╭─ │     ○ claims                                                           │  │
+│ 0│     ● product-development                                              │  │
+╰──│     ○ quote                                                            │  │
+╭─ │                                                                   3/3  │  │
+│ c│   Keep the staged snapshot  no                                         │  │
+╰──│                                                                        │… │
+╭─ │ ← → to change                                                          │  │
+│ n│ ← → change · ↑↓ fields · enter run · esc cancel                        │  │
+╰──╰────────────────────────────────────────────────────────────────────────╯  │
                                  │                                             │
                                  ╰─────────────────────────────────────────────╯

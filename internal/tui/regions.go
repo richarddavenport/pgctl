@@ -41,8 +41,9 @@ const (
 	// regModal and regHelp are the overlays. They are regions so that a script
 	// can assert a modal is open rather than inferring it from the text that
 	// happens to be on screen.
-	regModal comp.Name = "modal"
-	regHelp  comp.Name = "help"
+	regModal        comp.Name = "modal"
+	regModalOptions comp.Name = "modal.option"
+	regHelp         comp.Name = "help"
 )
 
 // panelRegions maps a panel to its region, in the same order as the panel

@@ -9,15 +9,15 @@ pgctl  pgctl.yaml
 │ claims               48.0 MB  │ │ user       mbpiadmin                                                                           │
 │ quote                20.0 GB  │ │ server     PostgreSQL 17.4                                                                     │
 ╰───────────────────────────────╯ │ databases  3                                                                                   │
-╭─ 3 Snapshots (1) ─────────────╮ │ total size 31.0 GB                                                                             │
-│ 08-27 22:╭────────────────────────────────────────────────────────────────────────────────────────────────────────────╮          │
-╰──────────│ Take a snapshot of prd                                                                                     │          │
-╭─ 4 Sets (│ Reads the chosen databases and writes a compressed copy. Nothing is written to prd.                        │          │
-│ claims 2+│                                                                                                            │          │
-╰──────────│ ▸ Databases          1 of 3                                                                                │          │
-╭─ 5 Runs ─│       ○ claims                                                                                             │          │
-│ nothing r│       ● product-development                                                                                │          │
-╰──────────│       ○ quote                                                                                              │          │
+╭─ 3 Snapsh╭────────────────────────────────────────────────────────────────────────────────────────────────────────────╮          │
+│ 08-27 22:│ Take a snapshot of prd                                                                                     │          │
+╰──────────│ Reads the chosen databases and writes a compressed copy. Nothing is written to prd.                        │          │
+╭─ 4 Sets (│                                                                                                            │          │
+│ claims 2+│ ▸ Databases          1 of 3                                                                                │          │
+╰──────────│   ▸ ○ claims                                                                                               │          │
+╭─ 5 Runs ─│     ● product-development                                                                                  │          │
+│ nothing r│     ○ quote                                                                                                │          │
+╰──────────│                                                                                                       3/3  │          │
            │   Upload to storage  no                                                                                    │          │
            │                                                                                                            │          │
            │ defaults to the one you were looking at; a takes all of them                                               │          │
