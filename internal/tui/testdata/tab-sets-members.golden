@@ -1,37 +1,37 @@
 pgctl  pgctl.yaml
-╭─ 1 Connections (3) ───────────╮ ╭────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ ● prd       protected         │ │ ‹ Members · Closure · Load order ›                                                             │
-│ ● qat       guarded           │ │                                                                                                │
-│ ✗ scratch                     │ │ claims                                                                                         │
-╰───────────────────────────────╯ │ claims and everything a claim points at                                                        │
-╭─ 2 Databases (3) ─────────────╮ │                                                                                                │
-│ product-development  11.0 GB  │ │ patterns      claims.*                                                                         │
-│ claims               48.0 MB  │ │ matches       2 tables on prd                                                                  │
-│ quote                20.0 GB  │ │ closure       +2 more — see Closure                                                            │
-╰───────────────────────────────╯ │                                                                                                │
-╭─ 3 Snapshots (1) ─────────────╮ │ MEMBERS                                                                                        │
-│ 08-27 22:00  1.9 GB l         │ │ TABLE                                                                                     SIZE │
-╰───────────────────────────────╯ │ claims.policy_claim                                                                   180.0 MB │
-╭─ 4 Sets (1) ──────────────────╮ │ claims.claim_detail                                                                          - │
-│ claims 2+2                    │ │                                                                                                │
-╰───────────────────────────────╯ │                                                                                                │
-╭─ 5 Runs ──────────────────────╮ │                                                                                                │
-│ nothing run yet               │ │                                                                                                │
-╰───────────────────────────────╯ │                                                                                                │
-                                  │                                                                                                │
-                                  │                                                                                                │
-                                  │                                                                                                │
-                                  │                                                                                                │
-                                  │                                                                                                │
-                                  │                                                                                                │
-                                  │                                                                                                │
-                                  │                                                                                                │
-                                  │                                                                                                │
-                                  │                                                                                                │
-                                  │                                                                                                │
-                                  │                                                                                                │
-                                  │                                                                                                │
-                                  │                                                                                                │
-                                  │                                                                                         11/11  │
-                                  ╰────────────────────────────────────────────────────────────────────────────────────────────────╯
-n snapshot · a apply · m move · p prune · / filter · tab pane · ? keys
+╭─ 1 Connections (3) ───────────╮▏╭────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ ● prd               protected │▏│ ‹ Members · Closure · Load order ›                                                             │
+│ ● qat                 guarded │▏│                                                                                                │
+│ ✗ scratch                     │▏│   claims                                                                                       │
+╰───────────────────────────────╯▏│   claims and everything a claim points at                                                      │
+╭─ 2 Databases (3) ─────────────╮▏│                                                                                                │
+│ product-development   11.0 GB │▏│   patterns      claims.*                                                                       │
+│ claims                48.0 MB │▏│   matches       2 tables on prd                                                                │
+│ quote                 20.0 GB │▏│   closure       +2 more — see Closure                                                          │
+╰───────────────────────────────╯▏│                                                                                                │
+╭─ 3 Snapshots (1) ─────────────╮▏│   MEMBERS                                                                                      │
+│   08-27 22:00        1.9 GB l │▏│   TABLE                                                                                   SIZE │
+╰───────────────────────────────╯▏│ › claims.policy_claim                                                                 180.0 MB │
+╭─ 4 Sets (1) ──────────────────╮▏│   claims.claim_detail                                                                        - │
+│ claims                    2+2 │▏│                                                                                                │
+╰───────────────────────────────╯▏│                                                                                                │
+╭─ 5 Runs ──────────────────────╮▏│                                                                                                │
+│ nothing run yet               │▏│                                                                                                │
+╰───────────────────────────────╯▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                         11/11  │
+                                 ▏╰────────────────────────────────────────────────────────────────────────────────────────────────╯
+n snapshot · a apply · m move · p prune · / filter · ctrl+p commands · ? keys

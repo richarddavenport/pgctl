@@ -1,37 +1,37 @@
 pgctl  pgctl.yaml
-╭─ 1 Connections (3) ───────────╮ ╭────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ ● prd       protected         │ │ ‹ Members · Closure · Load order ›                                                             │
-│ ● qat       guarded           │ │                                                                                                │
-│ ✗ scratch                     │ │ The load order is computed against the target when you plan an apply, because the target's     │
-╰───────────────────────────────╯ │ foreign keys are the ones a load has to satisfy. Press a to plan one.                          │
-╭─ 2 Databases (3) ─────────────╮ │                                                                                                │
-│ product-development  11.0 GB  │ │                                                                                                │
-│ claims               48.0 MB  │ │                                                                                                │
-│ quote                20.0 GB  │ │                                                                                                │
-╰───────────────────────────────╯ │                                                                                                │
-╭─ 3 Snapshots (1) ─────────────╮ │                                                                                                │
-│ 08-27 22:00  1.9 GB l         │ │                                                                                                │
-╰───────────────────────────────╯ │                                                                                                │
-╭─ 4 Sets (1) ──────────────────╮ │                                                                                                │
-│ claims 2+2                    │ │                                                                                                │
-╰───────────────────────────────╯ │                                                                                                │
-╭─ 5 Runs ──────────────────────╮ │                                                                                                │
-│ nothing run yet               │ │                                                                                                │
-╰───────────────────────────────╯ │                                                                                                │
-                                  │                                                                                                │
-                                  │                                                                                                │
-                                  │                                                                                                │
-                                  │                                                                                                │
-                                  │                                                                                                │
-                                  │                                                                                                │
-                                  │                                                                                                │
-                                  │                                                                                                │
-                                  │                                                                                                │
-                                  │                                                                                                │
-                                  │                                                                                                │
-                                  │                                                                                                │
-                                  │                                                                                                │
-                                  │                                                                                                │
-                                  │                                                                                                │
-                                  ╰────────────────────────────────────────────────────────────────────────────────────────────────╯
-n snapshot · a apply · m move · p prune · / filter · tab pane · ? keys
+╭─ 1 Connections (3) ───────────╮▏╭────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ ● prd               protected │▏│ ‹ Members · Closure · Load order ›                                                             │
+│ ● qat                 guarded │▏│                                                                                                │
+│ ✗ scratch                     │▏│ The load order is computed against the target when you plan an apply, because the target's     │
+╰───────────────────────────────╯▏│ foreign keys are the ones a load has to satisfy. Press a to plan one.                          │
+╭─ 2 Databases (3) ─────────────╮▏│                                                                                                │
+│ product-development   11.0 GB │▏│                                                                                                │
+│ claims                48.0 MB │▏│                                                                                                │
+│ quote                 20.0 GB │▏│                                                                                                │
+╰───────────────────────────────╯▏│                                                                                                │
+╭─ 3 Snapshots (1) ─────────────╮▏│                                                                                                │
+│   08-27 22:00        1.9 GB l │▏│                                                                                                │
+╰───────────────────────────────╯▏│                                                                                                │
+╭─ 4 Sets (1) ──────────────────╮▏│                                                                                                │
+│ claims                    2+2 │▏│                                                                                                │
+╰───────────────────────────────╯▏│                                                                                                │
+╭─ 5 Runs ──────────────────────╮▏│                                                                                                │
+│ nothing run yet               │▏│                                                                                                │
+╰───────────────────────────────╯▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏╰────────────────────────────────────────────────────────────────────────────────────────────────╯
+n snapshot · a apply · m move · p prune · / filter · ctrl+p commands · ? keys

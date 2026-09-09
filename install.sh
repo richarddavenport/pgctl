@@ -2,8 +2,8 @@
 # Fetch the pgctl release binary for this platform and put it on your PATH.
 #
 # For someone who wants the tool. If you want to CHANGE it, clone the repo and
-# run `make install` — building from source needs a tuikit checkout beside it,
-# because go.mod resolves tuikit through a replace.
+# run `make install`: tuikit is a tagged public module, so `go build` needs
+# nothing beside the checkout.
 #
 #   curl -fsSL <this file> | bash
 #   VERSION=v0.2.0 ./install.sh     # a specific release

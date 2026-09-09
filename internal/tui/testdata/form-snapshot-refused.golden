@@ -1,0 +1,37 @@
+pgctl  pgctl.yaml
+╭─ 1 Connections (3) ───────────╮▏╭────────────────────────────────────────────────╭──────────────────────────────────────────────╮╮
+│ ● prd               protected │▏│ ‹ Overview · Databases · Config ›              │refused                                       ││
+│ ● qat                 guarded │▏│                                                │                                              ││
+│ ✗ scratch                     │▏│ scratch                                        │scratch is unreachable, so there is no        ││
+╰───────────────────────────────╯▏│                                                │database to act on: dial tcp 127.0.0.1:5432:  ││
+╭─ 2 Databases ─────────────────╮▏│ CANNOT REACH SCRATCH                           │connect: connection refused                   ││
+│ unreachable                   │▏│   dial tcp 127.0.0.1:5432: connect: connection │                                              ││
+╰───────────────────────────────╯▏│                                                │esc dismiss                                   ││
+╭─ 3 Snapshots ─────────────────╮▏│ r retries. A secrets file that will not decrypt╰──────────────────────────────────────────────╯│
+│ none on scratch — press n     │▏│ address, and a stopped server all look the same from here.                                     │
+╰───────────────────────────────╯▏│                                                                                                │
+╭─ 4 Sets (1) ──────────────────╮▏│                                                                                                │
+│ claims                      ? │▏│                                                                                                │
+╰───────────────────────────────╯▏│                                                                                                │
+╭─ 5 Runs ──────────────────────╮▏│                                                                                                │
+│ nothing run yet               │▏│                                                                                                │
+╰───────────────────────────────╯▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏╰────────────────────────────────────────────────────────────────────────────────────────────────╯
+n snapshot · a apply · m move · p prune · / filter · ctrl+p commands · ? keys

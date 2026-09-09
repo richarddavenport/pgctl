@@ -5,24 +5,64 @@ import (
 	"strings"
 )
 
-// Storage kinds.
-const (
-	StorageLocal     = "local"
-	StorageAzureBlob = "azureblob"
-)
+// StorageAzureBlob is a remote's kind, and so far the only one. The local
+// directory is not a kind: it is always there and is not a remote.
+const StorageAzureBlob = "azureblob"
+
+// orDefault is a value or a placeholder, for an error message that shows the
+// shape to write rather than describing it.
+func orDefault(s, fallback string) string {
+	if s == "" {
+		return fallback
+	}
+	return s
+}
 
 // Validate reports the config problems that would make a run meaningless.
 // Problems that only make it worse are recorded in Warnings instead.
 func (c *Config) Validate() error {
-	switch c.Storage.Kind {
-	case StorageLocal:
-	case StorageAzureBlob:
-		if c.Storage.Container == "" {
-			return fmt.Errorf("storage.container is required for kind %q", StorageAzureBlob)
+	// The single-remote keys, refused by name with the shape to write instead.
+	// A config half-migrated is worse than one that will not load: it would
+	// keep pushing to the destination it always did while the interface offered
+	// a list that did not include it.
+	for key, value := range map[string]string{
+		"kind":       c.Storage.LegacyKind,
+		"container":  c.Storage.LegacyContainer,
+		"endpoint":   c.Storage.LegacyEndpoint,
+		"accountEnv": c.Storage.LegacyAccountEnv,
+		"keyEnv":     c.Storage.LegacyKeyEnv,
+	} {
+		if value == "" {
+			continue
 		}
-	default:
-		return fmt.Errorf("unknown storage.kind %q (want %q or %q)",
-			c.Storage.Kind, StorageLocal, StorageAzureBlob)
+		return fmt.Errorf("storage.%s is no longer read: storage now declares a "+
+			"list of destinations. Move it under storage.remotes:\n\n"+
+			"  storage:\n"+
+			"    dir: %s\n"+
+			"    remotes:\n"+
+			"      - name: snapshots\n"+
+			"        kind: %s\n"+
+			"        container: %s\n\n"+
+			"and see docs/config.md. A local-only config declares no remotes at all",
+			key, orDefault(c.Storage.Dir, ".pgctl/snapshots"),
+			StorageAzureBlob, orDefault(c.Storage.LegacyContainer, "pg-snapshots"))
+	}
+
+	names := map[string]bool{LocalStorage: true}
+	for _, r := range c.Storage.Remotes {
+		switch {
+		case r.Name == "":
+			return fmt.Errorf("a storage remote has no name")
+		case names[r.Name]:
+			return fmt.Errorf("storage remote %q declared twice, or named after "+
+				"the local directory", r.Name)
+		case r.Kind != StorageAzureBlob:
+			return fmt.Errorf("storage remote %q: unknown kind %q (want %q)",
+				r.Name, r.Kind, StorageAzureBlob)
+		case r.Container == "":
+			return fmt.Errorf("storage remote %q: container is required", r.Name)
+		}
+		names[r.Name] = true
 	}
 
 	setNames := map[string]bool{}
@@ -79,22 +119,40 @@ func (c *Config) Retentions() []int {
 	return []int{c.Storage.Retention.Daily, c.Storage.Retention.Weekly, c.Storage.Retention.Monthly}
 }
 
-// validPattern enforces schema qualification. An unqualified pattern would
-// resolve against search_path at some later moment, which for a tool that
-// truncates tables is not a risk worth carrying.
+// validPattern checks the shape of a table pattern.
+//
+// A pattern is `schema.table`, either part optionally wildcarded at its start
+// or end, or a bare WILDCARDED table pattern that applies in every schema —
+// `*as400*`. A bare exact name is still refused, because that is a table
+// somebody forgot to qualify rather than a statement about every schema. It is not
+// resolved against search_path at any point — an unqualified pattern means
+// "every schema" explicitly rather than "whichever one the connection happens
+// to be looking at", which for a tool that truncates tables is the distinction
+// that matters.
+//
+// What is still refused is a `*` in the middle: `oper*ions.foo` is either a
+// typo or a regexp somebody expected to work, and both are better answered now
+// than by a rule that matches nothing.
 func validPattern(pat string) error {
 	if pat == "" {
 		return fmt.Errorf("empty table pattern")
 	}
-	schema, table, ok := strings.Cut(pat, ".")
-	if !ok || schema == "" || table == "" {
-		return fmt.Errorf("table pattern %q is not schema-qualified (want schema.table)", pat)
+	schema, table := "*", pat
+	if s, t, ok := strings.Cut(pat, "."); ok {
+		schema, table = s, t
+	} else if !strings.Contains(pat, "*") {
+		return fmt.Errorf("table pattern %q is not schema-qualified (want schema.table, "+
+			"or *.%s if you mean that table in every schema)", pat, pat)
 	}
-	if strings.Contains(schema, "*") {
-		return fmt.Errorf("table pattern %q: wildcards are allowed in the table part only", pat)
+	if schema == "" || table == "" {
+		return fmt.Errorf("table pattern %q has an empty half (want schema.table, "+
+			"or a bare table pattern for every schema)", pat)
 	}
-	if inner := strings.Trim(table, "*"); strings.Contains(inner, "*") {
-		return fmt.Errorf("table pattern %q: `*` is only allowed at the start or the end", pat)
+	for part, half := range map[string]string{"schema": schema, "table": table} {
+		if inner := strings.Trim(half, "*"); strings.Contains(inner, "*") {
+			return fmt.Errorf("table pattern %q: in the %s part, `*` is only allowed "+
+				"at the start or the end", pat, part)
+		}
 	}
 	return nil
 }

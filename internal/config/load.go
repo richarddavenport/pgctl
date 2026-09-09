@@ -123,17 +123,22 @@ func (c *Config) applyDefaults() {
 	if c.Defaults.LockTimeout == 0 {
 		c.Defaults.LockTimeout = 30 * time.Second
 	}
-	if c.Storage.Kind == "" {
-		c.Storage.Kind = StorageLocal
-	}
 	if c.Storage.Dir == "" {
 		c.Storage.Dir = ".pgctl/snapshots"
 	}
-	if c.Storage.AccountEnv == "" {
-		c.Storage.AccountEnv = "AZURE_STORAGE_ACCOUNT"
-	}
-	if c.Storage.KeyEnv == "" {
-		c.Storage.KeyEnv = "AZURE_STORAGE_KEY"
+	for i := range c.Storage.Remotes {
+		r := &c.Storage.Remotes[i]
+		if r.Kind == "" {
+			r.Kind = StorageAzureBlob
+		}
+		// The defaults are the variables `az` itself sets, so a remote that
+		// uses the account you are already logged into names nothing.
+		if r.AccountEnv == "" {
+			r.AccountEnv = "AZURE_STORAGE_ACCOUNT"
+		}
+		if r.KeyEnv == "" {
+			r.KeyEnv = "AZURE_STORAGE_KEY"
+		}
 	}
 
 	// The template databases are never interesting, and `postgres` is the

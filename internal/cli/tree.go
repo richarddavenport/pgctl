@@ -38,8 +38,9 @@ func Commands() spec.Command {
 					spec.Flag{Name: "db", Kind: spec.String,
 						Help: "database to snapshot (default: every declared database)"},
 					spec.Flag{Name: "verbose", Short: "v", Help: "report every table"},
-					spec.Flag{Name: "no-push",
-						Help: "keep the snapshot local even when remote storage is configured"},
+					spec.Flag{Name: "to-storage", Kind: spec.String, Complete: destinations,
+						Help: "where to put it: local, a declared remote, several " +
+							"comma-separated, or all. Required once a remote is declared"},
 				),
 				Run: do(runSnapshot),
 			},
@@ -144,6 +145,25 @@ func applyFlagSet() []spec.Flag {
 		spec.Flag{Name: "confirm", Kind: spec.String, Complete: connections,
 			Help: "name of the connection being written to, required for a guarded one"},
 	)
+}
+
+// destinations completes a storage destination.
+//
+// From the config and nothing else, like every completer here: a tab key that
+// listed what a container actually holds would open a network connection, and
+// people stop pressing keys that pause.
+func destinations(prefix string) []string {
+	cfg, err := config.Load("")
+	if err != nil {
+		return nil
+	}
+	out := []string{}
+	for _, name := range append(cfg.Destinations(), "all") {
+		if strings.HasPrefix(name, prefix) {
+			out = append(out, name)
+		}
+	}
+	return out
 }
 
 // connections completes a connection name from the config.

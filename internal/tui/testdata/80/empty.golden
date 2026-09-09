@@ -1,23 +1,23 @@
 pgctl  pgctl.yaml
-╭─ 1 Connections (3) ──────────╮ ╭─────────────────────────────────────────────╮
-│ ● prd       protected        │ │ ‹ Overview · Databases · Config ›           │
-│ ● qat       guarded          │ │                                             │
-│ ✗ scratch                    │ │ prd                                         │
-╰──────────────────────────────╯ │ protected — never a target                  │
-╭─ 2 Databases (3) ────────────╮ │                                             │
-│ product-development  11.0 GB │ │ host       prd.example:5432                 │
-│ claims               48.0 MB │ │ user       mbpiadmin                        │
-│ quote                20.0 GB │ │ server     PostgreSQL 17.4                  │
-╰──────────────────────────────╯ │ databases  3                                │
-╭─ 3 Snapshots ────────────────╮ │ total size 31.0 GB                          │
-│ none — press n               │ │ checked    just now                         │
-╰──────────────────────────────╯ │                                             │
-╭─ 4 Sets (1) ─────────────────╮ │ SNAPSHOTS                                   │
-│ claims 2+2                   │ │   none — press n to take one                │
-╰──────────────────────────────╯ │                                             │
-╭─ 5 Runs ─────────────────────╮ │                                             │
-│ nothing run yet              │ │                                             │
-╰──────────────────────────────╯ │                                             │
-                                 │                                             │
-                                 ╰─────────────────────────────────────────────╯
-n snapshot · a apply · m move · p prune · / filter · tab pane · ? keys
+╭─ 1 Connections (3) ──────────╮▏╭─────────────────────────────────────────────╮
+│ ● prd              protected │▏│ ‹ Overview · Databases · Config ›           │
+│ ● qat                guarded │▏│                                             │
+│ ✗ scratch                    │▏│ prd                                         │
+╰──────────────────────────────╯▏│ protected — never a target                  │
+╭─ 2 Databases (3) ────────────╮▏│                                             │
+│ product-development  11.0 GB │▏│ host       prd.example:5432                 │
+│ claims               48.0 MB │▏│ user       mbpiadmin                        │
+│ quote                20.0 GB │▏│ server     PostgreSQL 17.4                  │
+╰──────────────────────────────╯▏│ databases  3                                │
+╭─ 3 Snapshots ────────────────╮▏│ total size 31.0 GB                          │
+│ none on prd — press n        │▏│ checked    just now                         │
+╰──────────────────────────────╯▏│                                             │
+╭─ 4 Sets (1) ─────────────────╮▏│ SNAPSHOTS                                   │
+│ claims                   2+2 │▏│   none — press n to take one                │
+╰──────────────────────────────╯▏│                                             │
+╭─ 5 Runs ─────────────────────╮▏│                                             │
+│ nothing run yet              │▏│                                             │
+╰──────────────────────────────╯▏│                                             │
+                                ▏│                                             │
+                                ▏╰─────────────────────────────────────────────╯
+n snapshot · a apply · m move · p prune · / filter · ctrl+p commands · ? keys

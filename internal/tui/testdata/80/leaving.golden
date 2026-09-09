@@ -1,0 +1,23 @@
+pgctl  pgctl.yaml
+╭─ 1 Connections (3) ──────────╮▏╭─────────────────────────────────────────────╮
+│ ● prd              protected │▏│ ‹ Overview · Databases · Config ›           │
+│ ● qat                guarded │▏│                                             │
+│ ✗ scratch                    │▏│ prd                                         │
+╰──────────────────────────────╯▏│ protected — never a target                  │
+╭─ 2 Dat╭──────────────────────────────────────────────────────────────╮       │
+│ produc│Leave while apply → qat is running?                           │       │
+│ claims│                                                              │       │
+│ quote │It is cancelled rather than abandoned, so the engine's        │       │
+╰───────│onFailure and postApply hooks still run — they are what       │       │
+╭─ 3 Sna│bring an environment back up. Anything already written stays  │       │
+│   08-2│written.                                                      │       │
+╰───────│                                                              │       │
+╭─ 4 Set│y cancel it and leave · esc stay                              │       │
+│ claims╰──────────────────────────────────────────────────────────────╯       │
+╰──────────────────────────────╯▏│   newest 14h ago  prd/product-development/… │
+╭─ 5 Runs (2) ─────────────────╮▏│                                             │
+│ ⠋ apply → qat           1:41 │▏│                                             │
+│ ✓ snapshot prd          3:22 │▏│                                             │
+╰──────────────────────────────╯▏│                                             │
+                                ▏╰─────────────────────────────────────────────╯
+q stop and leave · tab log · ? keys

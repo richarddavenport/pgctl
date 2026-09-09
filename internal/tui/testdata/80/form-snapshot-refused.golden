@@ -1,0 +1,23 @@
+pgctl  pgctl.yaml
+╭─ 1 Connections (3) ──────────╭──────────────────────────────────────────────╮╮
+│ ● prd              protected │refused                                       ││
+│ ● qat                guarded │                                              ││
+│ ✗ scratch                    │scratch is unreachable, so there is no        ││
+╰──────────────────────────────│database to act on: dial tcp 127.0.0.1:5432:  ││
+╭─ 2 Databases ────────────────│connect: connection refused                   ││
+│ unreachable                  │                                              ││
+╰──────────────────────────────│esc dismiss                                   ││
+╭─ 3 Snapshots ────────────────╰──────────────────────────────────────────────╯│
+│ none on scratch — press n    │▏│ r retries. A secrets file that will not     │
+╰──────────────────────────────╯▏│ decrypt, a firewall rule that does not list │
+╭─ 4 Sets (1) ─────────────────╮▏│ this address, and a stopped server all look │
+│ claims                     ? │▏│ the same from here.                         │
+╰──────────────────────────────╯▏│                                             │
+╭─ 5 Runs ─────────────────────╮▏│                                             │
+│ nothing run yet              │▏│                                             │
+╰──────────────────────────────╯▏│                                             │
+                                ▏│                                             │
+                                ▏│                                             │
+                                ▏│                                             │
+                                ▏╰─────────────────────────────────────────────╯
+n snapshot · a apply · m move · p prune · / filter · ctrl+p commands · ? keys

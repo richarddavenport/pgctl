@@ -2,29 +2,21 @@ package tui
 
 import (
 	"fmt"
-	"strings"
-
-	"github.com/charmbracelet/x/ansi"
 
 	"github.com/richarddavenport/tuikit/comp"
 )
 
-// Layout: a fixed-width left column of panels, the rest to the detail pane.
-// The column is wide enough for a snapshot timestamp and its location marker,
-// which is the widest thing that has to stay readable.
+// Layout: a left column of panels, the rest to the detail pane.
 const (
-	leftWidth   = 32
+	// leftWidth is the narrowest the panel column may be dragged, and the
+	// width it takes on a screen too small to divide. It is measured from the
+	// widest thing that has to stay readable there — a snapshot timestamp with
+	// its size and its location marker.
+	leftWidth = 32
+
+	// minPaneWide is the detail pane's floor. Below leftWidth+minPaneWide there
+	// is no useful division to make, so the pane gets the screen.
 	minPaneWide = 40
-
-	// panelBlock is what lipgloss is told the panel is: leftWidth less the two
-	// columns its rounded border takes.
-	panelBlock = leftWidth - 2
-
-	// panelInner is what a row actually gets. lipgloss's Width includes
-	// padding, so the row loses the two columns of it as well. Getting this
-	// wrong by two wraps every row, which is how the first version rendered a
-	// database list.
-	panelInner = panelBlock - 2
 )
 
 // Draw renders the whole screen.
@@ -52,11 +44,21 @@ func (m *Model) Draw(c *comp.Canvas, r comp.Rect) {
 	m.drawBody(c, bands[1])
 	m.drawFooter(c, bands[2])
 
+	// A refusal is a sentence, not a word, and the header has room for neither
+	// it nor the config path it would push off the row. So it goes in a toast:
+	// bounded, wrapped, in the corner, with the key that dismisses it.
+	m.drawError(c, bands[1])
+
 	// A modal DOES sit over the frame, because what it is about to do is about
 	// what is behind it — the snapshot named in the title is the one selected
 	// in the panel underneath.
-	if m.action != nil {
+	switch {
+	case m.action != nil:
 		m.drawAction(c, r)
+	case m.showCommand:
+		m.drawCommands(c, r)
+	case m.leaving:
+		m.drawLeaving(c)
 	}
 }
 
@@ -121,7 +123,7 @@ func (m *Model) screenHeight() int {
 	return m.height
 }
 
-// drawHeader is the tool's name, the config it read, and whatever just happened.
+// drawHeader is the tool's name, the config it read, and what just happened.
 func (m *Model) drawHeader(c *comp.Canvas, r comp.Rect) {
 	source := m.cfg.Source
 	if source == "" {
@@ -134,18 +136,39 @@ func (m *Model) drawHeader(c *comp.Canvas, r comp.Rect) {
 	}
 
 	var right []comp.Segment
-	switch {
-	case m.err != nil:
-		right = []comp.Segment{{Text: "✗ " + m.err.Error() + " ", Style: &dangerStyle}}
-	case m.status != "":
+	if m.status != "" {
 		right = []comp.Segment{{Text: "✓ " + m.status + " ", Style: &okStyle}}
 	}
 
 	// MinLeft protects the name and the config path from being squeezed to
-	// nothing by a long error message. The message is what just happened; the
-	// path is what pgctl is pointed at, and an operator about to apply to an
+	// nothing by a long status. The status is what just happened; the path is
+	// what pgctl is pointed at, and an operator about to apply to an
 	// environment wants to be sure of that one.
 	comp.Bar{Left: left, Right: right, MinLeft: 24}.Draw(c, r, comp.Region(regHeader))
+}
+
+// drawError puts whatever went wrong in a corner of the body.
+//
+// A toast rather than a line in the header, and the reason is what pgctl's
+// errors ARE: a refusal names the tables a selection reaches into, or the
+// extension a target cannot install. The header had one row and shared it with
+// the config path, so every refusal arrived truncated — the one message in the
+// tool most worth reading in full.
+func (m *Model) drawError(c *comp.Canvas, r comp.Rect) {
+	if m.err == nil {
+		return
+	}
+	comp.Toast{
+		Title:  "refused",
+		Body:   m.err.Error(),
+		Hint:   "esc dismiss",
+		Margin: 1,
+		Accent: &dangerStyle,
+		Border: &panelBorder,
+		// No BodyStyle: the message is ordinary text, and ordinary text is
+		// what the terminal draws without being told.
+		HintStyle: &mutedStyle,
+	}.Draw(c, r, comp.Region(regToast))
 }
 
 // drawBody splits the panel column from the detail pane.
@@ -169,7 +192,7 @@ func (m *Model) drawPanels(c *comp.Canvas, r comp.Rect) {
 		if band.H < 3 {
 			continue
 		}
-		focused := m.focus == panel && !m.paneFocus && m.action == nil
+		focused := m.panelFocused(panel)
 
 		pane := comp.Pane{
 			Title:      m.panelTitle(panel),
@@ -180,32 +203,36 @@ func (m *Model) drawPanels(c *comp.Canvas, r comp.Rect) {
 			FocusTitle: &titleStyle,
 		}
 		// Narrow, not Inset: a column off each side and none off the top, so
-		// the rows sit a space inside the border the way they did when the
-		// panel was a lipgloss box with Padding(0, 1) — and so the first row
-		// is not spent on a blank.
+		// the rows sit a space inside the border, and so the first row is not
+		// spent on a blank.
 		inside := pane.Draw(c, band, comp.Region(panelRegions[panel])).Narrow(1)
 
-		rows := m.panelRows(panel)
-		if len(rows) == 0 {
-			c.Text(inside.X, inside.Y, m.emptyPanel(panel), &mutedStyle,
-				comp.Region(panelRegions[panel]))
-			continue
-		}
-
+		// The empty state is the list's, not a line drawn beside it. Set here
+		// because it is not constant: a database panel with nothing in it says
+		// "unreachable", "probing…" or "none" depending on what pgctl has been
+		// able to find out, and all three are ordinary states rather than
+		// errors.
+		m.lists[panel].Empty = m.emptyPanel(panel)
 		m.lists[panel].Focused = focused
-		m.lists[panel].Draw(c, inside, rows)
+		m.lists[panel].Draw(c, inside, m.panelRows(panel))
 	}
+}
+
+// panelFocused is whether a panel has the keys — which it does not while a
+// modal is open, however it looked a moment ago.
+func (m *Model) panelFocused(panel int) bool {
+	return m.focus == panel && !m.paneFocus && m.action == nil && !m.showCommand
 }
 
 // panelBands divides the column between the panels.
 func (m *Model) panelBands(r comp.Rect) []comp.Rect {
 	cs := make([]comp.Constraint, panelCount)
 	for panel := range cs {
-		// The two borders, plus whatever the list spends on itself — which is
-		// nothing now that NoStatus is set, and is asked for rather than
-		// assumed. This was `const chrome = 3`, a number that goes silently
-		// wrong the moment the answer changes.
-		chrome := 2 + m.lists[panel].Overhead()
+		// The two borders, plus the rows the list spends on itself — which is
+		// none now that NoStatus is set, and is asked for rather than assumed.
+		// This was `const chrome = 3`, a number that goes silently wrong the
+		// moment the answer changes.
+		chrome := 2 + m.lists[panel].StatusRows()
 		want := max(m.panelLen(panel), 1) + chrome
 		// A title and one row is the least a panel can usefully be.
 		cs[panel] = comp.Fill(want).Min(1 + chrome).Max(want)
@@ -218,58 +245,82 @@ func (m *Model) panelBands(r comp.Rect) []comp.Rect {
 // The number is the key that jumps to it, which is the only reason it is on
 // screen: a panel labelled "1 Connections" tells you how to get there without
 // a legend.
+//
+// The filter appears here as text and nowhere as a caret. Where the typing
+// lands is shown once, by the comp.Input in the footer — the version that drew
+// its own ▏ in the title had the cursor in two places and could only ever
+// append, because a caret you cannot move is a typo you correct by deleting
+// back to it.
 func (m *Model) panelTitle(panel int) string {
-	focused := m.focus == panel && !m.paneFocus && m.action == nil
-	if focused && m.filtering {
-		return fmt.Sprintf("%d /%s▏", panel+1, m.filter)
-	}
 	title := fmt.Sprintf("%d %s", panel+1, panelTitles[panel])
-	if n := m.panelLen(panel); n > 0 {
+	if n := m.panelItems(panel); n > 0 {
 		title += fmt.Sprintf(" (%d)", n)
 	}
-	if focused && m.filter != "" {
-		title += " /" + m.filter
+	if m.panelFocused(panel) && m.filter.Text != "" {
+		title += " /" + m.filter.Text
 	}
 	return title
 }
 
-// drawFooter is one row of key hints.
+// drawFooter is one row: the filter being typed, or the keys that act on what
+// is focused.
 func (m *Model) drawFooter(c *comp.Canvas, r comp.Rect) {
 	id := comp.Region(regFooter)
-	if m.filtering {
-		comp.Bar{Left: []comp.Segment{{
-			Text:  "filter: " + m.filter + "▏" + comp.Hints(comp.Hint{Key: "enter", Label: "accept"}, comp.Hint{Key: "esc", Label: "clear"}),
-			Style: &footerStyle,
-		}}}.Draw(c, r, id)
-		return
-	}
+
 	// A modal carries its own keys, on its own bottom row. Repeating them down
 	// here would put the same answer in two places and make the reader choose
-	// which one to trust — and the one outside the box is the one that used to
-	// be the only one, which is what made the forms hard to act on.
-	if m.action != nil {
+	// which one to trust.
+	if m.action != nil || m.showCommand {
 		return
 	}
+
+	if m.filtering {
+		// The input takes the left of the row and the two keys that end it
+		// take the right, so the caret is never pushed off by the hints.
+		bands := comp.Layout{Constraints: []comp.Constraint{
+			comp.Fill(1), comp.Length(comp.Width(filterHints) + 1),
+		}}.Cols(r)
+		m.filter.Focused = true
+		m.filter.Draw(c, bands[0], comp.Region(regFilter))
+		comp.Bar{Right: []comp.Segment{{Text: filterHints, Style: &footerStyle}}}.
+			Draw(c, bands[1], id)
+		return
+	}
+
 	comp.Bar{Left: []comp.Segment{
 		{Text: fitHints(m.hints(), r.W), Style: &footerStyle},
 	}}.Draw(c, r, id)
 }
+
+// filterHints is what ends a filter, and it is a constant because comp.Hints
+// joins with the chrome's separator: building it per frame would measure the
+// same string every draw to lay out the row it sits on.
+var filterHints = comp.Hints(
+	comp.Hint{Key: "enter", Label: "keep"},
+	comp.Hint{Key: "esc", Label: "clear"},
+)
 
 func (m *Model) emptyPanel(panel int) string {
 	switch panel {
 	case panelConnections:
 		return "none declared"
 	case panelDatabases:
-		if env, ok := m.selectedConn(); ok {
-			if p := m.probes[env.Name]; p != nil && !p.Reachable {
+		if conn, ok := m.selectedConn(); ok {
+			if p := m.probes[conn.Name]; p != nil && !p.Reachable {
 				return "unreachable"
 			}
-			if m.probing[env.Name] {
+			if m.probing[conn.Name] {
 				return "probing…"
 			}
 		}
 		return "none"
 	case panelSnapshots:
+		// Named, because "none" on a panel whose contents depend on the
+		// selection above it is ambiguous between "this connection has none"
+		// and "pgctl has not looked".
+		if conn, ok := m.selectedConn(); ok {
+			return "none on " + conn.Name + " — press n"
+		}
 		return "none — press n"
 	case panelSets:
 		return "none declared"
@@ -281,12 +332,16 @@ func (m *Model) emptyPanel(panel int) string {
 
 // hints is what acts on what is focused, right now.
 //
-// Not every action pgctl has: swarmctl learned that the expensive way, where a
-// footer listing every action on every panel grew a letter per feature and read
-// as a menu of things mostly not applicable.
+// Not every action pgctl has: a footer listing every action on every panel
+// grows a letter per feature and reads as a menu of things mostly not
+// applicable. ctrl+p is where the whole list lives.
 func (m *Model) hints() []comp.Hint {
 	if m.active != nil {
-		return []comp.Hint{{Key: "q", Label: "cancel the run"}}
+		return []comp.Hint{
+			{Key: "q", Label: "stop and leave"},
+			{Key: "tab", Label: "log"},
+			{Key: "?", Label: "keys"},
+		}
 	}
 	hints := []comp.Hint{
 		{Key: "n", Label: "snapshot"},
@@ -299,7 +354,7 @@ func (m *Model) hints() []comp.Hint {
 	}
 	return append(hints,
 		comp.Hint{Key: "/", Label: "filter"},
-		comp.Hint{Key: "tab", Label: "pane"},
+		comp.Hint{Key: "ctrl+p", Label: "commands"},
 		comp.Hint{Key: "?", Label: "keys"},
 	)
 }
@@ -307,10 +362,8 @@ func (m *Model) hints() []comp.Hint {
 // fitHints joins key hints into one line no wider than the terminal.
 //
 // comp.Hint rather than pre-formatted strings, and comp.Hints to join them, so
-// the separator lives in the glyph set once instead of in every footer string —
-// and so this list is the same type a context menu is built from. tuikit's
-// mouse notes make that the rule: the keyboard path and the pointer path to an
-// action have to be ONE list, not a list and a keymap maintained beside it.
+// the separator lives in the chrome once instead of in every footer string —
+// and so this list is the same type the command directory is built from.
 //
 // The fitting is pgctl's own, because comp.Hints does not measure. The footer
 // used to render whatever it had: eight hints at 95 columns, on the LAST line
@@ -332,38 +385,6 @@ func fitHints(hints []comp.Hint, width int) string {
 		}
 	}
 	return comp.Truncate(comp.Hints(last), width)
-}
-
-// The text helpers are comp's now. They stay as functions here because they
-// have thirty-odd call sites between them and because two of them differ from
-// comp's in a way this package relies on.
-//
-// All three of the versions these replace cut by RUNES. That is wrong twice
-// over: a rune is not a column, so a CJK name measured this way is half its
-// real width; and a rendered line contains escape sequences, so cutting between
-// runes can end a line in the middle of one and leave the rest of the frame
-// wearing whatever colour it was setting. comp counts columns and is ANSI-aware.
-
-// clip returns the first width columns, with no ellipsis.
-//
-// Not comp.Truncate: the overlay uses this to cut the screen behind a modal,
-// and an ellipsis there would draw a "…" against the modal's left edge on every
-// row, which reads as content rather than as a seam.
-func clip(s string, width int) string {
-	if width <= 0 {
-		return ""
-	}
-	return ansi.Truncate(s, width, "")
-}
-
-// padTo pads to width columns, and unlike comp.Pad leaves a longer string
-// alone. Callers here pad columns into alignment and clip separately; a pad
-// that silently truncated would hide the overflow rather than show it.
-func padTo(s string, width int) string {
-	if w := comp.Width(s); w < width {
-		return s + strings.Repeat(" ", width-w)
-	}
-	return s
 }
 
 func max(a, b int) int {

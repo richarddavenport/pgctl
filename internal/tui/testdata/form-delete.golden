@@ -1,0 +1,36 @@
+pgctl  pgctl.yaml
+╭─ 1 Connections (3) ───────────╮▏╭────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ ● prd               protected │▏│ ‹ Manifest · Tables · Warnings · Drift ›                                                       │
+│ ● qat                 guarded │▏│                                                                                                │
+│ ✗ scratch                     │▏│ prd/product-development/20260828T030000Z                                                       │
+╰───────────────────────────────╯▏│                                                                                                │
+╭─ 2 Databases (3) ─────────────╮▏│ taken       2026-08-27 22:00  14h ago                                                          │
+│ product-development   11.0 GB │▏│ took        3:22                                                                               │
+│ claims                48.0 MB │▏│ size        1.9 GB                                                                             │
+│ quote                 20.0 GB │▏│ tables      3                                                                                  │
+╰───────────────────────────────╯▏│ where       local                                                                              │
+╭─ 3 Snapshots (1) ─────────────╮▏│ server      PostgreSQL    pg_dump                                                              │
+│   08-27 22:00        1.9 GB l │▏│ compression zstd:3   4 jobs                                                                    │
+╰───────────────────────────────╯▏│ source size 20.2 GB                                                                            │
+╭─ 4 Sets (╭────────────────────────────────────────────────────────────────────────────────────────────────────────────╮          │
+│ claims   │ Delete prd/product-development/20260828T030000Z                                                            │          │
+╰──────────│                                                                                                            │          │
+╭─ 5 Runs ─│ Removes 1.9 GB from local. This cannot be undone.                                                          │          │
+│ nothing r│                                                                                                            │          │
+╰──────────│ ▸ Yes, delete it  no                                                                                       │          │
+           │ space toggles                                                                                              │          │
+           │   ↑↓ field · space toggle · enter delete it · esc cancel                                                   │          │
+           ╰────────────────────────────────────────────────────────────────────────────────────────────────────────────╯          │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏╰────────────────────────────────────────────────────────────────────────────────────────────────╯

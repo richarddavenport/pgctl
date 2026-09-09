@@ -9,7 +9,7 @@ require (
 	github.com/jackc/pgx/v5 v5.10.0
 	github.com/klauspost/compress v1.19.2
 	github.com/muesli/termenv v0.16.0
-	github.com/richarddavenport/tuikit v0.0.0
+	github.com/richarddavenport/tuikit v0.1.1
 	gopkg.in/yaml.v3 v3.0.1
 )
 
@@ -39,10 +39,3 @@ require (
 	golang.org/x/sys v0.47.0 // indirect
 	golang.org/x/text v0.38.0 // indirect
 )
-
-// tuikit is private and untagged, so it cannot be fetched as a module; it
-// resolves from a sibling checkout instead. Relative, so it works on any
-// machine with both repos side by side rather than only on the one that wrote
-// it — which is also why CI checks out two repositories. All of that goes when
-// tuikit is tagged.
-replace github.com/richarddavenport/tuikit => ../tuikit

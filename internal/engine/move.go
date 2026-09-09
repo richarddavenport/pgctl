@@ -74,8 +74,10 @@ func (e *Engine) Move(ctx context.Context, req MoveRequest, report Reporter) err
 		Database:   req.Database,
 		Dir:        dir,
 		At:         at,
-		// Nothing is uploaded: this snapshot exists for the next few minutes.
-		NoPush: true,
+		// No destinations: this snapshot exists for the next few minutes, in a
+		// temporary directory, and is not catalogued. `--keep` copies it into
+		// storage afterwards; nothing uploads it.
+		Destinations: nil,
 	}, report); err != nil {
 		return err
 	}

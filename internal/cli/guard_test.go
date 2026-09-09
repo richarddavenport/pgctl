@@ -4,6 +4,8 @@ import (
 	"testing"
 
 	"github.com/richarddavenport/tuikit/guard"
+
+	"github.com/richarddavenport/pgctl/internal/tui"
 )
 
 // Every action reachable by mouse has a keyboard path.
@@ -28,4 +30,14 @@ func TestEveryActionHasAKeyboardPath(t *testing.T) {
 // like "replace this database", so the trap is expensive.
 func TestNoCommandStealsAReservedKey(t *testing.T) {
 	guard.Reserved(t, Commands())
+}
+
+// Every command with a key is documented on the help screen.
+//
+// The failure it catches is quiet and corrosive: a command declares Key "a",
+// the help screen does not list it, and a reader concludes the key does not
+// exist. Both sides come from one declaration each — the command tree and
+// tui.KeySections — and this is what holds them together.
+func TestEveryCommandKeyIsInTheHelp(t *testing.T) {
+	guard.Keys(t, Commands(), tui.KeySections())
 }

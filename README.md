@@ -47,9 +47,8 @@ The repository is private, so `install.sh` fetches the release asset through the
 `gh` CLI rather than plain `curl` — a token is needed either way, and `gh`
 already has one.
 
-To change pgctl rather than run it, clone it with a [tuikit] checkout beside it
-and `make install`. tuikit is unpublished, so `go.mod` resolves it through a
-`replace` to `../tuikit`.
+To change pgctl rather than run it, clone it and `make install`. [tuikit] is a
+tagged public module, so nothing else has to be checked out beside it.
 
 [tuikit]: https://github.com/richarddavenport/tuikit
 
@@ -66,8 +65,8 @@ pgctl snapshot --from default         # every database on that server
 Naming your servers takes a `pgctl.yaml`:
 
 ```sh
-pgctl snapshot --from prd             # every database there
-pgctl ls                              # what is on disk and in storage
+pgctl snapshot --from prd --to-storage snapshots   # where it goes is asked, not assumed
+pgctl ls                              # what is on disk and in every remote
 pgctl plan prd/latest --to qat        # what a refresh would do
 pgctl apply prd/latest --to qat       # do it
 pgctl move --from prd --to qat        # refresh without keeping a snapshot
@@ -112,7 +111,9 @@ rules:
     why: "20 GB of jsonb payloads; recent quotes are enough to work with"
 ```
 
-See `pgctl.example.yaml` for the whole surface, including hooks and storage.
+[`docs/config.md`](./docs/config.md) explains every section in prose — what a
+rule does to a table, which rule wins when two match, what a set is closed
+against — and `pgctl.example.yaml` is the whole surface as a commented file.
 
 ### Credentials
 

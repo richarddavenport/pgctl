@@ -23,7 +23,7 @@ func (m *Model) onMouse(msg tea.MouseMsg) tea.Cmd {
 		// A modal takes the mouse as well as the keyboard. Clicking the panel
 		// behind a confirmation is not an answer to it — and the panel is
 		// exactly what the confirmation is about, so the click is tempting.
-		Blocked: func() bool { return m.action != nil || m.showHelp },
+		Blocked: func() bool { return m.action != nil || m.showHelp || m.showCommand || m.leaving },
 
 		Press: func(id comp.ID, _ tea.MouseMsg) tea.Cmd {
 			// Clicking a panel's row selects it AND moves focus there, because
@@ -71,8 +71,15 @@ func (m *Model) onMouse(msg tea.MouseMsg) tea.Cmd {
 					return nil
 				}
 			}
-			if id.Name == regBody || id.Name == regPane {
+			switch id.Name {
+			case regBody, regPane:
 				m.paneList.Scroll(by)
+			case regLog:
+				// The log scrolls itself, and scrolling back is what leaves
+				// following — the component decides that, because "am I still
+				// tailing" is a fact about the viewport rather than a mode the
+				// tool keeps beside it.
+				m.logPane.Scroll(by)
 			}
 			return nil
 		},

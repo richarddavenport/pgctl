@@ -1,0 +1,22 @@
+pgctl  pgctl.yaml
+╭─ 1 Connections (3) ──────────╮▏╭─────────────────────────────────────────────╮
+│ ● prd              protected │▏│ ‹ Overview · Databases · Config ›           │
+│ ● qat                guarded │▏│                                             │
+│ ╭─ run ────────────────────────────────────────────────────────────────────╮ │
+╰─│> p                                                                       │ │
+╭─│every key that acts right now; a greyed row says why it cannot      5 of 9│ │
+│ │──────────────────────────────────────────────────────────────────────────│ │
+│ │  prune                             p    Operations          report what t│ │
+│ │  detail pane                       tab  Reading             focus it, the│ │
+╰─│  apply                             a    Operations          replace data │ │
+╭─│  snapshot                          n    Operations          read the chos│ │
+│ │  delete the snapshot               x    Operations          remove it fro│ │
+╰─│                                                                          │ │
+╭─│                                                                      5/5 │ │
+│ │──────────────────────────────────────────────────────────────────────────│ │
+╰─│  enter run · ↑↓ move · esc close                                         │ │
+╭─╰──────────────────────────────────────────────────────────────────────────╯ │
+│ nothing run yet              │▏│                                             │
+╰──────────────────────────────╯▏│                                             │
+                                ▏│                                             │
+                                ▏╰─────────────────────────────────────────────╯

@@ -383,6 +383,10 @@ by whoever later proposes "just a small metrics table".
 
 ## 18. The interface is built on tuikit, migrated rather than restarted
 
+**Superseded in part by decision 19**, which restarted it, and by decision 20,
+which removed the `replace`. The reasoning below is what produced both, so it
+stays.
+
 pgctl is one of the four tools tuikit was extracted from, so the question was
 never whether the framework fits — its `harness` package comment names this
 repo's `screenshot_probe_test.go` as the prototype it generalises. The question
@@ -422,3 +426,210 @@ pgctl still needs to ship, or a screen pgctl needs that `comp` actively gets in
 the way of. Neither is a reason to fork: the components are ordinary Go, and a
 tool that outgrows one can draw that screen itself, which is what `theme` and
 `guard` exist to keep honest either way.
+
+## 19. The interface was restarted on the scaffold, not migrated again
+
+Decision 18 said the opposite, and it was right at the time. This supersedes its
+conclusion and keeps its reasoning: the migration in place was the cheap way to
+get pgctl onto tuikit, and it left the interface a *port* — five panels, a tab
+strip, modal forms and a run log, all of them pgctl's own shapes with components
+substituted underneath where a component happened to fit.
+
+**Restarted.** `tuikit new pgctl` was generated into a scratch directory and its
+`internal/tui` was the starting point rather than the donor. The old interface
+moved to `_attic/tui`, where Go does not compile it — a directory whose name
+starts with `_` is invisible to the toolchain — and its 38 goldens are the
+reference for what the rebuilt one has to be able to say.
+
+**What changed, and none of it is cosmetic.** The key routing is `app.Keys`, so
+the order that makes a filter box typeable is the shape of a struct rather than
+an early return anybody can delete. A run is `comp.StepList` over the engine's
+own event stream, so the phases are the engine's account of what it is doing and
+a phase added to `apply.go` appears on screen without an edit here — the flat
+log it replaces was 60 lines of this package deciding what a phase looked like.
+The state glyphs are `Row.Status`, a column that keeps its colour under the
+selection, which is tuikit decision 46's distinction and not something the port
+could have expressed. `ctrl+p` lists every operation with the key that runs it
+*and the reason a refused one cannot*, which is the question this tool's readers
+ask most and previously got answered only by pressing the key. And the filter
+and the form's text fields have a caret you can move, which the hand-drawn `▏`
+could never be.
+
+**What it cost.** The 38 goldens were rewritten, and every one of them had to be
+read rather than accepted. Two behaviours went deliberately: `q` no longer
+means "cancel the run" — tuikit reserves it for leaving (its decision 42) — so a
+run in flight puts a question in front of it and answering the question is what
+cancels; and the plan preview is no longer `Plan.Describe()` reflowed, it is
+built from the `Plan`'s fields, because the CLI's description is written for a
+terminal that has already scrolled.
+
+**What would have to change to reverse this.** Nothing plausible. The reason
+decision 18 could be reversed cheaply is that the engine was never involved: the
+whole restart is one package, and `guard.Engine` still passes on the five that
+matter.
+
+## 20. tuikit is a dependency, not a directory
+
+Decision 18's "what it costs" paragraph — a sibling checkout, two
+`actions/checkout` steps, a PAT, and `go install` not working — was all one
+cause: tuikit was private and untagged, so `go.mod` resolved it through
+`replace github.com/richarddavenport/tuikit => ../tuikit`.
+
+tuikit went public and tagged `v0.1.1` on 2026-09-08, so the `replace` is gone
+and it is an ordinary `require`. What that deleted, in one commit: the relative
+path in `go.mod`, the second checkout in both workflows, the `TUIKIT_TOKEN`
+secret CI could not run without, the `working-directory: pgctl` every step
+needed because pgctl could not be checked out at the workspace root, and the
+paragraph in `AGENTS.md` telling an agent it needed two repositories.
+
+**What it costs.** A version to bump. `tuikit news` was the mechanism for
+noticing that a pull in `../tuikit` had changed this tool's behaviour with
+nothing to read; now there is something to read and something to bump, which is
+the ordinary arrangement. Developing both together is `go work` or a temporary
+`replace`, and neither is committed.
+
+## 21. Storage is a list of named destinations, and none of them is a default
+
+Decision 12 said a snapshot stays a tree in blob storage rather than a tarball,
+and that is what this builds on: a tree can be listed, partially downloaded, and
+held in more than one place without any of the copies knowing about the others.
+What decision 12 did not say is how many places there are, and the answer was
+one — `storage.kind: azureblob` with a container and a credential beside it.
+
+**A list.** `storage.remotes` is named destinations, each with its own container,
+its own credentials and its own retention. The local directory is not one of
+them: `pg_dump` writes a directory, so every snapshot begins on this machine.
+
+**Nothing is default.** `pgctl snapshot` requires `--to-storage` once a remote
+is declared, and the interface offers a toggle per destination with none ticked.
+Asked for, and the reason is worth keeping: *"It's really for flexibility. We
+don't exactly know when we will use one over the other."* A destination chosen
+by the config is a destination chosen once, months ago, by someone deciding a
+different question — and the cost of guessing wrong is gigabytes in a shared
+account, or a snapshot a colleague cannot reach because it stayed on a laptop.
+With no remotes declared there is one destination and nothing to ask, so the
+flag is optional until the day a remote appears.
+
+**Which makes "not local" expressible for the first time.** A snapshot placed
+only in a remote is uploaded and then deleted from disk, in that order, with the
+delete conditional on every upload having succeeded — so a failure leaves the
+local copy, which is the recoverable state. That is the answer to a laptop
+accumulating 1.9 GB nightlies, and the old `--no-push` bool could not say it.
+
+**Retention had to follow.** One policy for every destination deleted the
+archive's only copy on the day the local copy aged out, because `prune` ran a
+single policy and then called `DeleteSnapshotEverywhere`. Each destination now
+carries its own and prune walks them one at a time, deleting only from the one
+whose policy it is holding. A destination with no policy keeps everything and
+prune says so, because silence is indistinguishable from a policy that found
+nothing to do.
+
+**No compatibility shim.** `storage.kind` and its neighbours are refused by name
+with the shape to write instead. A config half-migrated is worse than one that
+will not load: it would keep pushing to the destination it always did while the
+interface offered a list that did not include it. `Storage` keeps the five old
+fields for exactly that error, and `TestTheOldStorageKeysAreRefusedWithTheNewShape`
+holds it closed.
+
+**What would have to change to reverse this.** Nothing about the mechanism — a
+single-remote config is a list of one, and that is how most of them will read.
+The part with a cost is the missing default, which is a keystroke and a flag on
+every snapshot forever; if that becomes the complaint rather than the safety,
+`default: true` on a destination is the smaller half of this decision to give
+back, and the list stays.
+
+## 22. A rule may wildcard the schema, and a bare name still may not
+
+The pattern language was `schema.table` with a `*` allowed at either end of the
+table part only, and the reasoning was written into the test: *"A schema is
+never implied: the same table name in another schema is a different table, and
+truncating the wrong one is unrecoverable."*
+
+That is a good rule about NAMES and it was applied to wildcards as well, which
+is where it stopped being right. The first real config wanted the opposite on
+its first day:
+
+```yaml
+  - table: "*as400*"
+    data: none
+    why: "we don't care about backing up anything that syncs to the as400"
+```
+
+Against the live catalogue that is **nine tables across five schemas** —
+claims, operations, ory, public and shared. Five rules cover them and stop
+covering them the day a sixth schema gains one, silently: the Rules tab flags a
+rule that matches NOTHING, and nothing can flag a schema for which nobody wrote
+a rule. The pattern the operator wrote is both what they meant and more correct
+than the workaround.
+
+**So either half may be wildcarded**, and a pattern with no `.` in it spans
+every schema. `*.policy` says it explicitly for an exact name.
+
+**A bare exact name is still refused**, which is the half of the old reasoning
+that survives: `policy` is a table somebody forgot to qualify. Nobody writes
+`*as400*` meaning one schema, and everybody who writes `policy` means one —
+that asymmetry is the whole decision, and it is why this is not simply "allow
+globs".
+
+**What was traded away, named.** `*.*log*` blanks tables in every schema, and
+`*log*` against `*_log*` is the cata·log trap this repo fell into once already
+(hdb_source_catalog_version). The safety that replaces "a rule cannot reach
+another schema" is measurement rather than restriction: the Rules tab reports
+how many tables each rule matched on the selected database, the manifest records
+every table's fate individually, and `pgctl plan` shows what an apply will do
+before it does it. A rule that quietly matches nothing and a rule that quietly
+matches forty are both visible; they were not, when the interface had no Rules
+tab at all.
+
+**Still not glob or regexp.** `*` at the ends of either part, and nothing else.
+A pattern that selects tables for truncation has to be legible to whoever
+reviews the config, and the forms here cover every rule anybody has written.
+
+## 23. A storage credential may come from a command, which decision 8 refused
+
+Decision 8 deleted pgctl's sops decryption and its `Secrets` type, and the
+reasoning holds: PostgreSQL has a complete credential scheme in `~/.pgpass` and
+`~/.pg_service.conf`, and a tool that reads credentials itself and passes them
+on connects by different rules from the `pg_dump` it shells out to. **This does
+not reopen that.** Database credentials still come from libpq's own files and
+pgctl never sees them.
+
+A storage account key is not a database credential and has no libpq equivalent.
+Decision 21 left it as an environment variable per remote, which is right for CI
+and leaves a person with one honest option:
+
+```sh
+sops exec-env envs/prd.env 'pgctl snapshot --from prd --to-storage snapshots'
+```
+
+That works today, needs no code, and is the shape decision 8 argues for — the
+credential store decrypts, pgctl knows nothing about sops. It was the
+recommendation until the cost was measured.
+
+**`sops exec-env` decrypts the whole file into the environment**, and pgctl
+hands its environment to `pg_dump`, `pg_restore`, `vacuumdb` and every hook a
+config declares. On the file this was built against that is **239 variables**,
+taking the process environment from 71 to 309, to deliver one key. A `preApply`
+hook scaling swarm services then runs with the whole of production's secrets in
+its environment. That is a strange thing for a tool with a test asserting
+`PGPASSWORD` never appears in `SubprocessEnv`.
+
+**So a remote may name a command.** `accountCommand` and `keyCommand`, run with
+a shell, relative to the config's directory, cached per process. It is the
+`git credential.helper` pattern, and the narrow version of what decision 8
+deleted: no file format, no key paths, no `Secrets` type — pgctl runs what the
+config tells it to and reads one line of stdout.
+
+**What the guarantees are, and why each one exists.** The value never reaches an
+error message: a failure reports stderr and the exit status, and the command
+text is dropped too — the test written for the first rule found the second, by
+using `printf THE-SECRET` as its command and watching the error quote it. The
+value never reaches a subprocess. A command that exits zero and prints nothing
+is an error, because that is exactly what sops does when an extract path matches
+no key, and the alternative is an authentication failure minutes later naming
+nothing.
+
+**What would have to change to reverse this.** A credential helper turning into
+a config format — a `sops:` block, key paths, a file type — would be decision 8
+happening again, and the answer then is the same: it is not pgctl's job to know
+how a team encrypts a file.

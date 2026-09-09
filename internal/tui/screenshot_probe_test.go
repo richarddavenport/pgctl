@@ -101,7 +101,12 @@ func TestCaptureScreens(t *testing.T) {
 
 	// 6. The plan, which is the last thing before a destructive act.
 	m.action.stage = stagePlan
-	m.action.plan = &planPreview{plan: capturePlan(m), needsName: true, typed: "qa"}
+	m.action.plan = capturePlan(m)
+	// Half typed, because a guarded target's phrase is a FIELD now and the
+	// half-typed state is the one worth looking at.
+	if f := m.action.field("confirm"); f != nil {
+		f.text, f.caret = "qa", 2
+	}
 	shot("13-plan-guarded")
 
 	// 7. Something running.
@@ -110,6 +115,10 @@ func TestCaptureScreens(t *testing.T) {
 	m.runs = append(m.runs, captureRun())
 	m.lists[panelRuns].Reset()
 	shot("14-running")
+
+	m.tabs[panelRuns] = 1
+	shot("14b-running-log")
+	m.tabs[panelRuns] = 0
 
 	m.runs[len(m.runs)-1].running = false
 	m.runs[len(m.runs)-1].endedAt = m.now
@@ -121,7 +130,8 @@ func TestCaptureScreens(t *testing.T) {
 	m.showHelp = false
 
 	// 9. Filtering.
-	m.focus, m.filtering, m.filter = panelDatabases, false, "cl"
+	m.focus, m.filtering = panelDatabases, false
+	m.filter.Text, m.filter.Cursor = "cl", 2
 	shot("17-filter")
 
 	entries, _ := os.ReadDir(dir)
@@ -246,7 +256,7 @@ func captureSnapshot(connection, database string, tables []pg.TableInfo) *engine
 		source += t.Bytes
 		man.Tables = append(man.Tables, entry)
 	}
-	return &engine.Entry{Manifest: man, Local: true, Remote: true}
+	return &engine.Entry{Manifest: man, At: []string{config.LocalStorage, "snapshots"}}
 }
 
 // capturePlan is a plan of the shape a set-level apply produces, with the load

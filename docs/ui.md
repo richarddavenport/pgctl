@@ -41,11 +41,21 @@ so moving between panels changes the questions the pane can answer:
 | Databases | Tables · Rules · Foreign keys |
 | Snapshots | Manifest · Tables · Warnings · Drift |
 | Sets | Members · Closure · Load order |
-| Runs | Log |
+| Runs | Steps · Log |
 
 `tab` moves focus into the pane and then cycles its tabs; the selected tab is
 remembered per panel, so returning to a panel returns to the tab you were
-reading. The chevrons around the strip say that it cycles.
+reading. The chevrons around the strip say that it cycles. A tab longer than the
+pane scrolls, and the bar down its right edge says where in it you are — a
+213-table manifest is the normal case here, not an edge one.
+
+The **Rules** tab is the one worth a word here, because it is the only tab that
+shows *config* rather than *state*: a rule says how much of a table a snapshot
+carries — everything, the rows matching a predicate, or nothing at all — and the
+tab shows each rule with how many tables it matched on this database. A rule that
+matched **nothing** is coloured, because that is what a renamed table leaves
+behind and it is otherwise invisible. [`config.md`](./config.md) has the rest,
+including which rule wins when two match the same table.
 
 ## What the markers mean
 
@@ -74,7 +84,38 @@ Beside the name, `protected` and `guarded` are the two safety flags:
 
 `n` snapshot, `a` apply, `m` move, `p` prune, `x` delete a snapshot. Each opens
 a form over the frame, showing every field at once so you can see what you have
-chosen rather than remember it. `enter` runs it, `esc` cancels.
+chosen rather than remember it. `enter` runs it, `esc` cancels, and the keys are
+on the form's own bottom row rather than in the frame's footer: the one place a
+reader looks when a box appears in front of them should say how to leave it.
+
+**A form does not ask what the panels already said.** `n` snapshots the database
+selected in panel 2, on the connection selected in panel 1, and says so in its
+title; `m` moves that same database. Neither offers a list to choose from,
+because the panels are that choice, and two ways to say one thing are two ways
+that can disagree — which is how an earlier version came to offer one server's
+name beside another server's databases. Move the panel cursor to change it.
+
+**It does ask where the snapshot goes**, because no panel says that: the config
+declares the destinations and the answer differs from one run to the next. One
+toggle per destination, **nothing pre-ticked**, and `enter` with none ticked is
+a refusal rather than a default — a snapshot is gigabytes and a shared account
+is not somewhere to end up by accident. Ticking a remote and *not* `local` is
+the "do not fill my laptop" answer: it uploads, and then deletes the local copy.
+A config with no remotes has one destination and the form asks nothing at all.
+
+The cost is that the interface takes one database at a time. `pgctl snapshot
+--from <conn> --to-storage <where>` with no `--db` still covers every declared
+database, which is what the nightly runs.
+
+A field that cannot apply is **disabled, not hidden** — widening means nothing
+to a whole-database apply — because a field that vanishes is one the operator
+has to re-find, and the row under the cursor always explains itself in the same
+place.
+
+**`ctrl+p` is the whole list**, with the key that runs each one, and a command
+that cannot run is listed with the reason rather than left out: "apply — no
+snapshot selected", "move — every other connection is protected". Running an
+entry presses its key, so the directory cannot drift from the keyboard.
 
 A destructive operation shows its **plan** first — what would be dropped,
 truncated, loaded and rebuilt — and a set-level apply is **refused** unless the
@@ -82,9 +123,25 @@ selection is referentially closed. The Closure tab says which tables it reaches
 into, and `--widen` accepts them; the refusal names all of them rather than
 letting the load fail halfway.
 
-While something runs, the Runs panel is where it lives, `q` cancels it, and
-cancelling still runs the engine's failure hooks so an environment that was
-scaled down comes back up.
+While something runs, the Runs panel is where it lives, and it has two tabs
+because there are two questions. **Steps** is where it has got to: the phases
+come from the engine's own event stream, one glyph each and what each one cost,
+with a bar above them where there is a real fraction to show — an apply knows
+how many tables it will load, and a snapshot does not until `pg_dump` has read
+the catalog. **Log** is what it said, in order, tailing, scrollable back.
+
+`q` leaves, here as everywhere — it is one of the four keys tuikit reserves. A
+run in flight makes leaving expensive, so it asks first, and answering the
+question cancels the operation rather than abandoning it: the engine's
+`onFailure` and `postApply` hooks are what bring an environment that was scaled
+down back up. `ctrl+c` does the same without the question, because ctrl+c is the
+terminal's own "stop" and a tool that puts a dialog in front of it has taken
+away the one key a reader is certain of.
+
+A refusal arrives as a bounded note in the corner with `esc` to dismiss it,
+because pgctl's refusals are sentences — the tables a selection reaches into,
+the extension a target cannot install — and a header row shared with the config
+path truncated the one message in the tool most worth reading in full.
 
 `?` is every binding, by screen. The footer names only what acts on what is
 focused right now — a footer that listed every action on every panel would grow
@@ -100,7 +157,13 @@ make frames     # regenerate docs/screens.md and its SVGs
 make watch      # recapture on save, reload the browser, while building a screen
 ```
 
-Both drive `TestCaptureFrames`, whose nineteen states are the same list the
-goldens and the narrow-terminal run walk — so a screen added without a frame is
-a screen added without any of them. `go test ./internal/tui -update-goldens`
-after an intended layout change, and read the diff.
+Both drive `TestCaptureFrames`, whose forty states are the same list the
+goldens, the narrow-terminal run, the colour check and the fits-its-terminal
+check all walk — so a screen added without a frame is a screen added without any
+of them, and the tab bodies are generated from `paneTabs()` rather than listed.
+`go test ./internal/tui -update-goldens` after an intended layout change, and
+read the diff.
+
+The interface this replaced is in [`_attic/tui`](../_attic) with its own 38
+goldens, unbuilt. It is what "parity" means when there is a question about
+whether a screen still says something it used to.

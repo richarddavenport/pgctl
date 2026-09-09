@@ -1,0 +1,36 @@
+pgctl  pgctl.yaml
+╭─ 1 Connections (3) ───────────╮▏╭────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ ● prd               protected │▏│ ‹ Overview · Databases · Config ›                                                              │
+│ ● qat                 guarded │▏│                                                                                                │
+│ ✗ scratch                     │▏│ prd                                                                                            │
+╰───────────────────────────────╯▏│ protected — never a target                                                                     │
+╭─ 2 Databa╭────────────────────────────────────────────────────────────────────────────────────────────────────────────╮          │
+│ product-d│ Apply prd/product-development/20260828T030000Z                                                             │          │
+│ claims   │                                                                                                            │          │
+│ quote    │ Replaces data on the target. The plan is shown before anything is touched.                                 │          │
+╰──────────│                                                                                                            │          │
+╭─ 3 Snapsh│ REPLACE 6 tables in product-development on qat                                                             │          │
+│   08-27 2│ from prd/product-development/20260828T030000Z taken 2026-08-27 22:00, 2.3 GB of source data                │          │
+╰──────────│                                                                                                            │          │
+╭─ 4 Sets (│ widened to include 2 more: operations.policy_contract, public.address                                      │          │
+│ claims   │                                                                                                            │          │
+╰──────────│ 81 foreign keys dropped and rebuilt, 31 indexes rebuilt                                                    │          │
+╭─ 5 Runs ─│ 12 user triggers disabled for the load on 1 table                                                          │          │
+│ nothing r│                                                                                                            │          │
+╰──────────│ LOAD ORDER                                                                                                 │          │
+           │ 1. public.address                                                                                          │          │
+           │ 2. operations.cancellation, operations.policy_contract, operations.policy_contract_quote                   │          │
+           │ 3. claims.policy_claim                                                                                     │          │
+           │ 4. claims.claim_detail                                                                                     │          │
+           │ ring: operations.cancellation, operations.policy_contract, operations.policy_contract_quote                │          │
+           │                                                                                                            │          │
+           │ ! audit.logged_actions carries no data in this snapshot, so applying it empties the table                  │          │
+           │                                                                                                     16/16  │          │
+           │ read it, then confirm. Nothing has been touched yet.                                                       │          │
+           │   enter apply it · ↑↓ read · esc back                                                                      │          │
+           ╰────────────────────────────────────────────────────────────────────────────────────────────────────────────╯          │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏╰────────────────────────────────────────────────────────────────────────────────────────────────╯

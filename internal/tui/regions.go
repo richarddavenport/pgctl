@@ -34,16 +34,32 @@ const (
 	regSetsRow        comp.Name = "sets.row"
 	regRunsRow        comp.Name = "runs.row"
 
-	regPane comp.Name = "pane"
-	regTabs comp.Name = "pane.tabs"
-	regBody comp.Name = "pane.body"
+	regPane   comp.Name = "pane"
+	regTabs   comp.Name = "pane.tabs"
+	regBody   comp.Name = "pane.body"
+	regScroll comp.Name = "pane.scroll"
 
-	// regModal and regHelp are the overlays. They are regions so that a script
-	// can assert a modal is open rather than inferring it from the text that
-	// happens to be on screen.
-	regModal        comp.Name = "modal"
-	regModalOptions comp.Name = "modal.option"
-	regHelp         comp.Name = "help"
+	// The run screen's two halves. A run is the one thing in pgctl that is
+	// still happening while you look at it, so both are addressable: a script
+	// asserting on a finished run reads the steps, and one asserting on a
+	// failure reads the log.
+	regSteps comp.Name = "run.steps"
+	regLog   comp.Name = "run.log"
+	regMeter comp.Name = "run.meter"
+
+	// The overlays. They are regions so that a script can assert a modal is
+	// open rather than inferring it from the text that happens to be on screen.
+	regModal      comp.Name = "modal"
+	regConfirmBox comp.Name = "confirm"
+	regHelp       comp.Name = "help"
+	regToast      comp.Name = "toast"
+	regFilter     comp.Name = "filter"
+
+	// The command directory, and the menu that is the same list on a row.
+	regCommands    comp.Name = "commands"
+	regCommandItem comp.Name = "commands.item"
+	regMenu        comp.Name = "menu"
+	regMenuItem    comp.Name = "menu.item"
 )
 
 // panelRegions maps a panel to its region, in the same order as the panel

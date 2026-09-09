@@ -39,21 +39,73 @@ func runSnapshot(ctx context.Context, c spec.Call) error {
 		}
 	}
 
+	dest, err := chosenDestinations(e, c.Flag("to-storage"))
+	if err != nil {
+		return err
+	}
+
 	// One timestamp for every database in the run, so that a nightly of six
 	// databases is one snapshot set rather than six unrelated ones.
 	at := time.Now()
 	report := printer(c.Bool("verbose"))
 	for _, db := range databases {
 		if _, err := e.Dump(ctx, engine.DumpRequest{
-			Connection: from,
-			Database:   db,
-			At:         at,
-			NoPush:     c.Bool("no-push"),
+			Connection:   from,
+			Database:     db,
+			At:           at,
+			Destinations: dest,
 		}, report); err != nil {
 			return err
 		}
 	}
 	return nil
+}
+
+// chosenDestinations resolves --to-storage.
+//
+// There is NO DEFAULT once a remote is declared, and that is the decision worth
+// reading: a snapshot is gigabytes, and where it goes — a shared account a
+// colleague restores from, an archive nobody prunes, or this laptop — is not
+// something to infer from silence. With no remotes there is exactly one
+// destination and nothing to ask about, so the flag is optional until the day a
+// remote appears, and required from then on. `all` is the shorthand.
+func chosenDestinations(e *engine.Engine, flag string) ([]string, error) {
+	cfg := e.Config()
+	if len(cfg.Remotes()) == 0 {
+		if flag != "" && flag != config.LocalStorage && flag != "all" {
+			return nil, fmt.Errorf("no storage remotes are declared in %s, so %q is "+
+				"the only destination", cfg.Source, config.LocalStorage)
+		}
+		return []string{config.LocalStorage}, nil
+	}
+
+	if flag == "" {
+		return nil, fmt.Errorf("--to-storage is required: %s declares %s. "+
+			"Name one, several comma-separated, or all",
+			cfg.Source, strings.Join(cfg.Destinations(), ", "))
+	}
+	if flag == "all" {
+		return cfg.Destinations(), nil
+	}
+
+	var out []string
+	for _, name := range strings.Split(flag, ",") {
+		name = strings.TrimSpace(name)
+		if name == "" {
+			continue
+		}
+		if name != config.LocalStorage {
+			if _, ok := cfg.RemoteByName(name); !ok {
+				return nil, fmt.Errorf("no storage destination named %q — declared: %s",
+					name, strings.Join(cfg.Destinations(), ", "))
+			}
+		}
+		out = append(out, name)
+	}
+	if len(out) == 0 {
+		return nil, fmt.Errorf("--to-storage named nothing")
+	}
+	return out, nil
 }
 
 func runList(ctx context.Context, c spec.Call) error {
@@ -352,10 +404,24 @@ func runBrowse(_ context.Context, c spec.Call) error {
 		return tui.Run(m)
 	}
 
-	script, err := harness.ScriptFile(c.Flag("script"))
-	if err != nil {
-		return err
+	// An empty --script is "just the first frame", not a file called "".
+	// harness.ScriptFile reads a path when what it is given is not obviously a
+	// script body, so handing it the empty string is an os.ReadFile("") and an
+	// error that says `open : no such file or directory`. tuikit issue 89 — the
+	// generated scaffold has the same line, so this goes when that is fixed.
+	var script string
+	if path := c.Flag("script"); path != "" {
+		script, err = harness.ScriptFile(path)
+		if err != nil {
+			return err
+		}
 	}
+	// The world, read here rather than in Init: a capture never runs a tea.Cmd,
+	// so a model that loads asynchronously captures the screen from before its
+	// data arrived — harness.LoadsBeforeCapture is the check that reports it,
+	// and this is what makes the check unnecessary.
+	m.LoadNow()
+
 	// Wrapped in a runner because the model has no View: the runner owns the
 	// canvas, so it is what the harness drives. No pixel layer — a snapshot is
 	// capturing frames for documentation and must record the characters,

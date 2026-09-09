@@ -16,7 +16,7 @@ func TestPanelBandsKeepsItsThreeRules(t *testing.T) {
 
 	// Two borders, and whatever the list spends on itself — nothing, with
 	// NoStatus set. Asked for rather than assumed; see panelBands.
-	chrome := 2 + m.lists[panelConnections].Overhead()
+	chrome := 2 + m.lists[panelConnections].StatusRows()
 	minBand := 1 + chrome
 	for _, rows := range []int{4, 20, 21, 24, 30, 40, 60, 120} {
 		got := m.panelBands(comp.Rect{W: 1, H: rows})

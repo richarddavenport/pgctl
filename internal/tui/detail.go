@@ -24,7 +24,7 @@ func (m *Model) viewConnectionTab(tab, width int) paneContent {
 	conn, ok := m.selectedConn()
 	if !ok {
 		return facts(m.detail(comp.Block{
-			Text: "no environments declared in " + m.cfg.Source,
+			Text: "no connections declared in " + m.cfg.Source,
 		}))
 	}
 	probe := m.probes[conn.Name]
@@ -34,9 +34,9 @@ func (m *Model) viewConnectionTab(tab, width int) paneContent {
 		if probe == nil || !probe.Reachable {
 			return facts(m.unreachable(conn.Name, probe))
 		}
-		rows := make([][]string, 0, len(probe.Databases))
+		rows := make([][]comp.Segment, 0, len(probe.Databases))
 		for _, db := range probe.Databases {
-			rows = append(rows, []string{db.Name, engine.HumanBytes(db.Bytes)})
+			rows = append(rows, cells(text(db.Name), text(engine.HumanBytes(db.Bytes))))
 		}
 		return paneContent{lines: tableRows(width,
 			[]string{"DATABASE", "SIZE"},
@@ -184,9 +184,9 @@ func (m *Model) unreachable(name string, probe *engine.Probe) comp.Detail {
 }
 
 func (m *Model) viewDatabaseTab(tab, width int) paneContent {
-	conn, hasEnv := m.selectedConn()
+	conn, hasConn := m.selectedConn()
 	db, hasDB := m.selectedDatabase()
-	if !hasEnv || !hasDB {
+	if !hasConn || !hasDB {
 		return facts(m.detail(comp.Block{Text: "no database selected"}))
 	}
 	key := liveKey(conn.Name, db.Name)
@@ -216,24 +216,24 @@ func (m *Model) viewDatabaseTab(tab, width int) paneContent {
 			return facts(m.detail(comp.Block{Text: "no tables"}))
 		}
 
-		rows := make([][]string, 0, len(tables))
+		rows := make([][]comp.Segment, 0, len(tables))
 		var total int64
 		for _, t := range tables {
 			total += t.Bytes
-			rows = append(rows, []string{
-				t.Name,
-				engine.HumanBytes(t.Bytes),
-				compactCount(t.EstimatedRows),
+			rows = append(rows, cells(
+				text(t.Name),
+				text(engine.HumanBytes(t.Bytes)),
+				text(compactCount(t.EstimatedRows)),
 				dataMode(m.ruleFor(t.Name)),
-			})
+			))
 		}
 		head := make([]comp.Row, 0, 2)
 		head = append(head,
-			row(span(comp.Pad("tables", 14), &mutedStyle),
+			headRow(span(comp.Pad("tables", 14), &mutedStyle),
 				span(fmt.Sprint(len(tables)), nil),
 				span("   "+comp.Pad("total", 8), &mutedStyle),
 				span(engine.HumanBytes(total), nil)),
-			comp.Row{})
+			blank())
 		return paneContent{lines: append(head, tableRows(width,
 			[]string{"TABLE", "SIZE", "ROWS", "SNAPSHOT"},
 			[]comp.Column{{Fill: true}, {Width: 9, Right: true},
@@ -251,16 +251,34 @@ func (m *Model) viewDatabaseTab(tab, width int) paneContent {
 // rule silently matching nothing is the same mistake with the sign flipped.
 func (m *Model) viewRules(key string) comp.Detail {
 	if len(m.cfg.Rules) == 0 {
-		return m.detail(comp.Block{Text: "no rules declared. Every table is dumped whole."})
+		return m.detail(comp.Block{
+			Text: "No rules declared, so every table is carried whole. A rule says " +
+				"how much of a table a snapshot contains: every row, the rows " +
+				"matching a predicate, or none at all.",
+		})
 	}
 	tables := m.liveTable[key]
 
-	blocks := make([]comp.Block, 0, len(m.cfg.Rules))
-	for _, rule := range m.cfg.Rules {
-		matched := 0
+	var blocks []comp.Block
+	// The precedence, said once and only where it can matter. Two rules can
+	// match one table and only the last of them applies, which is a fact about
+	// the config that the list of rules below cannot show — it looks like four
+	// independent statements.
+	if len(m.cfg.Rules) > 1 {
+		blocks = append(blocks, comp.Block{
+			Text: "Where two rules match a table, the LAST one applies.",
+		})
+	}
+
+	for i, rule := range m.cfg.Rules {
+		matched, wins := 0, 0
 		for _, t := range tables {
-			if config.MatchPattern(rule.Table, t.Name) {
-				matched++
+			if !config.MatchPattern(rule.Table, t.Name) {
+				continue
+			}
+			matched++
+			if m.winningRule(t.Name) == i {
+				wins++
 			}
 		}
 
@@ -272,11 +290,29 @@ func (m *Model) viewRules(key string) comp.Detail {
 		case matched == 0:
 			match.Value = "nothing"
 			match.Style = &dangerStyle
+		case wins == matched:
+			match.Value = plural(matched, "table")
 		default:
-			match.Value = fmt.Sprintf("%d tables", matched)
+			// Some or all of its matches belong to a later rule. Worth its own
+			// wording: "3 tables" beside a rule that decides nothing about two
+			// of them is a true number and a misleading one.
+			match.Value = fmt.Sprintf("%s, %d of them overridden below",
+				plural(matched, "table"), matched-wins)
+			match.Style = &warnStyle
+			if wins == 0 {
+				match.Value = fmt.Sprintf("%s, every one overridden below — "+
+					"this rule decides nothing", plural(matched, "table"))
+				match.Style = &dangerStyle
+			}
 		}
 
-		facts := []comp.Fact{{Label: "data", Value: dataMode(m.cfg.RuleFor(rule.Table))}, match}
+		// This rule's OWN data mode, not the effective one for its pattern. The
+		// version this replaces asked RuleFor(rule.Table), which resolves a
+		// TABLE NAME — handed a pattern it matched the pattern's own text
+		// against the other patterns, so `audit.*` reported whatever a rule
+		// literally named `audit.*` would have done.
+		mode := dataMode(rule)
+		facts := []comp.Fact{{Label: "data", Value: mode.Text, Style: mode.Style}, match}
 		if rule.Where != "" {
 			facts = append(facts, comp.Fact{Label: "where", Value: rule.Where})
 		}
@@ -292,6 +328,23 @@ func (m *Model) viewRules(key string) comp.Detail {
 	return d
 }
 
+// winningRule is the index of the rule that decides a table, or -1.
+//
+// The engine's rule is "the last match wins", and this is that rule read
+// backwards so the interface can say which of several matching rules is the one
+// doing anything. config.RuleFor returns the resolved rule and not its
+// position, which is the right shape for the engine and not enough for a screen
+// that lists all of them.
+func (m *Model) winningRule(table string) int {
+	winner := -1
+	for i, r := range m.cfg.Rules {
+		if config.MatchPattern(r.Table, table) {
+			winner = i
+		}
+	}
+	return winner
+}
+
 func (m *Model) viewSnapshotTab(tab, width int) paneContent {
 	entry, ok := m.selectedSnapshot()
 	if !ok {
@@ -301,20 +354,31 @@ func (m *Model) viewSnapshotTab(tab, width int) paneContent {
 
 	switch tab {
 	case 1: // Tables
-		rows := make([][]string, 0, len(man.Tables))
+		rows := make([][]comp.Segment, 0, len(man.Tables))
 		for _, t := range man.Tables {
-			detail := "all"
+			// What the snapshot actually CARRIES for this table, which is the
+			// question this column exists to answer: everything, nothing, or the
+			// rows a filter admitted. The amber is on the two that are not
+			// everything, because a table restored with fewer rows than it had
+			// is the surprise worth catching before the apply rather than after.
+			carried := comp.Segment{Text: "all", Style: &mutedStyle}
 			switch t.Data {
 			case config.DataNone:
-				detail = "none"
+				carried = comp.Segment{Text: "none", Style: &warnStyle}
 			case config.DataFiltered:
-				detail = fmt.Sprintf("%s rows", compactCount(t.Rows))
+				carried = comp.Segment{
+					Text:  fmt.Sprintf("%s rows", compactCount(t.Rows)),
+					Style: &warnStyle,
+				}
 			}
-			rows = append(rows, []string{
-				t.Name, engine.HumanBytes(t.SourceBytes), compactCount(t.SourceRows), detail,
-			})
+			rows = append(rows, cells(
+				text(t.Name),
+				text(engine.HumanBytes(t.SourceBytes)),
+				text(compactCount(t.SourceRows)),
+				carried,
+			))
 		}
-		sort.Slice(rows, func(i, j int) bool { return rows[i][0] < rows[j][0] })
+		sort.Slice(rows, func(i, j int) bool { return rows[i][0].Text < rows[j][0].Text })
 		return paneContent{lines: tableRows(width,
 			[]string{"TABLE", "SOURCE SIZE", "ROWS", "CARRIED"},
 			[]comp.Column{{Fill: true}, {Width: 12, Right: true},
@@ -439,7 +503,7 @@ func (m *Model) viewSnapshotTab(tab, width int) paneContent {
 func (m *Model) viewDrift(man *snapshot.Manifest) comp.Detail {
 	conn, ok := m.selectedConn()
 	if !ok {
-		return m.detail(comp.Block{Text: "select an environment to compare against"})
+		return m.detail(comp.Block{Text: "select a connection to compare against"})
 	}
 	key := liveKey(conn.Name, man.Database)
 	tables := m.liveTable[key]
@@ -533,11 +597,12 @@ func (m *Model) viewSetTab(tab, width int) paneContent {
 	// is for. Rows rather than a builder, so the branches that end in a table
 	// can put them above it and the ones that do not can hand them to
 	// comp.Detail as a Title.
-	head := []comp.Row{{Text: set.Name, Style: &titleStyle}}
+	head := []comp.Row{{Text: set.Name, Style: &titleStyle, Skip: true}}
 	if set.Description != "" {
-		head = append(head, comp.Row{Text: set.Description, Style: &mutedStyle})
+		head = append(head,
+			comp.Row{Text: set.Description, Style: &mutedStyle, Skip: true})
 	}
-	head = append(head, comp.Row{})
+	head = append(head, blank())
 
 	if info == nil || info.loading {
 		d := m.detail(comp.Block{
@@ -591,117 +656,40 @@ func (m *Model) viewSetTab(tab, width int) paneContent {
 
 	default: // Members
 		head = append(head,
-			row(span(comp.Pad("patterns", 14), &mutedStyle),
+			headRow(span(comp.Pad("patterns", 14), &mutedStyle),
 				span(strings.Join(set.Include, ", "), nil)))
 		if len(set.Exclude) > 0 {
 			head = append(head,
-				row(span(comp.Pad("excluding", 14), &mutedStyle),
+				headRow(span(comp.Pad("excluding", 14), &mutedStyle),
 					span(strings.Join(set.Exclude, ", "), nil)))
 		}
 		head = append(head,
-			row(span(comp.Pad("matches", 14), &mutedStyle),
+			headRow(span(comp.Pad("matches", 14), &mutedStyle),
 				span(fmt.Sprintf("%d tables on %s", len(info.members), conn.Name), nil)))
 		if len(info.added) > 0 {
 			head = append(head,
-				row(span(comp.Pad("closure", 14), &mutedStyle),
+				headRow(span(comp.Pad("closure", 14), &mutedStyle),
 					span(fmt.Sprintf("+%d more — see Closure", len(info.added)), &warnStyle)))
 		}
-		head = append(head, comp.Row{}, comp.Row{Text: heading("members"), Style: &headerStyle})
+		head = append(head, blank(),
+			comp.Row{Text: heading("members"), Style: &headerStyle, Skip: true})
 
 		sizes := map[string]int64{}
 		for _, t := range m.liveTable[liveKey(conn.Name, db.Name)] {
 			sizes[t.Name] = t.Bytes
 		}
-		rows := make([][]string, 0, len(info.members))
+		rows := make([][]comp.Segment, 0, len(info.members))
 		for _, n := range info.members {
-			size := "-"
+			size := comp.Segment{Text: "-", Style: &mutedStyle}
 			if b, ok := sizes[n]; ok {
-				size = engine.HumanBytes(b)
+				size = text(engine.HumanBytes(b))
 			}
-			rows = append(rows, []string{n, size})
+			rows = append(rows, cells(text(n), size))
 		}
 		return paneContent{lines: append(head, tableRows(width,
 			[]string{"TABLE", "SIZE"},
 			[]comp.Column{{Fill: true}, {Width: 10, Right: true}}, rows)...)}
 	}
-}
-
-// viewRunTab is one operation's log, newest last.
-//
-// Rows with a style each rather than comp.LogPane, and the reason is the event
-// kinds. LogPane distinguishes a line from stdout from a line from stderr, and
-// nothing else — deliberately: its doc says most programs write ordinary
-// progress to stderr, so colouring that as a failure "would make every run look
-// broken". pgctl's engine reports six kinds, and step, table, warning, done and
-// failed are five different things a reader needs to tell apart at a glance.
-// Mapping them onto stderr-or-not would throw away the distinction the engine
-// went to the trouble of making.
-//
-// It still scrolls, because these are lines through comp.List — a set-level
-// apply of 38 tables logs a few hundred of them.
-func (m *Model) viewRunTab(width int) paneContent {
-	r, ok := m.selectedRun()
-	if !ok {
-		return facts(m.detail(comp.Block{
-			Text: "Nothing has run yet. n takes a snapshot, a applies one, " +
-				"m moves between environments.",
-		}))
-	}
-
-	state, stateStyle := "ok", &okStyle
-	switch {
-	case r.running:
-		state, stateStyle = spinner(m.now)+" running", &accentStyle
-	case r.err != nil:
-		state, stateStyle = "failed", &dangerStyle
-	}
-
-	rows := []comp.Row{row(
-		span(r.kind, &titleStyle),
-		span("  "+elapsed(r.duration(m.now))+"  ", &mutedStyle),
-		span(state, stateStyle),
-	)}
-	if r.explain != "" {
-		for _, line := range comp.Wrap(r.explain, width) {
-			rows = append(rows, comp.Row{Text: line, Style: &mutedStyle})
-		}
-	}
-	rows = append(rows, comp.Row{})
-
-	for _, ev := range r.log() {
-		switch ev.Kind {
-		case engine.EventStep:
-			rows = append(rows, row(span("· ", &mutedStyle), span(ev.Message, nil)))
-		case engine.EventTable:
-			rows = append(rows, row(
-				span("  "+ev.Table+" ", nil), span(ev.Message, &mutedStyle)))
-		case engine.EventWarning:
-			rows = append(rows, wrapped("! "+ev.Message, width, &warnStyle)...)
-		case engine.EventDone:
-			rows = append(rows, comp.Row{Text: "✓ " + ev.Message, Style: &okStyle})
-		case engine.EventFailed:
-			rows = append(rows, wrapped("✗ "+ev.Message, width, &dangerStyle)...)
-		}
-	}
-	if p := r.latestProgress(); r.running && p.Message != "" {
-		rows = append(rows, comp.Row{},
-			row(span(spinner(m.now)+" ", &accentStyle), span(p.Message, nil)))
-	}
-	if r.err != nil {
-		rows = append(rows, comp.Row{})
-		rows = append(rows, wrapped(r.err.Error(), width, &dangerStyle)...)
-	}
-	return paneContent{lines: rows}
-}
-
-// wrapped is one message over as many rows as it needs, all in one style.
-func wrapped(text string, width int, style *lipgloss.Style) []comp.Row {
-	lines := comp.Wrap(text, width)
-	out := make([]comp.Row, 0, len(lines))
-	for _, line := range lines {
-		out = append(out, comp.Row{Text: line, Style: style})
-	}
-	return out
 }
 
 // orDash is a value or an em dash, in PLAIN text.
@@ -738,18 +726,4 @@ func compactCount(n int64) string {
 	default:
 		return fmt.Sprintf("%.1fM", float64(n)/1_000_000)
 	}
-}
-
-// wrap breaks text at word boundaries so a long error is readable in a pane.
-func wrap(s string, width int) string {
-	// The floor is this package's, not comp's: a pane squeezed to fifteen
-	// columns is better read as overflowing than as one word per line.
-	if width < 20 {
-		width = 20
-	}
-	// comp.Wrap, because the version this replaces compared BYTES against the
-	// width — len(line)+1+len(word) — so every description containing an em
-	// dash or an arrow wrapped two or three columns early. This file is full of
-	// them.
-	return strings.Join(comp.Wrap(s, width), "\n")
 }

@@ -1,0 +1,22 @@
+pgctl  pgctl.yaml
+╭─╭─ run ────────────────────────────────────────────────────────────────────╮─╮
+│ │>   type to search 9 commands                                             │ │
+│ │every key that acts right now; a greyed row says why it cannot      9 of 9│ │
+│ │──────────────────────────────────────────────────────────────────────────│ │
+╰─│ Operations                                       act on what is selected │ │
+╭─│  snapshot                    n    read the chosen databases and write a c│ │
+│ │  apply                            no snapshot selected — take one with n │ │
+│ │  move                        m    snapshot one connection into another an│ │
+│ │  prune                       p    report what the retention policy would │ │
+╰─│  delete the snapshot              no snapshot selected                   │ │
+╭─│ Reading                                               nothing is written │ │
+│ │  reload                      r    re-list snapshots and re-probe every co│ │
+╰─│  filter                      /    narrow the focused panel               │ │
+╭─│  detail pane                 tab  focus it, then cycle its tabs          │ │
+│ │  keys                        ?    every binding, by screen               │ │
+╰─│                                                                          │ │
+╭─│                                                                    11/11 │ │
+│ │──────────────────────────────────────────────────────────────────────────│ │
+╰─│  enter run · ↑↓ move · esc close                                         │ │
+  ╰──────────────────────────────────────────────────────────────────────────╯ │
+                                ▏╰─────────────────────────────────────────────╯

@@ -2,6 +2,7 @@ package tui
 
 import (
 	"context"
+	"fmt"
 	"sync"
 	"time"
 
@@ -166,10 +167,26 @@ func (m *Model) loadSetMembers(env, database, set string) tea.Cmd {
 // runRecord is one operation, kept for the Runs panel so a failure can be read
 // after the screen that reported it has gone.
 type runRecord struct {
+	// id is what the Runs panel's cursor follows. Runs are prepended newest
+	// first, so a run starting while you are reading an older one moves every
+	// row down by one — and a cursor that is an index would follow the row
+	// rather than the run.
+	id string
+
 	kind      string
 	explain   string
 	startedAt time.Time
 	endedAt   time.Time
+
+	// total is how many tables the operation expects to touch, or zero when
+	// nothing knows yet.
+	//
+	// Only a plan has this: it resolved the selection against the target's
+	// catalog before anything was executed, so the denominator is real. A
+	// snapshot does not know how many tables it will find until pg_dump has
+	// read the catalog, and a meter drawn from a cumulative byte count with
+	// nothing to divide it by is a bar that invents its own progress.
+	total int
 
 	mu     sync.Mutex
 	events []engine.Event
@@ -207,18 +224,43 @@ func (r *runRecord) add(ev engine.Event) {
 	r.events = append(r.events, ev)
 }
 
+// progress is the newest progress event.
+//
+// Progress is redrawn in place rather than appended — see runRecord.progress —
+// so it is not in the event list and the steps have to ask for it separately.
+// That seam is where a fixture goes wrong: one that appends progress to events
+// renders a step list nothing can produce.
+func (r *runRecord) progressNow() engine.Event {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	return r.progress
+}
+
+// tablesSeen is how many distinct tables the operation has reported, which is
+// the numerator of the meter.
+//
+// Counted from the events rather than kept as a running total, because the
+// engine reports a table more than once — a load and then a reindex — and a
+// counter incremented per event would run past the denominator and clamp there
+// for the second half of the run.
+func (r *runRecord) tablesSeen() int {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	seen := map[string]bool{}
+	for _, ev := range r.events {
+		if ev.Table != "" {
+			seen[ev.Table] = true
+		}
+	}
+	return len(seen)
+}
+
 // log returns a copy of the record's events, safe to render while the operation
 // is still writing to it.
 func (r *runRecord) log() []engine.Event {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	return append([]engine.Event{}, r.events...)
-}
-
-func (r *runRecord) latestProgress() engine.Event {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-	return r.progress
 }
 
 func (r *runRecord) duration(now time.Time) time.Duration {
@@ -229,11 +271,19 @@ func (r *runRecord) duration(now time.Time) time.Duration {
 }
 
 // start runs an operation in the background, recording it.
-func (m *Model) start(kind, explain string, op func(context.Context, engine.Reporter) (string, error)) tea.Cmd {
+//
+// total is the tables the operation expects to touch, and zero is the honest
+// answer for everything but an apply — see runRecord.total. It is a parameter
+// rather than a field somebody sets afterwards so that every caller has to say
+// which of the two it is.
+func (m *Model) start(kind, explain string, total int,
+	op func(context.Context, engine.Reporter) (string, error)) tea.Cmd {
 	ctx, cancel := context.WithCancel(context.Background())
 	r := &runRecord{
+		id:        fmt.Sprintf("%s-%d", kind, len(m.runs)),
 		kind:      kind,
 		explain:   explain,
+		total:     total,
 		startedAt: time.Now(),
 		running:   true,
 		cancel:    cancel,

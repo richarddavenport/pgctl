@@ -8,6 +8,10 @@ import (
 
 // Engine performs pgctl's operations against a project.
 type Engine struct {
+	// creds caches what a credential command printed, so a listing that opens
+	// three remotes naming one sops file decrypts it once. See credential.go.
+	creds credentials
+
 	cfg *config.Config
 	// root is the directory the config's relative paths resolve against —
 	// normally the repository root, since that is where envs/ lives.

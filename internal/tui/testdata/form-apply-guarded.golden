@@ -1,0 +1,36 @@
+pgctl  pgctl.yaml
+╭─ 1 Connections (3) ───────────╮▏╭────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ ● prd               protected │▏│ ‹ Manifest · Tables · Warnings · Drift ›                                                       │
+│ ● qat                 guarded │▏│                                                                                                │
+│ ✗ scratch                     │▏│ prd/product-development/20260828T030000Z                                                       │
+╰───────────────────────────────╯▏│                                                                                                │
+╭─ 2 Databases (3) ─────────────╮▏│ taken       2026-08-27 22:00  14h ago                                                          │
+│ product-development   11.0 GB │▏│ took        3:22                                                                               │
+│ claims                48.0 MB │▏│ size        1.9 GB                                                                             │
+│ quote                 20.0 GB │▏│ tables      3                                                                                  │
+╰───────────────────────────────╯▏│ where       local                                                                              │
+╭─ 3 Snapshots (1) ─────────────╮▏│ server      PostgreSQL    pg_dump                                                              │
+│   08-27 2╭────────────────────────────────────────────────────────────────────────────────────────────────────────────╮          │
+╰──────────│ Apply prd/product-development/20260828T030000Z                                                             │          │
+╭─ 4 Sets (│                                                                                                            │          │
+│ claims   │ Replaces data on the target. The plan is shown before anything is touched.                                 │          │
+╰──────────│                                                                                                            │          │
+╭─ 5 Runs ─│   Target                  ‹ qat  (guarded — needs its name typed) ›  (1/2)                                 │          │
+│ nothing r│   Scope                   ‹ set claims — claims and everything a claim points at ›  (2/3)                  │          │
+╰──────────│   Tables                  nothing yet                                                                      │          │
+           │   Widen to closure        no                                                                               │          │
+           │ ▸ Type the target's name  qa                                                                               │          │
+           │ a guarded target needs its name in full                                                                    │          │
+           │   ↑↓ field · type · enter plan it · esc cancel                                                             │          │
+           ╰────────────────────────────────────────────────────────────────────────────────────────────────────────────╯          │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏╰────────────────────────────────────────────────────────────────────────────────────────────────╯

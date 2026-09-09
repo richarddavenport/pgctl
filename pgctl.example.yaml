@@ -67,18 +67,63 @@ defaults:
   # pgctl is about to truncate — not slow work.
   lockTimeout: 30s
 
+# Storage is this machine, plus any number of named remotes.
+#
+# The local directory is not one of the remotes and is not optional: pg_dump
+# writes a directory, so every snapshot begins here whatever its destination.
+# What is optional is whether the local copy STAYS — a snapshot placed only in a
+# remote is uploaded and then deleted from disk, which is how a laptop stops
+# filling up with 1.9 GB nightlies.
+#
+# There is no default destination once a remote is declared. `pgctl snapshot`
+# requires --to-storage, and the interface asks with nothing pre-ticked: a
+# snapshot is gigabytes, and whether it lands in a shared account a colleague
+# restores from is not something to infer from silence.
 storage:
-  kind: azureblob
-  container: pg-snapshots
   dir: .pgctl/snapshots
-  # Read from the environment, for the same reason database passwords come from
-  # ~/.pgpass: a credential belongs where the tools that need it already look.
-  accountEnv: AZURE_STORAGE_ACCOUNT
-  keyEnv: AZURE_STORAGE_KEY
+
+  # The LOCAL policy. Two days, because this is a working copy and the remotes
+  # hold the history. An unset policy deletes nothing.
   retention:
-    daily: 7
-    weekly: 4
-    monthly: 3
+    daily: 2
+
+  remotes:
+    # The dedicated snapshots account: prd writes, QAT and latest read, one
+    # retention policy, and no environment holding another's credentials.
+    - name: snapshots
+      kind: azureblob
+      container: pg-snapshots
+      # Read from the environment, for the same reason database passwords come
+      # from ~/.pgpass: a credential belongs where the tools that need it
+      # already look. These two are the defaults, and the variables `az` sets,
+      # so a remote using the account you are logged into names neither.
+      accountEnv: AZURE_STORAGE_ACCOUNT
+      keyEnv: AZURE_STORAGE_KEY
+      retention:
+        daily: 7
+        weekly: 4
+        monthly: 3
+
+    # A second destination is an ordinary thing to want: a longer history, in a
+    # cheaper tier, that the working policy never touches. Its own credentials,
+    # because two accounts have two keys — and here they come from a COMMAND
+    # rather than the environment, which is for a team whose secrets live in an
+    # encrypted file.
+    #
+    # A command wins over a set variable, runs relative to this file's
+    # directory, and runs once per process. Its output never reaches an error
+    # message, a log, or a subprocess.
+    #
+    # `sops exec-env envs/prd.env pgctl …` needs none of this and is a fine
+    # answer — the difference is that exec-env puts the WHOLE decrypted file
+    # into the environment of pgctl and of every pg_dump, pg_restore and hook
+    # it runs. A command delivers one value.
+    - name: archive
+      container: pg-archive
+      accountCommand: sops -d --extract '["AZURE_ARCHIVE_ACCOUNT"]' envs/prd.env
+      keyCommand: sops -d --extract '["AZURE_ARCHIVE_KEY"]' envs/prd.env
+      retention:
+        monthly: 12
 
 sets:
   - name: contracts

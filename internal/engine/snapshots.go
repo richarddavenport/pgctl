@@ -10,6 +10,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/richarddavenport/pgctl/internal/config"
 	"github.com/richarddavenport/pgctl/internal/snapshot"
 )
 
@@ -31,7 +32,7 @@ func (e *Engine) openSnapshotIn(ctx context.Context, id string, report Reporter)
 	if env, ok := strings.CutSuffix(id, "/latest"); ok {
 		for i := len(entries) - 1; i >= 0; i-- {
 			if entries[i].Manifest.Connection == env && entries[i].Manifest.Complete() {
-				return entries[i].Manifest, entries[i].Local, nil
+				return entries[i].Manifest, entries[i].Local(), nil
 			}
 		}
 		return nil, false, fmt.Errorf("no complete snapshot of %q", env)
@@ -47,7 +48,7 @@ func (e *Engine) openSnapshotIn(ctx context.Context, id string, report Reporter)
 	case 0:
 		return nil, false, fmt.Errorf("no snapshot %q", id)
 	case 1:
-		return matches[0].Manifest, matches[0].Local, nil
+		return matches[0].Manifest, matches[0].Local(), nil
 	default:
 		ids := make([]string, 0, len(matches))
 		for _, m := range matches {
@@ -108,6 +109,18 @@ type Group struct {
 // SnapshotGroups returns the snapshots grouped by environment and database,
 // optionally restricted to one environment.
 func (e *Engine) SnapshotGroups(ctx context.Context, connection string, report Reporter) ([]Group, error) {
+	return e.snapshotGroupsIn(ctx, connection, "", report)
+}
+
+// snapshotGroupsIn is the same, restricted to the snapshots present in one
+// destination.
+//
+// Retention is per destination now, so the grouping has to be too: a snapshot
+// the local policy has finished with may be the only copy the archive has, and
+// a group built from the merged index would count it once and delete it twice.
+func (e *Engine) snapshotGroupsIn(ctx context.Context, connection, destination string,
+	report Reporter) ([]Group, error) {
+
 	entries, err := e.Index(ctx, report)
 	if err != nil {
 		return nil, err
@@ -118,6 +131,9 @@ func (e *Engine) SnapshotGroups(ctx context.Context, connection string, report R
 	for _, entry := range entries {
 		m := entry.Manifest
 		if connection != "" && m.Connection != connection {
+			continue
+		}
+		if destination != "" && !entry.isAt(destination) {
 			continue
 		}
 		key := m.Connection + "/" + m.Database
@@ -143,11 +159,51 @@ func (e *Engine) DeleteSnapshotEverywhere(ctx context.Context, id string) error 
 	if err := e.DeleteSnapshot(id); err != nil {
 		return err
 	}
-	remote, err := e.remote(ctx, connectionOf(id))
-	if err != nil || remote == nil {
+	remotes, err := e.remotes(ctx)
+	for _, remote := range remotes {
+		if dErr := remote.Store.Delete(ctx, id); dErr != nil && err == nil {
+			err = dErr
+		}
+	}
+	return err
+}
+
+// retentionPolicies is the destinations that have a policy, by name.
+//
+// Local's is storage.retention; a remote's is its own. A destination missing
+// from this map keeps everything.
+func (e *Engine) retentionPolicies() map[string]snapshot.Policy {
+	out := map[string]snapshot.Policy{}
+	local := policyOf(e.cfg.Storage.Retention)
+	if !local.Unset() {
+		out[config.LocalStorage] = local
+	}
+	for _, r := range e.cfg.Remotes() {
+		if p := policyOf(r.Retention); !p.Unset() {
+			out[r.Name] = p
+		}
+	}
+	return out
+}
+
+func policyOf(r config.Retention) snapshot.Policy {
+	return snapshot.Policy{Daily: r.Daily, Weekly: r.Weekly, Monthly: r.Monthly}
+}
+
+// DeleteSnapshotFrom removes a snapshot from ONE destination.
+//
+// What a per-destination retention policy needs: a snapshot the local policy
+// has finished with is not one the archive policy has finished with, and the
+// version of prune that deleted everywhere could not express the difference.
+func (e *Engine) DeleteSnapshotFrom(ctx context.Context, id, destination string) error {
+	if destination == config.LocalStorage {
+		return e.DeleteSnapshot(id)
+	}
+	remote, err := e.remoteNamed(ctx, destination)
+	if err != nil {
 		return err
 	}
-	return remote.Delete(ctx, id)
+	return remote.Store.Delete(ctx, id)
 }
 
 // DeleteSnapshot removes a snapshot from local storage.
@@ -166,44 +222,61 @@ func (e *Engine) DeleteSnapshot(id string) error {
 	return nil
 }
 
-// Prune applies the retention policy, reporting what it would remove and
-// removing it only when apply is set.
+// Prune applies each destination's retention policy, reporting what it would
+// remove and removing it only when apply is set.
+//
+// Per destination, because the policies are: a laptop keeping two days and an
+// archive container keeping a year is the ordinary arrangement, and the version
+// of this that ran one policy and then called DeleteSnapshotEverywhere could
+// not express it — it deleted the archive's only copy on the day the local one
+// aged out.
+//
+// A destination with no policy is skipped and SAID to be skipped. An unset
+// policy deletes nothing, which is what makes a fresh config safe to prune, and
+// silence would make that indistinguishable from a policy that found nothing to
+// do.
 //
 // Shared by the CLI and the TUI so that "what would go" is computed once: a
-// retention policy that behaves differently depending on which front end ran
-// it would be worse than none.
+// retention policy that behaved differently depending on which front end ran it
+// would be worse than none.
 func (e *Engine) Prune(ctx context.Context, env string, apply bool, report Reporter) (string, error) {
-	policy := snapshot.Policy{
-		Daily:   e.cfg.Storage.Retention.Daily,
-		Weekly:  e.cfg.Storage.Retention.Weekly,
-		Monthly: e.cfg.Storage.Retention.Monthly,
-	}
-	if policy.Unset() {
-		return "", fmt.Errorf("no storage.retention configured, so there is nothing to prune")
-	}
-
-	groups, err := e.SnapshotGroups(ctx, env, report)
-	if err != nil {
-		return "", err
+	policies := e.retentionPolicies()
+	if len(policies) == 0 {
+		return "", fmt.Errorf("no retention configured on any destination (%s), "+
+			"so there is nothing to prune", strings.Join(e.cfg.Destinations(), ", "))
 	}
 
 	var removed int
 	var freed int64
-	for _, group := range groups {
-		keep, remove := snapshot.Keep(group.Snapshots, policy)
-		if len(remove) == 0 {
+	for _, destination := range e.cfg.Destinations() {
+		policy, ok := policies[destination]
+		if !ok {
+			report.step("prune", fmt.Sprintf("%s: no retention configured, keeping everything",
+				destination))
 			continue
 		}
-		report.step("prune", fmt.Sprintf("%s/%s: keeping %d, removing %d",
-			group.Connection, group.Database, len(keep), len(remove)))
-		for _, m := range remove {
-			report.table("prune", m.ID, fmt.Sprintf("%s, taken %s",
-				humanBytes(m.Bytes), m.StartedAt.Local().Format("2006-01-02 15:04")))
-			removed++
-			freed += m.Bytes
-			if apply {
-				if err := e.DeleteSnapshotEverywhere(ctx, m.ID); err != nil {
-					return "", err
+
+		groups, err := e.snapshotGroupsIn(ctx, env, destination, report)
+		if err != nil {
+			return "", err
+		}
+		for _, group := range groups {
+			keep, remove := snapshot.Keep(group.Snapshots, policy)
+			if len(remove) == 0 {
+				continue
+			}
+			report.step("prune", fmt.Sprintf("%s %s/%s: keeping %d, removing %d",
+				destination, group.Connection, group.Database, len(keep), len(remove)))
+			for _, m := range remove {
+				report.table("prune", m.ID, fmt.Sprintf("%s from %s, taken %s",
+					humanBytes(m.Bytes), destination,
+					m.StartedAt.Local().Format("2006-01-02 15:04")))
+				removed++
+				freed += m.Bytes
+				if apply {
+					if err := e.DeleteSnapshotFrom(ctx, m.ID, destination); err != nil {
+						return "", err
+					}
 				}
 			}
 		}

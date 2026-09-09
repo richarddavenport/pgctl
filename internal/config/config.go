@@ -116,14 +116,50 @@ type Defaults struct {
 	StatementTimeout time.Duration `yaml:"statementTimeout"`
 }
 
-// Storage is where snapshots live once taken.
+// Storage is where snapshots live once taken: this machine, plus any number of
+// declared remotes.
+//
+// The local directory is not one of the remotes and is not optional — pg_dump
+// writes a directory, so every snapshot begins here whatever its destination.
+// What IS optional is whether the local copy stays: a snapshot placed only in a
+// remote is pushed and then deleted from disk.
 type Storage struct {
-	// Kind is "local" or "azureblob".
-	Kind string `yaml:"kind"`
-
-	// Dir is the local root, and doubles as the staging area for a remote
-	// destination.
+	// Dir is the local root, and the staging area for every remote.
 	Dir string `yaml:"dir"`
+
+	// Retention bounds the LOCAL copies. Each remote carries its own, because a
+	// laptop keeping two days and an archive container keeping a year is the
+	// ordinary arrangement and one policy cannot say both.
+	Retention Retention `yaml:"retention"`
+
+	// Remotes are the places a snapshot can be sent, in the order they are
+	// offered and the order a download prefers.
+	Remotes []Remote `yaml:"remotes"`
+
+	// The single-remote keys, kept only so that Validate can refuse them by
+	// name. They were `storage.kind: azureblob` with the container and the
+	// credentials beside it, which cannot express two destinations at all.
+	// A config carrying them is not misread — it is rejected with the shape to
+	// write instead, because silently treating them as one unnamed remote
+	// would leave two schemas alive and every doc ambiguous about which is
+	// current.
+	LegacyKind       string `yaml:"kind"`
+	LegacyContainer  string `yaml:"container"`
+	LegacyEndpoint   string `yaml:"endpoint"`
+	LegacyAccountEnv string `yaml:"accountEnv"`
+	LegacyKeyEnv     string `yaml:"keyEnv"`
+}
+
+// Remote is one place snapshots can be sent.
+type Remote struct {
+	// Name is what the interface offers and what --to-storage takes. It is the
+	// only identity a remote has: nothing keys off the container or the
+	// account, so a container can be renamed without a snapshot changing where
+	// pgctl thinks it is.
+	Name string `yaml:"name"`
+
+	// Kind is "azureblob". A closed set of one, so far.
+	Kind string `yaml:"kind"`
 
 	Container string `yaml:"container"`
 
@@ -134,11 +170,66 @@ type Storage struct {
 	// AccountEnv and KeyEnv name the environment variables holding the storage
 	// account and its key, following the same principle as the database
 	// credentials: pgctl reads them from where they already are rather than
-	// storing them.
+	// storing them. Per remote, because two accounts have two keys.
 	AccountEnv string `yaml:"accountEnv"`
 	KeyEnv     string `yaml:"keyEnv"`
 
+	// AccountCommand and KeyCommand are shell commands printing the account and
+	// the key, for a team whose credentials live in an encrypted file rather
+	// than in the environment:
+	//
+	//	keyCommand: sops -d --extract '["AZURE_STORAGE_KEY"]' envs/prd.env
+	//
+	// They take precedence over the Env variables when set — a command is a
+	// deliberate statement about where the credential is, and an inherited
+	// variable is usually an accident of the shell.
+	//
+	// Why this exists when `sops exec-env … pgctl …` needs no code at all: that
+	// decrypts the WHOLE file into the environment, and pgctl passes its
+	// environment to pg_dump, pg_restore and every configured hook. On the file
+	// this was built against that is 239 variables reaching every subprocess to
+	// deliver one key. A command fetches the one value, when it is needed.
+	//
+	// The output is never logged and never reaches an error message. See
+	// engine.credential.
+	AccountCommand string `yaml:"accountCommand"`
+	KeyCommand     string `yaml:"keyCommand"`
+
+	// Retention bounds this remote's copies. Unset deletes nothing here, which
+	// is the same rule the local policy follows.
 	Retention Retention `yaml:"retention"`
+}
+
+// LocalStorage is the name of the destination that is always present: this
+// machine's disk. Reserved, so a remote cannot be called it and a front end can
+// offer one list.
+const LocalStorage = "local"
+
+// Destinations is every place a snapshot can be put, local first.
+//
+// The order is the order the interface offers, and the order a download prefers
+// — local costs nothing, and after that the config's own order is the closest
+// thing to a statement of preference anybody has given.
+func (c *Config) Destinations() []string {
+	out := make([]string, 0, 1+len(c.Remotes()))
+	out = append(out, LocalStorage)
+	for _, r := range c.Remotes() {
+		out = append(out, r.Name)
+	}
+	return out
+}
+
+// Remotes is the declared remotes.
+func (c *Config) Remotes() []Remote { return c.Storage.Remotes }
+
+// RemoteByName finds a remote.
+func (c *Config) RemoteByName(name string) (Remote, bool) {
+	for _, r := range c.Storage.Remotes {
+		if r.Name == name {
+			return r, true
+		}
+	}
+	return Remote{}, false
 }
 
 // Retention is how many snapshots of each cadence survive a prune. Zero means
@@ -189,6 +280,24 @@ type Rule struct {
 	// Why records what the rule is for, so that a table missing its history in
 	// a copied environment is explicable without reading a commit log.
 	Why string `yaml:"why"`
+}
+
+// Mode is what this rule does to a table's data, with the default applied.
+//
+// The default is "all", or "filtered" when a Where is set — so a rule almost
+// never writes `data:` at all. It is a method rather than a branch inside
+// RuleFor because RuleFor resolves a TABLE NAME through every rule, and a
+// caller holding one rule (the interface's Rules tab, listing them) needs the
+// same answer without a table to look up. Two copies of a default is two
+// answers to "is this filtered".
+func (r Rule) Mode() DataMode {
+	if r.Data != "" {
+		return r.Data
+	}
+	if r.Where != "" {
+		return DataFiltered
+	}
+	return DataAll
 }
 
 // Hooks are shell commands run around an apply. They exist because quiescing a

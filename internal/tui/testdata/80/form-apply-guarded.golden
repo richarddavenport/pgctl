@@ -1,0 +1,22 @@
+pgctl  pgctl.yaml
+╭─ 1 Connections (3) ──────────╮▏╭─────────────────────────────────────────────╮
+│ ● prd              protected │▏│ ‹ Manifest · Tables · Warnings · Drift ›    │
+│ ● qat                guarded │▏│                                             │
+│ ✗╭────────────────────────────────────────────────────────────────────────╮  │
+╰──│ Apply prd/product-development/20260828T030000Z                         │  │
+╭─ │                                                                        │  │
+│ p│ Replaces data on the target. The plan is shown before anything is      │  │
+│ c│ touched.                                                               │  │
+│ q│                                                                        │  │
+╰──│   Target                  ‹ qat  (guarded — needs its name typed) ›  ( │  │
+╭─ │   Scope                   ‹ set claims — claims and everything a claim │  │
+│  │   Tables                  nothing yet                                  │  │
+╰──│   Widen to closure        no                                           │  │
+╭─ │ ▸ Type the target's name  qa                                           │  │
+│ c│ a guarded target needs its name in full                                │  │
+╰──│   ↑↓ field · type · enter plan it · esc cancel                         │  │
+╭─ ╰────────────────────────────────────────────────────────────────────────╯  │
+│ nothing run yet              │▏│   no data      1                            │
+╰──────────────────────────────╯▏│   foreign keys 0                            │
+                                ▏│                                             │
+                                ▏╰─────────────────────────────────────────────╯

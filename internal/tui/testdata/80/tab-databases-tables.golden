@@ -1,23 +1,23 @@
 pgctl  pgctl.yaml
-╭─ 1 Connections (3) ──────────╮ ╭─────────────────────────────────────────────╮
-│ ● prd       protected        │ │ ‹ Tables · Rules · Foreign keys ›           │
-│ ● qat       guarded          │ │                                             │
-│ ✗ scratch                    │ │ tables        3   total   24.2 GB           │
-╰──────────────────────────────╯ │                                             │
-╭─ 2 Databases (3) ────────────╮ │ TABLE               SIZE     ROWS SNAPSHOT  │
-│ product-development  11.0 GB │ │ claims.policy…  180.0 MB     483k all       │
-│ claims               48.0 MB │ │ quotes.quote     20.0 GB     147k filtered  │
-│ quote                20.0 GB │ │ audit.logged_…    4.0 GB     9.1M all       │
-╰──────────────────────────────╯ │                                             │
-╭─ 3 Snapshots (1) ────────────╮ │                                             │
-│ 08-27 22:00  1.9 GB l        │ │                                             │
-╰──────────────────────────────╯ │                                             │
-╭─ 4 Sets (1) ─────────────────╮ │                                             │
-│ claims 2+2                   │ │                                             │
-╰──────────────────────────────╯ │                                             │
-╭─ 5 Runs ─────────────────────╮ │                                             │
-│ nothing run yet              │ │                                             │
-╰──────────────────────────────╯ │                                             │
-                                 │                                        6/6  │
-                                 ╰─────────────────────────────────────────────╯
-n snapshot · a apply · m move · p prune · / filter · tab pane · ? keys
+╭─ 1 Connections (3) ──────────╮▏╭─────────────────────────────────────────────╮
+│ ● prd              protected │▏│ ‹ Tables · Rules · Foreign keys ›           │
+│ ● qat                guarded │▏│                                             │
+│ ✗ scratch                    │▏│   tables        3   total   24.2 GB         │
+╰──────────────────────────────╯▏│                                             │
+╭─ 2 Databases (3) ────────────╮▏│   TABLE             SIZE     ROWS SNAPSHOT  │
+│ product-development  11.0 GB │▏│ › claims.poli…  180.0 MB     483k all       │
+│ claims               48.0 MB │▏│   quotes.quote   20.0 GB     147k filtered  │
+│ quote                20.0 GB │▏│   audit.logge…    4.0 GB     9.1M all       │
+╰──────────────────────────────╯▏│                                             │
+╭─ 3 Snapshots (1) ────────────╮▏│                                             │
+│   08-27 22:00       1.9 GB l │▏│                                             │
+╰──────────────────────────────╯▏│                                             │
+╭─ 4 Sets (1) ─────────────────╮▏│                                             │
+│ claims                   2+2 │▏│                                             │
+╰──────────────────────────────╯▏│                                             │
+╭─ 5 Runs ─────────────────────╮▏│                                             │
+│ nothing run yet              │▏│                                             │
+╰──────────────────────────────╯▏│                                             │
+                                ▏│                                        6/6  │
+                                ▏╰─────────────────────────────────────────────╯
+n snapshot · a apply · m move · p prune · / filter · ctrl+p commands · ? keys

@@ -29,8 +29,15 @@ type DumpRequest struct {
 	// At fixes the snapshot's timestamp and id. Zero means now.
 	At time.Time
 
-	// NoPush keeps the snapshot local even when a remote store is configured.
-	NoPush bool
+	// Destinations is where the finished snapshot should end up: names from
+	// config.Destinations. Empty means local only, which is what a
+	// single-destination config has and the only sensible reading of "you did
+	// not say".
+	//
+	// A list rather than the NoPush bool this replaces, because a bool can only
+	// answer a question with one remote in it. The local copy is deleted after
+	// a successful push when local is NOT among them — see Engine.Place.
+	Destinations []string
 }
 
 // Dump takes a snapshot of one database.
@@ -174,14 +181,16 @@ func (e *Engine) Dump(ctx context.Context, req DumpRequest, report Reporter) (*s
 	report.send(Event{Kind: EventProgress, Step: "dump", Bytes: m.Bytes,
 		Message: fmt.Sprintf("snapshot %s written to %s (%s)", id, dir, humanBytes(m.Bytes))})
 
-	// Uploaded as part of taking it, not as a separate command someone has to
+	// Placed as part of taking it, not as a separate command someone has to
 	// remember: a nightly whose artifact is still on the runner when the runner
 	// is recycled has not backed anything up.
-	if !req.NoPush {
-		if err := e.Push(ctx, id, report); err != nil {
-			// The snapshot exists and is complete; failing to upload it is
-			// worth failing the run over, but not worth deleting it over.
-			return m, fmt.Errorf("snapshot %s is on disk but could not be uploaded: %w", id, err)
+	if len(req.Destinations) > 0 {
+		if err := e.Place(ctx, id, req.Destinations, report); err != nil {
+			// The snapshot exists and is complete; failing to place it is worth
+			// failing the run over, but not worth deleting it over — and Place
+			// only removes the local copy once every upload has succeeded, so
+			// the snapshot is still here to retry with.
+			return m, fmt.Errorf("snapshot %s is on disk but could not be placed: %w", id, err)
 		}
 	}
 

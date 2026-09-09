@@ -1,22 +1,22 @@
 pgctl  pgctl.yaml
-╭─ 1 Connections (3) ──────────╮ ╭─────────────────────────────────────────────╮
-│ ● prd       protected        │ │ ‹ Overview · Databases · Config ›           │
-│ ● qat       guarded          │ │                                             │
-│ ✗╭────────────────────────────────────────────────────────────────────────╮  │
-╰──│ Take a snapshot of prd                                                 │  │
-╭─ │ Reads the chosen databases and writes a compressed copy. Nothing is    │  │
-│ p│ written to prd.                                                        │  │
+╭─ 1 Connections (3) ──────────╮▏╭─────────────────────────────────────────────╮
+│ ● prd              protected │▏│ ‹ Overview · Databases · Config ›           │
+│ ● qat                guarded │▏│                                             │
+│ ✗ scratch                    │▏│ prd                                         │
+╰──────────────────────────────╯▏│ protected — never a target                  │
+╭─ ╭────────────────────────────────────────────────────────────────────────╮  │
+│ p│ Take a snapshot of prd/product-development                             │  │
 │ c│                                                                        │  │
-│ q│ ▸ Databases          1 of 3                                            │  │
-╰──│   ▸ ○ claims                                                           │  │
-╭─ │     ● product-development                                              │  │
-│ 0│     ○ quote                                                            │  │
-╰──│                                                                   3/3  │  │
-╭─ │   Upload to storage  no                                                │  │
-│ c│                                                                        │  │
-╰──│ defaults to the one you were looking at; a takes all of them           │… │
-╭─ │ space toggle · a all · n none · ↑↓ fields · enter run · esc cancel     │  │
-│ n╰────────────────────────────────────────────────────────────────────────╯  │
-╰──────────────────────────────╯ │                                             │
-                                 │                                             │
-                                 ╰─────────────────────────────────────────────╯
+│ q│ Reads product-development and writes a compressed copy. Nothing is     │  │
+╰──│ written to prd.                                                        │  │
+╭─ │                                                                        │  │
+│  │ ▸ local      no                                                        │  │
+╰──│   snapshots  no                                                        │  │
+╭─ │ keep it on this machine, in snapshots                                  │  │
+│ c│   ↑↓ field · space toggle · enter take it · esc cancel                 │  │
+╰──╰────────────────────────────────────────────────────────────────────────╯… │
+╭─ 5 Runs ─────────────────────╮▏│                                             │
+│ nothing run yet              │▏│                                             │
+╰──────────────────────────────╯▏│                                             │
+                                ▏│                                             │
+                                ▏╰─────────────────────────────────────────────╯

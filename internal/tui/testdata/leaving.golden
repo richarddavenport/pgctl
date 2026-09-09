@@ -1,0 +1,37 @@
+pgctl  pgctl.yaml
+╭─ 1 Connections (3) ───────────╮▏╭────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ ● prd               protected │▏│ ‹ Overview · Databases · Config ›                                                              │
+│ ● qat                 guarded │▏│                                                                                                │
+│ ✗ scratch                     │▏│ prd                                                                                            │
+╰───────────────────────────────╯▏│ protected — never a target                                                                     │
+╭─ 2 Databases (3) ─────────────╮▏│                                                                                                │
+│ product-development   11.0 GB │▏│ host       prd.example:5432                                                                    │
+│ claims                48.0 MB │▏│ user       mbpiadmin                                                                           │
+│ quote                 20.0 GB │▏│ server     PostgreSQL 17.4                                                                     │
+╰───────────────────────────────╯▏│ databases  3                                                                                   │
+╭─ 3 Snapshots (1) ─────────────╮▏│ total size 31.0 GB                                                                             │
+│   08-27 22:00        1.9 GB l │▏│ checked    just now                                                                            │
+╰───────────────────────────────╯▏╭──────────────────────────────────────────────────────────────╮                                 │
+╭─ 4 Sets (1) ──────────────────╮▏│Leave while apply → qat is running?                           │                                 │
+│ claims                    2+2 │▏│                                                              │                                 │
+╰───────────────────────────────╯▏│It is cancelled rather than abandoned, so the engine's        │                                 │
+╭─ 5 Runs (2) ──────────────────╮▏│onFailure and postApply hooks still run — they are what       │                                 │
+│ ⠋ apply → qat            1:41 │▏│bring an environment back up. Anything already written stays  │                                 │
+│ ✓ snapshot prd           3:22 │▏│written.                                                      │                                 │
+╰───────────────────────────────╯▏│                                                              │                                 │
+                                 ▏│y cancel it and leave · esc stay                              │                                 │
+                                 ▏╰──────────────────────────────────────────────────────────────╯                                 │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏╰────────────────────────────────────────────────────────────────────────────────────────────────╯
+q stop and leave · tab log · ? keys

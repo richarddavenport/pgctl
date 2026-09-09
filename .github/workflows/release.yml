@@ -6,10 +6,8 @@ on:
 permissions:
   contents: write
 
-# Two checkouts, for the reason ci.yml gives.
-defaults:
-  run:
-    working-directory: pgctl
+# One checkout, for the reason ci.yml gives: tuikit is a tagged module now, so
+# there is no sibling directory to make room for.
 
 jobs:
   release:
@@ -17,18 +15,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          path: pgctl
           # The full history, because the version is `git describe` and a
           # shallow clone cannot see the tag it was triggered by.
           fetch-depth: 0
-      - uses: actions/checkout@v4
-        with:
-          repository: richarddavenport/tuikit
-          path: tuikit
-          token: ${{ secrets.TUIKIT_TOKEN }}
       - uses: actions/setup-go@v5
         with:
-          go-version-file: pgctl/go.mod
+          go-version-file: go.mod
       - name: build
         run: |
           mkdir -p dist
@@ -42,5 +34,5 @@ jobs:
           cd dist && shasum -a 256 * > checksums.txt
       - uses: softprops/action-gh-release@v2
         with:
-          files: pgctl/dist/*
+          files: dist/*
           generate_release_notes: true

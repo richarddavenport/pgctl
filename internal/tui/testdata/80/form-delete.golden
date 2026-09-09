@@ -1,0 +1,22 @@
+pgctl  pgctl.yaml
+╭─ 1 Connections (3) ──────────╮▏╭─────────────────────────────────────────────╮
+│ ● prd              protected │▏│ ‹ Manifest · Tables · Warnings · Drift ›    │
+│ ● qat                guarded │▏│                                             │
+│ ✗ scratch                    │▏│ prd/product-development/20260828T030000Z    │
+╰──────────────────────────────╯▏│                                             │
+╭─ 2 Databases (3) ────────────╮▏│ taken       2026-08-27 22:00  14h ago       │
+│ p╭────────────────────────────────────────────────────────────────────────╮  │
+│ c│ Delete prd/product-development/20260828T030000Z                        │  │
+│ q│                                                                        │  │
+╰──│ Removes 1.9 GB from local. This cannot be undone.                      │  │
+╭─ │                                                                        │  │
+│  │ ▸ Yes, delete it  no                                                   │  │
+╰──│ space toggles                                                          │  │
+╭─ │   ↑↓ field · space toggle · enter delete it · esc cancel               │  │
+│ c╰────────────────────────────────────────────────────────────────────────╯  │
+╰──────────────────────────────╯▏│   whole        1                            │
+╭─ 5 Runs ─────────────────────╮▏│   filtered     1                            │
+│ nothing run yet              │▏│   no data      1                            │
+╰──────────────────────────────╯▏│   foreign keys 0                            │
+                                ▏│                                             │
+                                ▏╰─────────────────────────────────────────────╯

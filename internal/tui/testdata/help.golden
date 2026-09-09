@@ -1,37 +1,37 @@
-                             ╭────────────────────────────────────────────────────────────────────────╮
-                             │                                                                        │
-                             │ pgctl keys                                                             │
-                             │                                                                        │
-                             │ MOVING                                                                 │
-                             │   1-5          jump to a panel                                         │
-                             │   ↑ ↓ / j k    move within a panel                                     │
-                             │   J K          next / previous panel                                   │
-                             │   g G          first / last row                                        │
-                             │   tab          focus the detail pane, then cycle its tabs              │
-                             │   shift+tab    previous tab                                            │
-                             │   ← / h        leave the detail pane                                   │
-                             │   /            filter the focused panel                                │
-                             │   esc          clear the filter, or leave the pane                     │
-                             │                                                                        │
-                             │ DOING                                                                  │
-                             │   n            take a snapshot — choose environment and databases      │
-                             │   a            apply the selected snapshot — choose target and scope   │
-                             │   m            move one environment's data into another                │
-                             │   p            prune snapshots by the retention policy                 │
-                             │   x            delete the selected snapshot                            │
-                             │   r            reload snapshots and re-probe environments              │
-                             │                                                                        │
-                             │ IN A FORM                                                              │
-                             │   ↑ ↓          move between fields                                     │
-                             │   ← →          change a choice                                         │
-                             │   space        toggle                                                  │
-                             │   a / n        select all / none in a multi-select                     │
-                             │   enter        run it                                                  │
-                             │   esc          cancel                                                  │
-                             │                                                                        │
-                             │ WHILE SOMETHING RUNS                                                   │
-                             │   q            cancel it — the engine's failure hooks still run        │
-                             │                                                                        │
-                             │ any key closes this                                                    │
-                             │                                                                        │
-                             ╰────────────────────────────────────────────────────────────────────────╯
+                                  ╭──────────────────────────────────────────────────────────────╮
+                                  │pgctl keys                                                    │
+                                  │                                                              │
+                                  │Moving                                                        │
+                                  │1-5        jump to a panel                                    │
+                                  │↑ ↓ / j k  move within a panel                                │
+                                  │J K        next / previous panel                              │
+                                  │g G        first / last row                                   │
+                                  │tab        focus the detail pane, then cycle its tabs         │
+                                  │shift+tab  previous tab                                       │
+                                  │← / h      leave the detail pane                              │
+                                  │/          filter the focused panel                           │
+                                  │esc        clear the filter, or leave the pane                │
+                                  │                                                              │
+                                  │Doing                                                         │
+                                  │ctrl+p     every command, with the key that runs it           │
+                                  │n          take a snapshot — choose the databases             │
+                                  │a          apply the selected snapshot — choose target and sc…│
+                                  │m          move one connection's data into another            │
+                                  │p          prune snapshots by the retention policy            │
+                                  │x          delete the selected snapshot                       │
+                                  │r          reload snapshots and re-probe connections          │
+                                  │                                                              │
+                                  │In a form                                                     │
+                                  │↑ ↓        move between fields                                │
+                                  │← →        change a choice                                    │
+                                  │space      toggle                                             │
+                                  │enter      run it, or plan it                                 │
+                                  │esc        cancel                                             │
+                                  │                                                              │
+                                  │Reading a plan                                                │
+                                  │↑ ↓        scroll it — nothing has been touched yet           │
+                                  │w          widen to the referential closure and re-plan       │
+                                  │enter      apply it                                           │
+                                  │esc        back to the form                                   │
+                                  │↓ 5 more                                                      │
+                                  ╰──────────────────────────────────────────────────────────────╯

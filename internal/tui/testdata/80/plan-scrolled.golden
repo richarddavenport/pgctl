@@ -1,0 +1,23 @@
+pgc╭────────────────────────────────────────────────────────────────────────╮
+╭─ │ Apply prd/product-development/20260828T030000Z                         │──╮
+│ ●│                                                                        │  │
+│ ●│ Replaces data on the target. The plan is shown before anything is      │  │
+│ ✗│ touched.                                                               │  │
+╰──│                                                                        │  │
+╭─ │ 81 foreign keys dropped and rebuilt, 31 indexes rebuilt                │  │
+│ p│ 12 user triggers disabled for the load on 1 table                      │  │
+│ c│                                                                        │  │
+│ q│ LOAD ORDER                                                             │  │
+╰──│ 1. public.address                                                      │  │
+╭─ │ 2. operations.cancellation, operations.policy_contract,                │  │
+│  │ operations.policy_contract_quote                                       │  │
+╰──│ 3. claims.policy_claim                                                 │  │
+╭─ │ 4. claims.claim_detail                                                 │  │
+│ c│ ring: operations.cancellation, operations.policy_contract,             │  │
+╰──│ operations.policy_contract_quote                                       │… │
+╭─ │                                                                        │  │
+│ n│ ! audit.logged_actions carries no data in this snapshot, so applying   │  │
+╰──│                                                                 19/20  │  │
+   │ read it, then confirm. Nothing has been touched yet.                   │  │
+   │   enter apply it · ↑↓ read · esc back                                  │──╯
+   ╰────────────────────────────────────────────────────────────────────────╯

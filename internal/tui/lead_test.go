@@ -31,7 +31,8 @@ func TestTheSelectedRowKeepsItsStateColour(t *testing.T) {
 	// is the selected one.
 	var selected string
 	for _, line := range harness.Lines(r.View()) {
-		if strings.Contains(harness.Strip(line), "prd       protected") {
+		if strings.Contains(harness.Strip(line), "prd") &&
+			strings.Contains(harness.Strip(line), "protected") {
 			selected = line
 			if i := strings.Index(line, "│ ‹"); i > 0 {
 				selected = line[:i]
@@ -49,7 +50,7 @@ func TestTheSelectedRowKeepsItsStateColour(t *testing.T) {
 	if !strings.Contains(codes, "47m") {
 		t.Errorf("the row is not highlighted: %q", codes)
 	}
-	// And the lead is still green: prd is reachable in the fixture.
+	// And the status glyph is still green: prd is reachable in the fixture.
 	if !strings.Contains(codes, "32m") {
 		t.Errorf("the ● lost its colour under the highlight.\ncodes: %s", codes)
 	}

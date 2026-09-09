@@ -7,9 +7,15 @@ already exists rather than an hour of reading production.
 ## What it does
 
 ```sh
-pgctl snapshot --from prd    # every database on the server, one timestamp for the set
+pgctl snapshot --from prd --to-storage snapshots   # every database, one timestamp for the set
 pgctl prune --apply          # enforce storage.retention
 ```
+
+`--to-storage` names a destination declared under `storage.remotes`, and is
+required once one exists: there is no default, so a cron line cannot quietly
+start writing somewhere nobody chose. `--to-storage snapshots` uploads and keeps
+the local copy; naming the remote alone uploads and then deletes it, which is
+what a runner with a small disk wants.
 
 `snapshot` uploads as part of taking it. A nightly whose artifact is still on
 the runner when the runner is recycled has not backed anything up.
@@ -77,7 +83,7 @@ jobs:
           printf '%s\n' "$PGPASS" > ~/.pgpass
 
       - name: Snapshot production
-        run: pgctl snapshot --from prd
+        run: pgctl snapshot --from prd --to-storage snapshots
 
       - name: Enforce retention
         run: pgctl prune --apply

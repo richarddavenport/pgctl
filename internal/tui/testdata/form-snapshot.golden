@@ -1,36 +1,36 @@
 pgctl  pgctl.yaml
-╭─ 1 Connections (3) ───────────╮ ╭────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ ● prd       protected         │ │ ‹ Overview · Databases · Config ›                                                              │
-│ ● qat       guarded           │ │                                                                                                │
-│ ✗ scratch                     │ │ prd                                                                                            │
-╰───────────────────────────────╯ │ protected — never a target                                                                     │
-╭─ 2 Databases (3) ─────────────╮ │                                                                                                │
-│ product-development  11.0 GB  │ │ host       prd.example:5432                                                                    │
-│ claims               48.0 MB  │ │ user       mbpiadmin                                                                           │
-│ quote                20.0 GB  │ │ server     PostgreSQL 17.4                                                                     │
-╰───────────────────────────────╯ │ databases  3                                                                                   │
-╭─ 3 Snapsh╭────────────────────────────────────────────────────────────────────────────────────────────────────────────╮          │
-│ 08-27 22:│ Take a snapshot of prd                                                                                     │          │
-╰──────────│ Reads the chosen databases and writes a compressed copy. Nothing is written to prd.                        │          │
-╭─ 4 Sets (│                                                                                                            │          │
-│ claims 2+│ ▸ Databases          1 of 3                                                                                │          │
-╰──────────│   ▸ ○ claims                                                                                               │          │
-╭─ 5 Runs ─│     ● product-development                                                                                  │          │
-│ nothing r│     ○ quote                                                                                                │          │
-╰──────────│                                                                                                       3/3  │          │
-           │   Upload to storage  no                                                                                    │          │
-           │                                                                                                            │          │
-           │ defaults to the one you were looking at; a takes all of them                                               │          │
-           │ space toggle · a all · n none · ↑↓ fields · enter run · esc cancel                                         │          │
+╭─ 1 Connections (3) ───────────╮▏╭────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ ● prd               protected │▏│ ‹ Overview · Databases · Config ›                                                              │
+│ ● qat                 guarded │▏│                                                                                                │
+│ ✗ scratch                     │▏│ prd                                                                                            │
+╰───────────────────────────────╯▏│ protected — never a target                                                                     │
+╭─ 2 Databases (3) ─────────────╮▏│                                                                                                │
+│ product-development   11.0 GB │▏│ host       prd.example:5432                                                                    │
+│ claims                48.0 MB │▏│ user       mbpiadmin                                                                           │
+│ quote                 20.0 GB │▏│ server     PostgreSQL 17.4                                                                     │
+╰───────────────────────────────╯▏│ databases  3                                                                                   │
+╭─ 3 Snapshots (1) ─────────────╮▏│ total size 31.0 GB                                                                             │
+│   08-27 22:00        1.9 GB l │▏│ checked    just now                                                                            │
+╰──────────╭────────────────────────────────────────────────────────────────────────────────────────────────────────────╮          │
+╭─ 4 Sets (│ Take a snapshot of prd/product-development                                                                 │          │
+│ claims   │                                                                                                            │          │
+╰──────────│ Reads product-development and writes a compressed copy. Nothing is written to prd.                         │          │
+╭─ 5 Runs ─│                                                                                                            │          │
+│ nothing r│ ▸ local      no                                                                                            │          │
+╰──────────│   snapshots  no                                                                                            │          │
+           │ keep it on this machine, in snapshots                                                                      │          │
+           │   ↑↓ field · space toggle · enter take it · esc cancel                                                     │          │
            ╰────────────────────────────────────────────────────────────────────────────────────────────────────────────╯          │
-                                  │                                                                                                │
-                                  │                                                                                                │
-                                  │                                                                                                │
-                                  │                                                                                                │
-                                  │                                                                                                │
-                                  │                                                                                                │
-                                  │                                                                                                │
-                                  │                                                                                                │
-                                  │                                                                                                │
-                                  │                                                                                                │
-                                  ╰────────────────────────────────────────────────────────────────────────────────────────────────╯
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏╰────────────────────────────────────────────────────────────────────────────────────────────────╯

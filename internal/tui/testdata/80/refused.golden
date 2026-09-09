@@ -1,0 +1,23 @@
+pgctl  pgctl.yaml
+╭─ 1 Connections (3) ──────────╭──────────────────────────────────────────────╮╮
+│ ● prd              protected │refused                                       ││
+│ ● qat                guarded │                                              ││
+│ ✗ scratch                    │no snapshot selected — press n to take one,   ││
+╰──────────────────────────────│or move to the Snapshots panel                ││
+╭─ 2 Databases (3) ────────────│                                              ││
+│ product-development  11.0 GB │esc dismiss                                   ││
+│ claims               48.0 MB ╰──────────────────────────────────────────────╯│
+│ quote                20.0 GB │▏│                                             │
+╰──────────────────────────────╯▏│                                             │
+╭─ 3 Snapshots ────────────────╮▏│                                             │
+│ none on prd — press n        │▏│                                             │
+╰──────────────────────────────╯▏│                                             │
+╭─ 4 Sets (1) ─────────────────╮▏│                                             │
+│ claims                   2+2 │▏│                                             │
+╰──────────────────────────────╯▏│                                             │
+╭─ 5 Runs ─────────────────────╮▏│                                             │
+│ nothing run yet              │▏│                                             │
+╰──────────────────────────────╯▏│                                             │
+                                ▏│                                             │
+                                ▏╰─────────────────────────────────────────────╯
+n snapshot · a apply · m move · p prune · x delete · / filter · ? keys

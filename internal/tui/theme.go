@@ -26,24 +26,40 @@ var Palette = theme.Default
 
 // Glyphs is tuikit's set plus the four pgctl needs.
 //
-// The braille spinner in rows.go needs no entry: theme.SpinnerRange covers
-// U+2800-U+28FF, on the reasoning that braille is in every terminal font, which
-// is why a spinner reaches for it instead of the block elements.
+// comp.Spinner needs no entry: theme.SpinnerRange covers U+2800-U+28FF, and the
+// component draws the frames rather than pgctl, so its characters never appear
+// in a literal here for guard.Glyphs to see.
 var Glyphs = theme.DefaultGlyphs.With(
 	'←', "leftwards arrow — the key hint for changing a choice, and → is in the default set; they are a pair or neither reads",
 	'○', "white circle — an environment pgctl has not reached yet, and an unselected database. ● is the filled half of the same question",
-	'▏', "left one-eighth block — the text cursor in the filter and the action form. The same character azctl chose, for the same reason: an interface that cannot show where typing lands is one you type into blind",
+	'▏', "left one-eighth block — the divider comp.Split draws between the panel column and the detail pane",
 	'╭', "rounded box drawing", '╮', "rounded box drawing",
 	'╰', "rounded box drawing", '╯', "rounded box drawing",
 )
 
-// Chrome is tuikit's, with pgctl's rounded panels.
+// Chrome is tuikit's, with pgctl's rounded panels and a drawn divider.
 //
-// One field, and the four corners are in the glyph set above so guard.Chrome
-// can check them. pgctl's panels have been rounded since the first TUI commit;
+// The corners and the divider are in the glyph set above, so guard.Chrome can
+// check them. Two overrides:
+//
+// Rounded panels, because pgctl's have been rounded since the first TUI commit;
 // this is where that stops being a lipgloss call in three places and becomes a
 // decision written down once.
-var Chrome = theme.DefaultChrome.With(theme.RoundedBox)
+//
+// A drawn divider, because pgctl's is DRAGGABLE. The default is a blank, on the
+// reasoning that a gap between panes should read as space rather than as a third
+// thing — right for a layout you cannot change, and it hides the one affordance
+// here that is worth finding. A seam you can grab should look like a seam.
+var Chrome = drawnDivider(theme.DefaultChrome.With(theme.RoundedBox))
+
+// drawnDivider is a function because theme.Chrome.With takes a box set and
+// nothing else. Assigning a field needs a copy, and a copy needs somewhere to
+// live; this is that, rather than a var block that mutates a package-level value
+// in an init.
+func drawnDivider(c theme.Chrome) theme.Chrome {
+	c.Divider, c.VDivider = "▏", "▏"
+	return c
+}
 
 // Colours are named for their role rather than their hue, so a theme change is
 // one edit here.
@@ -87,4 +103,14 @@ var (
 
 	tabStyle       = lipgloss.NewStyle().Foreground(Palette.Muted)
 	activeTabStyle = lipgloss.NewStyle().Foreground(Palette.Accent).Bold(true).Underline(true)
+
+	// The caret's two cells, which is where the palette's selection roles are
+	// doing their second job: SelectionFG is the terminal's background and
+	// SelectionBG its foreground, so a caret painted with them is reverse
+	// video — and it inverts correctly on a pale terminal BY CONSTRUCTION
+	// rather than by detecting one. There is no "foreground" role to reach
+	// for, deliberately: nine roles is the whole vocabulary, and ordinary text
+	// is what the terminal already draws.
+	cursorFG = lipgloss.NewStyle().Foreground(Palette.SelectionFG)
+	cursorBG = lipgloss.NewStyle().Background(Palette.SelectionBG)
 )
