@@ -27,8 +27,8 @@ available and it is free: a dump taken on a laptop crosses the WAN twice, once
 to read production and once to write it back to storage. A runner in Azure
 crosses it zero times.
 
-For MBPNetwork that means the Forgejo runner on `vm-forge-0`, which is already
-an Azure VM. Failing that, any Azure-hosted runner.
+In the estate this was built for that means an existing Forgejo runner that is
+already an Azure VM. Failing that, any Azure-hosted runner.
 
 ## What it needs
 

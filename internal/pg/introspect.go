@@ -294,7 +294,7 @@ type Index struct {
 // This is a restore failure caught at dump time. Excluding a schema excludes
 // its functions, but a trigger on a retained table still references one, and
 // pg_restore fails on every CREATE TRIGGER — after it has spent an hour loading
-// the data. MBPNetwork's audit schema is exactly this shape: every audited
+// the data. The audit schema this was measured against is exactly this shape: every audited
 // table in claims and operations calls audit.if_modified_func.
 func DanglingTriggers(ctx context.Context, conn *pgx.Conn, excludeSchemas []string) ([]DanglingTrigger, error) {
 	if len(excludeSchemas) == 0 {

@@ -134,12 +134,12 @@ exported and nothing configured. To keep it somewhere else, set `PGSERVICEFILE`
 # ~/.pg_service.conf
 [prd]
 host=postgres.example.com
-user=mbpiadmin
+user=dbadmin
 dbname=product-development
 sslmode=require
 
 # ~/.pgpass   (chmod 600)
-postgres.example.com:5432:*:mbpiadmin:the-password
+postgres.example.com:5432:*:dbadmin:the-password
 ```
 
 The trade is deliberate: connection details are per-machine rather than shared
@@ -172,3 +172,7 @@ stay out of. Nothing there is built except where it says so.
 directory format, zstd, why filtered tables use binary `COPY`, why constraints
 are rebuilt `NOT VALID` and validated separately, and why masking is a seam with
 no rules in it yet.
+
+## Licence
+
+MIT — see [`LICENSE`](./LICENSE).

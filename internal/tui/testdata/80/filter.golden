@@ -6,7 +6,7 @@ pgctl  pgctl.yaml
 │ product-development   9.0 GB │▏│ guarded                                     │
 ╰──────────────────────────────╯▏│                                             │
 ╭─ [3] Snapshots ──────────────╮▏│ host       qat.example:5432                 │
-│ none on qat — press n        │▏│ user       mbpiadmin                        │
+│ none on qat — press n        │▏│ user       dbadmin                          │
 ╰──────────────────────────────╯▏│ server     PostgreSQL 17.4                  │
 ╭─ [4] Restorable (1) ─────────╮▏│ databases  1                                │
 │   prd                        │▏│ total size 9.0 GB                           │

@@ -12,7 +12,7 @@ func fk(name, child, parent string) FK {
 	return FK{Name: name, Child: child, Parent: parent}
 }
 
-// A slice of the real MBPNetwork shape: contracts hang off accounts, cost
+// A slice of a real production shape: contracts hang off accounts, cost
 // detail and assets hang off contracts, claims hang off contracts.
 func sample() *Graph {
 	return NewGraph(
@@ -196,9 +196,9 @@ func names(fks []FK) []string {
 	return out
 }
 
-// A ring must hold up only what is genuinely behind it. The MBPNetwork schema
-// has operations.cancellation and operations.policy_contract referencing each
-// other, with a long tail of tables hanging off the contract; an ordering that
+// A ring must hold up only what is genuinely behind it. The schema this was
+// measured against has operations.cancellation and operations.policy_contract
+// referencing each other, with a long tail of tables hanging off the contract; an ordering that
 // gave up on the ring would drag that whole tail into the unorderable pile.
 func TestCycleDoesNotSwallowDownstreamTables(t *testing.T) {
 	g := NewGraph(

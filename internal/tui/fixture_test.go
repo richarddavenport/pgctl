@@ -110,7 +110,7 @@ func fixtureModel(t *testing.T) *Model {
 
 	m.probes["prd"] = &engine.Probe{
 		Connection: "prd", Reachable: true, ServerVersion: 170004,
-		Host: "prd.example", Port: 5432, User: "mbpiadmin",
+		Host: "prd.example", Port: 5432, User: "dbadmin",
 		ProbedAt: epoch.Add(-30 * time.Second),
 		Databases: []engine.DatabaseInfo{
 			{Name: "product-development", Bytes: 11 << 30},
@@ -120,7 +120,7 @@ func fixtureModel(t *testing.T) *Model {
 	}
 	m.probes["qat"] = &engine.Probe{
 		Connection: "qat", Reachable: true, ServerVersion: 170004,
-		Host: "qat.example", Port: 5432, User: "mbpiadmin",
+		Host: "qat.example", Port: 5432, User: "dbadmin",
 		ProbedAt:  epoch.Add(-time.Minute),
 		Databases: []engine.DatabaseInfo{{Name: "product-development", Bytes: 9 << 30}},
 	}

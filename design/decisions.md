@@ -6,7 +6,7 @@ it. New decisions go at the bottom.
 ## 1. The unit of work is a snapshot, not a script run
 
 The tooling this replaces (`tools/postgres/pg_dump.sh` and friends in the
-MBPNetwork monorepo) has no artifact identity: it writes `$db.sql` into a
+monorepo of the estate pgctl was built for) has no artifact identity: it writes `$db.sql` into a
 working directory and the operator remembers what it holds. Every question that
 matters afterwards — which environment did this come from, when, at what schema
 version, was `quotes.quote` in it — is unanswerable.
@@ -34,7 +34,8 @@ Two consequences, both decisive:
 
 The default compression for `-Fc`/`-Fd` is gzip level 6, which is the slowest
 part of a dump once parallelism is in play. PostgreSQL 16 added
-`--compress=zstd:N`; 17 is what every MBPNetwork environment runs. zstd at a low
+`--compress=zstd:N`; 17 is what every environment in the estate this was
+built for runs. zstd at a low
 level is both faster and smaller than gzip-6 — there is no trade to make.
 
 Recorded as a decision rather than a flag default because it sets the floor on
@@ -197,8 +198,8 @@ today. There is no flag to turn that off.
 
 ## 10. Masking is a hook point without rules, for now
 
-Whether prd data may land in QAT unmasked is an open policy question at
-MBPNetwork, not a technical one. Deciding it wrongly in either direction is
+Whether prd data may land in QAT unmasked is an open policy question for the
+organisation running it, not a technical one. Deciding it wrongly in either direction is
 expensive: masking that is not required costs throughput on every refresh, and
 skipping masking that is required is a disclosure.
 

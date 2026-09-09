@@ -6,7 +6,7 @@ pgctl  pgctl.yaml
 │ ✗ scratch                     │▏│ protected — never a target                                                                     │
 ╰───────────────────────────────╯▏│                                                                                                │
 ╭─ [2] Databases (3) ───────────╮▏│ host       prd.example:5432                                                                    │
-│ product-development   11.0 GB │▏│ user       mbpiadmin                                                                           │
+│ product-development   11.0 GB │▏│ user       dbadmin                                                                             │
 │ claims                48.0 MB │▏│ server     PostgreSQL 17.4                                                                     │
 │ quote    ╭────────────────────────────────────────────────────────────────────────────────────────────────────────────╮          │
 ╰──────────│ Take a snapshot of prd                                                                                     │          │
