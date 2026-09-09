@@ -47,64 +47,73 @@
 <text x="14" y="105.92" textLength="257.4" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">╰───────────────────────────────╯</text>
 <text x="271.4" y="105.92" textLength="7.8" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">▏</text>
 <text x="279.2" y="105.92" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
-<text x="310.4" y="105.92" textLength="7.8" lengthAdjust="spacing" fill="#00cd00" xml:space="preserve">✓</text>
-<text x="318.2" y="105.92" textLength="39" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve"> dump</text>
-<text x="357.2" y="105.92" textLength="163.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">  claims.policy_claim</text>
-<text x="989" y="105.92" textLength="31.2" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">2:30</text>
+<text x="294.8" y="105.92" textLength="148.2" lengthAdjust="spacing" fill="#ff00ff" font-weight="600" xml:space="preserve">product-development</text>
 <text x="1035.8" y="105.92" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="14" y="122.17" textLength="15.6" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">╭─</text>
 <text x="29.6" y="122.17" textLength="124.8" lengthAdjust="spacing" fill="#7f7f7f" font-weight="600" xml:space="preserve"> 2 Databases (3)</text>
 <text x="162.2" y="122.17" textLength="109.2" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">─────────────╮</text>
 <text x="271.4" y="122.17" textLength="7.8" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">▏</text>
 <text x="279.2" y="122.17" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
-<text x="310.4" y="122.17" textLength="7.8" lengthAdjust="spacing" fill="#00cd00" xml:space="preserve">✓</text>
-<text x="318.2" y="122.17" textLength="109.2" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve"> filtered copy</text>
-<text x="427.4" y="122.17" textLength="109.2" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">  quotes.quote</text>
-<text x="989" y="122.17" textLength="31.2" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">0:50</text>
+<text x="326" y="122.17" textLength="7.8" lengthAdjust="spacing" fill="#00cd00" xml:space="preserve">✓</text>
+<text x="333.8" y="122.17" textLength="39" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve"> dump</text>
+<text x="372.8" y="122.17" textLength="163.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">  claims.policy_claim</text>
+<text x="973.4" y="122.17" textLength="31.2" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">2:30</text>
 <text x="1035.8" y="122.17" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="14" y="138.43" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="29.6" y="138.43" textLength="226.2" lengthAdjust="spacing" fill="#ff00ff" font-weight="600" xml:space="preserve">product-development   11.0 GB</text>
 <text x="263.6" y="138.43" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="271.4" y="138.43" textLength="7.8" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">▏</text>
 <text x="279.2" y="138.43" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
-<text x="294.8" y="138.43" textLength="499.2" lengthAdjust="spacing" fill="#00cd00" xml:space="preserve">      ! rule &#34;operations.gone&#34; matches no table in this database</text>
+<text x="326" y="138.43" textLength="7.8" lengthAdjust="spacing" fill="#00cd00" xml:space="preserve">✓</text>
+<text x="333.8" y="138.43" textLength="109.2" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve"> filtered copy</text>
+<text x="443" y="138.43" textLength="109.2" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">  quotes.quote</text>
+<text x="973.4" y="138.43" textLength="31.2" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">0:20</text>
 <text x="1035.8" y="138.43" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="14" y="154.68" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="21.8" y="154.68" textLength="234" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve"> claims                48.0 MB</text>
 <text x="263.6" y="154.68" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="271.4" y="154.68" textLength="7.8" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">▏</text>
 <text x="279.2" y="154.68" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
-<text x="310.4" y="154.68" textLength="7.8" lengthAdjust="spacing" fill="#00cd00" xml:space="preserve">✓</text>
-<text x="318.2" y="154.68" textLength="70.2" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve"> manifest</text>
-<text x="388.4" y="154.68" textLength="163.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">  2,040,893,635 bytes</text>
-<text x="989" y="154.68" textLength="31.2" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">0:02</text>
+<text x="310.4" y="154.68" textLength="499.2" lengthAdjust="spacing" fill="#00cd00" xml:space="preserve">      ! rule &#34;operations.gone&#34; matches no table in this database</text>
 <text x="1035.8" y="154.68" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="14" y="170.93" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="21.8" y="170.93" textLength="234" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve"> quote                 20.0 GB</text>
 <text x="263.6" y="170.93" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="271.4" y="170.93" textLength="7.8" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">▏</text>
 <text x="279.2" y="170.93" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
+<text x="326" y="170.93" textLength="7.8" lengthAdjust="spacing" fill="#00cd00" xml:space="preserve">✓</text>
+<text x="333.8" y="170.93" textLength="39" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve"> push</text>
+<text x="372.8" y="170.93" textLength="319.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">  prd/product-development/… to azure blob</text>
+<text x="973.4" y="170.93" textLength="31.2" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">0:10</text>
 <text x="1035.8" y="170.93" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="14" y="187.18" textLength="257.4" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">╰───────────────────────────────╯</text>
 <text x="271.4" y="187.18" textLength="7.8" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">▏</text>
 <text x="279.2" y="187.18" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
-<text x="310.4" y="187.18" textLength="312" lengthAdjust="spacing" fill="#00cd00" xml:space="preserve">snapshotted product-development from prd</text>
 <text x="1035.8" y="187.18" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="14" y="203.43" textLength="15.6" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">╭─</text>
 <text x="29.6" y="203.43" textLength="124.8" lengthAdjust="spacing" fill="#7f7f7f" font-weight="600" xml:space="preserve"> 3 Snapshots (1)</text>
 <text x="162.2" y="203.43" textLength="109.2" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">─────────────╮</text>
 <text x="271.4" y="203.43" textLength="7.8" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">▏</text>
 <text x="279.2" y="203.43" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
+<text x="294.8" y="203.43" textLength="46.8" lengthAdjust="spacing" fill="#7f7f7f" font-weight="600" xml:space="preserve">claims</text>
 <text x="1035.8" y="203.43" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="14" y="219.68" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="45.2" y="219.68" textLength="210.6" lengthAdjust="spacing" fill="#ff00ff" font-weight="600" xml:space="preserve">08-27 22:00        1.9 GB l</text>
 <text x="263.6" y="219.68" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="271.4" y="219.68" textLength="7.8" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">▏</text>
 <text x="279.2" y="219.68" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
+<text x="326" y="219.68" textLength="7.8" lengthAdjust="spacing" fill="#00cd00" xml:space="preserve">✓</text>
+<text x="333.8" y="219.68" textLength="39" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve"> dump</text>
+<text x="372.8" y="219.68" textLength="288.6" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">  pg_dump --format=directory --jobs=4</text>
+<text x="973.4" y="219.68" textLength="31.2" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">0:15</text>
 <text x="1035.8" y="219.68" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="14" y="235.93" textLength="257.4" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">╰───────────────────────────────╯</text>
 <text x="271.4" y="235.93" textLength="7.8" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">▏</text>
 <text x="279.2" y="235.93" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
+<text x="326" y="235.93" textLength="7.8" lengthAdjust="spacing" fill="#00cd00" xml:space="preserve">✓</text>
+<text x="333.8" y="235.93" textLength="39" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve"> push</text>
+<text x="372.8" y="235.93" textLength="218.4" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">  prd/claims/… to azure blob</text>
+<text x="973.4" y="235.93" textLength="31.2" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">0:07</text>
 <text x="1035.8" y="235.93" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="14" y="252.18" textLength="15.6" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">╭─</text>
 <text x="29.6" y="252.18" textLength="85.8" lengthAdjust="spacing" fill="#7f7f7f" font-weight="600" xml:space="preserve"> 4 Sets (1)</text>
@@ -117,6 +126,7 @@
 <text x="263.6" y="268.43" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="271.4" y="268.43" textLength="7.8" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">▏</text>
 <text x="279.2" y="268.43" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
+<text x="294.8" y="268.43" textLength="327.6" lengthAdjust="spacing" fill="#00cd00" xml:space="preserve">  snapshotted product-development from prd</text>
 <text x="1035.8" y="268.43" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="14" y="284.68" textLength="257.4" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">╰───────────────────────────────╯</text>
 <text x="271.4" y="284.68" textLength="7.8" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">▏</text>
@@ -188,6 +198,7 @@
 <text x="1035.8" y="560.92" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="14" y="577.17" textLength="265.2" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">                                 ▏</text>
 <text x="279.2" y="577.17" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
+<text x="981.2" y="577.17" textLength="39" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">11/11</text>
 <text x="1035.8" y="577.17" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="14" y="593.42" textLength="265.2" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">                                 ▏</text>
 <text x="279.2" y="593.42" textLength="764.4" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">╰────────────────────────────────────────────────────────────────────────────────────────────────╯</text>

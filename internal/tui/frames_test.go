@@ -128,6 +128,16 @@ func states(t *testing.T) []state {
 			r := run(m, w, h)
 			return keys(r, "5", "tab", "tab")
 		}},
+		// The log of a run that covered two databases: every line names which,
+		// because the phases repeat and a path inside a message is not an
+		// answer.
+		{"run-log-databases", func(w, h int) *app.Runner {
+			m := fixtureModel(t)
+			fixtureSnapshot(t, m)
+			fixtureRun(m)
+			r := run(m, w, h)
+			return keys(r, "5", "j", "tab", "tab")
+		}},
 		{"run-finished", func(w, h int) *app.Runner {
 			m := fixtureModel(t)
 			fixtureSnapshot(t, m)

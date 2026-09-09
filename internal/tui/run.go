@@ -105,9 +105,9 @@ func (m *Model) drawMeter(c *comp.Canvas, r comp.Rect, rec *runRecord) {
 	}.Draw(c, r, comp.Region(regMeter))
 }
 
-// drawSteps is the phases of the run.
+// drawSteps is the phases of the run, under the database each belongs to.
 func (m *Model) drawSteps(c *comp.Canvas, r comp.Rect, rec *runRecord) {
-	steps := rec.steps(m.now)
+	steps, databases := rec.stepsByDatabase(m.now)
 	if len(steps) == 0 {
 		m.detail(comp.Block{Text: spinner(m.now) + " starting…"}).
 			Draw(c, r, comp.Region(regSteps))
@@ -124,21 +124,41 @@ func (m *Model) drawSteps(c *comp.Canvas, r comp.Rect, rec *runRecord) {
 		status = rec.summary
 	}
 
+	// Nothing in a step list is selectable — a step is something that happened,
+	// not a thing to act on — so the pane's cursor marker is turned off for
+	// this view. Left on, comp.List drew a › against row zero, which is a
+	// database heading, and the cursor could not move off it because every row
+	// is Skip.
+	m.paneList.Marker, m.paneList.Blank = "", ""
+	defer func() { m.paneList.Marker, m.paneList.Blank = "› ", "  " }()
+
+	look := stepLook(m.now)
 	list := comp.StepList{
 		Steps:       steps,
-		Look:        stepLook(m.now),
+		Look:        look,
 		Status:      status,
 		StatusStyle: statusStyle,
 		Muted:       &mutedStyle,
 	}
 
-	// A set-level apply logs eleven phases and a whole-database one seven, so
-	// they fit — but a run whose steps outgrow the pane scrolls, because
-	// StepList draws every step and does not scroll and a run that has
-	// overflowed is exactly the one you want the end of. Rows() is what the
-	// component offers for that.
+	// One database, or an operation that does not name one: the steps ARE the
+	// run and there is nothing to group under.
 	rows := list.Rows(r.W)
-	if len(rows) <= r.H {
+	if names := distinct(databases); len(names) > 1 {
+		// The width a grouped row actually gets: the rect, less the indent the
+		// heading puts its steps under. Getting this wrong clips the
+		// right-aligned duration column and nothing says so — the same
+		// mistake, in the same shape, as the detail pane's tables.
+		rows = m.groupedStepRows(steps, databases, look, r.W-c.Chrome().Indent)
+		rows = append(rows, blank(), comp.Row{Text: "  " + status, Style: statusStyle, Skip: true})
+	}
+
+	// A set-level apply logs eleven phases and a whole-database one seven, so
+	// they fit — but a snapshot of six databases is eighteen plus six headings,
+	// and StepList draws every step and does not scroll. A run that has
+	// overflowed is exactly the one you want the end of, so it goes through the
+	// list, which does.
+	if len(rows) <= r.H && len(distinct(databases)) <= 1 {
 		list.Draw(c, r, regSteps)
 		return
 	}
@@ -146,14 +166,73 @@ func (m *Model) drawSteps(c *comp.Canvas, r comp.Rect, rec *runRecord) {
 	m.paneList.DrawFunc(c, r, len(rows), func(i int) comp.Row { return rows[i] })
 }
 
+// groupedStepRows is the steps with a heading per database.
+//
+// One StepList per group rather than one for all of them, because the component
+// is what knows how a step is drawn — the glyph, the label column, the
+// right-aligned duration — and reimplementing that here to insert headings
+// would be the fourth tool to draw a step list by hand. It lays out each group;
+// this only decides what comes between them.
+func (m *Model) groupedStepRows(steps []comp.Step, databases []string,
+	look [5]comp.StepLook, width int) []comp.Row {
+
+	var out []comp.Row
+	for i := 0; i < len(steps); {
+		db := databases[i]
+		j := i
+		for j < len(steps) && databases[j] == db {
+			j++
+		}
+
+		if db == "" {
+			db = "the run"
+		}
+		if len(out) > 0 {
+			out = append(out, blank())
+		}
+		out = append(out, comp.Row{Text: db, Style: &headerStyle, Skip: true})
+
+		group := comp.StepList{Steps: steps[i:j], Look: look, Muted: &mutedStyle}
+		for _, row := range group.Rows(width - 2) {
+			row.Depth, row.Skip = 1, true
+			out = append(out, row)
+		}
+		i = j
+	}
+	return out
+}
+
+// distinct is the unique values, in order of appearance.
+func distinct(in []string) []string {
+	seen := map[string]bool{}
+	var out []string
+	for _, s := range in {
+		if seen[s] {
+			continue
+		}
+		seen[s] = true
+		out = append(out, s)
+	}
+	return out
+}
+
 // drawLog is every event in order.
 func (m *Model) drawLog(c *comp.Canvas, r comp.Rect, rec *runRecord) {
 	events := rec.log()
+
+	// The database column is measured, not guessed. comp.Pad truncates as well
+	// as pads, so a literal twelve turned `product-development` into
+	// `product-dev…` on every line of its own run.
+	width := 0
+	for _, ev := range events {
+		width = max(width, comp.Width(ev.Database))
+	}
+
 	lines := make([]comp.LogLine, 0, len(events))
 	for _, ev := range events {
 		lines = append(lines, comp.LogLine{
 			At:   ev.At.Local().Format("15:04:05"),
-			Text: logText(ev),
+			Text: logText(ev, width),
 			// A warning and a failure are the two the reader has to be able to
 			// find in a run that logged four hundred lines. Everything else the
 			// engine reports is ordinary progress, and colouring that as an
@@ -176,17 +255,24 @@ func (m *Model) drawLog(c *comp.Canvas, r comp.Rect, rec *runRecord) {
 }
 
 // logText is one event as a line.
-func logText(ev engine.Event) string {
+//
+// The database leads, where there is one, for the same reason the steps are
+// grouped by it: a snapshot of six databases logs the same phases six times and
+// the only other clue is a path inside a message.
+func logText(ev engine.Event, width int) string {
+	var what string
 	switch {
 	case ev.Table != "" && ev.Message != "":
-		return ev.Table + "  " + ev.Message
+		what = ev.Table + "  " + ev.Message
 	case ev.Table != "":
-		return ev.Table
-	case ev.Step != "" && ev.Kind == engine.EventStep:
-		return ev.Message
+		what = ev.Table
 	default:
-		return ev.Message
+		what = ev.Message
 	}
+	if ev.Database != "" {
+		return comp.Pad(ev.Database, width) + "  " + what
+	}
+	return what
 }
 
 // steps is the run's phases, derived from the events rather than declared.
@@ -197,9 +283,20 @@ func logText(ev engine.Event) string {
 // this file decides is only how a phase LOOKS — which one is running, what each
 // one cost, and which one a failure belongs to.
 func (r *runRecord) steps(now time.Time) []comp.Step {
+	steps, _ := r.stepsByDatabase(now)
+	return steps
+}
+
+// stepsByDatabase is the phases, and which database each one belongs to.
+//
+// Two returns rather than a struct, because comp.Step is the component's type
+// and pgctl does not get to add a field to it. The slices are the same length
+// and the same order, which is the whole contract.
+func (r *runRecord) stepsByDatabase(now time.Time) ([]comp.Step, []string) {
 	events := r.log()
 
 	var steps []comp.Step
+	var databases []string
 	var startedAt []time.Time
 	at := func(i int) *comp.Step { return &steps[i] }
 
@@ -207,13 +304,17 @@ func (r *runRecord) steps(now time.Time) []comp.Step {
 		last := len(steps) - 1
 
 		// A named phase that is not the one we are in opens a new step and
-		// closes the one before it.
-		if ev.Step != "" && (last < 0 || steps[last].Label != ev.Step) {
+		// closes the one before it — and so does the SAME phase arriving about
+		// a different database, which is what makes six dumps six steps rather
+		// than one step that keeps restarting.
+		if ev.Step != "" && (last < 0 || steps[last].Label != ev.Step ||
+			databases[last] != ev.Database) {
 			if last >= 0 && steps[last].State == comp.StepRunning {
 				at(last).State = comp.StepDone
 				at(last).Took = elapsed(ev.At.Sub(startedAt[last]))
 			}
 			steps = append(steps, comp.Step{Label: ev.Step, State: comp.StepRunning})
+			databases = append(databases, ev.Database)
 			startedAt = append(startedAt, ev.At)
 			last = len(steps) - 1
 		}
@@ -265,7 +366,7 @@ func (r *runRecord) steps(now time.Time) []comp.Step {
 			steps[last].Took = elapsed(r.endedAt.Sub(startedAt[last]))
 		}
 	}
-	return steps
+	return steps, databases
 }
 
 // stepLook is the glyph and colour per state.

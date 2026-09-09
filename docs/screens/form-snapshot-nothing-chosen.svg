@@ -1,8 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1057.6" height="625.25" viewBox="0 0 1057.6 625.25" font-family="ui-monospace, &#39;SF Mono&#39;, SFMono-Regular, Menlo, Consolas, &#39;DejaVu Sans Mono&#39;, monospace" font-size="13" role="img">
 <title>terminal frame, 132 columns by 37 rows</title>
 <rect width="1057.6" height="625.25" rx="7" fill="#0c0c0e"/>
-<rect x="115.4" y="304.5" width="15.6" height="16.25" fill="#e5e5e5"/>
-<rect x="146.6" y="304.5" width="795.6" height="16.25" fill="#e5e5e5"/>
 <text x="14" y="24.68" textLength="39" lengthAdjust="spacing" fill="#ff00ff" font-weight="600" xml:space="preserve">pgctl</text>
 <text x="53" y="24.68" textLength="93.6" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">  pgctl.yaml</text>
 <text x="14" y="40.92" textLength="15.6" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">╭─</text>
@@ -121,9 +119,9 @@
 <text x="14" y="317.18" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="29.6" y="317.18" textLength="70.2" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">nothing r</text>
 <text x="99.8" y="317.18" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
-<text x="115.4" y="317.18" textLength="7.8" lengthAdjust="spacing" fill="#000000" font-weight="600" xml:space="preserve">▸</text>
+<text x="115.4" y="317.18" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" font-weight="600" xml:space="preserve">▸</text>
 <text x="131" y="317.18" textLength="7.8" lengthAdjust="spacing" fill="#00cd00" xml:space="preserve">●</text>
-<text x="146.6" y="317.18" textLength="163.8" lengthAdjust="spacing" fill="#000000" font-weight="600" xml:space="preserve">  product-development</text>
+<text x="146.6" y="317.18" textLength="163.8" lengthAdjust="spacing" fill="#ff00ff" font-weight="600" xml:space="preserve">  product-development</text>
 <text x="950" y="317.18" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="1035.8" y="317.18" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="14" y="333.43" textLength="85.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">╰──────────</text>
@@ -144,7 +142,8 @@
 <text x="1035.8" y="365.93" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="99.8" y="382.18" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="131" y="382.18" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">○</text>
-<text x="146.6" y="382.18" textLength="483.6" lengthAdjust="spacing" fill="#ff00ff" font-weight="600" xml:space="preserve">  local           keep it on this machine, in .pgctl/snapshots</text>
+<text x="146.6" y="382.18" textLength="54.6" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">  local</text>
+<text x="287" y="382.18" textLength="343.2" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">keep it on this machine, in .pgctl/snapshots</text>
 <text x="950" y="382.18" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="1035.8" y="382.18" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="99.8" y="398.43" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>

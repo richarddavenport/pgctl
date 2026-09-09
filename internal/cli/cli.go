@@ -77,11 +77,21 @@ func load(configPath string) (*engine.Engine, error) {
 // printer renders the engine's event stream as lines. Steps are the structure,
 // tables are the detail, and a warning is prefixed so it survives a skim of a
 // CI log.
+//
+// A step names its DATABASE when the run covers more than one, because the
+// phases repeat per database and the alternative is reading a path out of a
+// message: `pgctl snapshot --from prd` over six databases prints dump, push and
+// place six times each, and without this nothing says which is which. The same
+// fact the interface groups its step list by.
 func printer(verbose bool) engine.Reporter {
 	return func(ev engine.Event) {
+		step := ev.Step
+		if ev.Database != "" {
+			step = ev.Database + " " + ev.Step
+		}
 		switch ev.Kind {
 		case engine.EventStep:
-			fmt.Printf("→ %s: %s\n", ev.Step, ev.Message)
+			fmt.Printf("→ %s: %s\n", step, ev.Message)
 		case engine.EventTable:
 			if verbose {
 				fmt.Printf("  %s: %s\n", ev.Table, ev.Message)
@@ -91,6 +101,13 @@ func printer(verbose bool) engine.Reporter {
 				fmt.Printf("  %s\n", ev.Message)
 			}
 		case engine.EventWarning:
+			// The warning keeps its own shape: it is about the database it
+			// names, and a reader skimming a CI log for `!` should not have to
+			// parse a prefix to find out which one.
+			if ev.Database != "" {
+				fmt.Printf("! %s: %s\n", ev.Database, ev.Message)
+				return
+			}
 			fmt.Printf("! %s\n", ev.Message)
 		case engine.EventDone:
 			fmt.Printf("✓ %s\n", ev.Message)

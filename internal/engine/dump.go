@@ -53,6 +53,12 @@ func (e *Engine) Dump(ctx context.Context, req DumpRequest, report Reporter) (*s
 	}
 	excludeSchemas := e.cfg.Databases.ExcludeSchemas
 
+	// Everything this operation reports is about this database, including what
+	// Place and Push report from inside it. Stamped here so no call site has to
+	// remember, and so a front end has the fact rather than a path to parse out
+	// of a message.
+	report = report.about(req.Database)
+
 	target, err := Resolve(ctx, e.cfg, e.root, req.Connection, req.Database)
 	if err != nil {
 		return nil, err

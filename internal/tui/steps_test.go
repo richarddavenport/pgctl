@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/richarddavenport/tuikit/comp"
+	"github.com/richarddavenport/tuikit/harness"
 
 	"github.com/richarddavenport/pgctl/internal/engine"
 )
@@ -123,5 +124,51 @@ func TestTheMeterCountsTablesNotEvents(t *testing.T) {
 	}
 	if got := rec.tablesSeen(); got != 2 {
 		t.Errorf("tablesSeen = %d, want 2 distinct tables of 4 events", got)
+	}
+}
+
+// The steps are grouped by the database they are about.
+//
+// A snapshot of six databases reports the same three phases six times, and the
+// only other clue which is which is a path inside a message — a reader looking
+// at eighteen steps called dump, push and place asked which database they were
+// on, which is the whole reason engine.Event carries a Database now.
+func TestTheStepsAreGroupedByDatabase(t *testing.T) {
+	m := fixtureModel(t)
+	fixtureRun(m)
+	m.focus = panelRuns
+	m.lists[panelRuns].Select(1) // the finished snapshot, which covers two
+
+	rec, ok := m.selectedRun()
+	if !ok {
+		t.Fatal("no run selected")
+	}
+	steps, databases := rec.stepsByDatabase(epoch)
+	if len(steps) != len(databases) {
+		t.Fatalf("%d steps and %d databases; the slices are one contract",
+			len(steps), len(databases))
+	}
+	if got := distinct(databases); len(got) != 2 {
+		t.Errorf("databases = %v, want the two the run covered", got)
+	}
+
+	// The same phase about a different database is a different step. Without
+	// that, six dumps are one step that keeps restarting.
+	dumps := 0
+	for _, s := range steps {
+		if s.Label == "dump" {
+			dumps++
+		}
+	}
+	if dumps != 2 {
+		t.Errorf("%d dump steps, want one per database", dumps)
+	}
+
+	// And the frame says both names.
+	frame := harness.Strip(run(m, 132, 38).View())
+	for _, want := range []string{"product-development", "claims"} {
+		if !strings.Contains(frame, want) {
+			t.Errorf("the step list does not name %q:\n%s", want, frame)
+		}
 	}
 }

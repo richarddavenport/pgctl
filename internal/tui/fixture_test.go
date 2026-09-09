@@ -185,6 +185,12 @@ func fixtureRun(m *Model) *runRecord {
 	ev := func(kind engine.EventKind, step, table, msg string, after time.Duration) engine.Event {
 		return engine.Event{Kind: kind, Step: step, Table: table, Message: msg, At: at.Add(after)}
 	}
+	// The same phases, about a database, which is what a multi-database
+	// snapshot reports and what the steps group under.
+	about := func(db string, e engine.Event) engine.Event {
+		e.Database = db
+		return e
+	}
 
 	// Built through add(), the same door the engine's reporter comes through:
 	// it routes a progress event to a different field from the rest, and a
@@ -200,13 +206,18 @@ func fixtureRun(m *Model) *runRecord {
 		summary:   "snapshotted product-development from prd",
 	}
 	for _, e := range []engine.Event{
-		ev(engine.EventStep, "dump", "", "pg_dump --format=directory --jobs=4", 0),
-		ev(engine.EventTable, "dump", "claims.policy_claim", "180 MB", 30*time.Second),
-		ev(engine.EventStep, "filtered copy", "", "1 table has a row filter", 150*time.Second),
-		ev(engine.EventTable, "filtered copy", "quotes.quote", "4,200 rows", 152*time.Second),
-		ev(engine.EventWarning, "filtered copy", "", `rule "operations.gone" matches no table in this database`, 160*time.Second),
-		ev(engine.EventStep, "manifest", "", "2,040,893,635 bytes", 200*time.Second),
-		ev(engine.EventDone, "manifest", "", "snapshot complete", 202*time.Second),
+		// Two databases, so the grouping the run screen does has something to
+		// group. A fixture of one is the arrangement in which six identical
+		// steps look fine.
+		about("product-development", ev(engine.EventStep, "dump", "", "pg_dump --format=directory --jobs=4", 0)),
+		about("product-development", ev(engine.EventTable, "dump", "claims.policy_claim", "180 MB", 30*time.Second)),
+		about("product-development", ev(engine.EventStep, "filtered copy", "", "1 table has a row filter", 150*time.Second)),
+		about("product-development", ev(engine.EventTable, "filtered copy", "quotes.quote", "4,200 rows", 152*time.Second)),
+		about("product-development", ev(engine.EventWarning, "filtered copy", "", `rule "operations.gone" matches no table in this database`, 160*time.Second)),
+		about("product-development", ev(engine.EventStep, "push", "", "prd/product-development/… to azure blob", 170*time.Second)),
+		about("claims", ev(engine.EventStep, "dump", "", "pg_dump --format=directory --jobs=4", 180*time.Second)),
+		about("claims", ev(engine.EventStep, "push", "", "prd/claims/… to azure blob", 195*time.Second)),
+		about("claims", ev(engine.EventDone, "push", "", "snapshot complete", 202*time.Second)),
 	} {
 		done.add(e)
 	}
