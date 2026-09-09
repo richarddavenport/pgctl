@@ -4,9 +4,11 @@ Issues and PRDs for pgctl live as GitHub issues on
 [`richarddavenport/pgctl`](https://github.com/richarddavenport/pgctl). Use the
 `gh` CLI for all operations.
 
-The repository is **private**. Anything written to an issue is visible to whoever
-has access to it, which is worth remembering before pasting a connection string
-or a log line into one.
+The repository is **public** as of 2026-09-09. Anything written to an issue is
+world-readable and indexed, which is worth remembering before pasting a
+connection string, a hostname, a storage account name or a log line into one —
+an issue is a fine place to leak by accident, and unlike a commit it cannot be
+rewritten out of existence.
 
 ## Conventions
 
