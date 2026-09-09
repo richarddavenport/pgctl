@@ -141,8 +141,13 @@ EOF
 
 echo
 echo "wrote $formula for $version"
-echo
-echo "next:"
-echo "  ruby -c $formula"
-echo "  brew audit --strict --formula richarddavenport/tap/pgctl"
-echo "  git -C $tap commit -am \"pgctl $version\" && git -C $tap push"
+
+# tap.sh sets this: it commits and pushes itself, and these instructions would
+# name a temp directory it is about to delete.
+if [ -z "${PGCTL_TAP_PUSHER:-}" ]; then
+  echo
+  echo "next:"
+  echo "  ruby -c $formula"
+  echo "  brew audit --strict --formula richarddavenport/tap/pgctl"
+  echo "  git -C $tap commit -am \"pgctl $version\" && git -C $tap push"
+fi

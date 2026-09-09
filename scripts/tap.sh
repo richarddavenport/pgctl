@@ -69,13 +69,20 @@ work=$(mktemp -d)
 trap 'rm -rf "$work"' EXIT
 git clone -q "$tap_url" "$work/tap"
 
-"$here/update-tap.sh" "$version" "$work/tap"
+# PGCTL_TAP_PUSHER stops update-tap.sh printing the commit-and-push instructions
+# it ends with: they are right for somebody running it by hand and wrong here,
+# where they name a temp directory this script is about to delete.
+PGCTL_TAP_PUSHER=1 "$here/update-tap.sh" "$version" "$work/tap"
 
-if git -C "$work/tap" diff --quiet -- Formula/pgctl.rb; then
+# Staged first, then compared against the index. `git diff` alone does not see
+# an UNTRACKED file, so the first version of this reported "the formula already
+# describes v0.2.0 — nothing to push" for a formula it had just created, and
+# pushed nothing. The tap's first formula is exactly the case that has to work.
+git -C "$work/tap" add Formula/pgctl.rb
+if git -C "$work/tap" diff --cached --quiet; then
   echo "the formula already describes $version — nothing to push"
   exit 0
 fi
-git -C "$work/tap" add Formula/pgctl.rb
 git -C "$work/tap" commit -qm "pgctl $version"
 git -C "$work/tap" push -q
 
