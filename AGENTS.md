@@ -79,10 +79,11 @@ tuikit frames /tmp/pgctl-frames -out /tmp/frames.html -title pgctl
 
 ## Keeping up with tuikit
 
-tuikit is resolved through `replace => ../tuikit`, so it has no version: a pull
-there changes this tool's behaviour with nothing to bump and nothing to read.
-Two commands close that gap, and **both are worth running before you build any
-interface**.
+tuikit is a tagged module now — `v0.1.1` in `go.mod` — so its behaviour changes
+only when somebody bumps it. What does not come with the bump is the reasoning:
+a version number says nothing about which of tuikit's decisions changed under
+it. Two commands close that gap, and **both are worth running before you build
+any interface**.
 
 ```sh
 tuikit news           # what tuikit decided since this tool last looked
