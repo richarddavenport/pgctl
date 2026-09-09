@@ -489,10 +489,14 @@ tarball — which is what lets a set-level apply download only the files it need
 
 ### Reading where something is
 
-`pgctl ls`'s `WHERE` column and the Snapshots panel both say it. The panel is
-twenty-eight columns wide, so it abbreviates — `l` on disk, `r` in a remote,
-`l+r` both — and the snapshot's **Manifest** tab names the destinations in full,
-where there is room for them.
+`pgctl ls`'s `WHERE` column names every destination a snapshot is in, and so
+does the snapshot's **Manifest** tab in the interface.
+
+The Snapshots panel does not: twenty-eight columns cannot hold `local+Azure
+Storage` beside a timestamp and a size, so it shows the CONSEQUENCE instead —
+`↓` means the files are not on this machine and an apply downloads them first.
+A letter per location was tried and the first reader to meet it asked what `r`
+meant.
 
 ## Hooks: making room for the restore
 

@@ -146,21 +146,23 @@ func (m *Model) snapshotRows() []comp.Row {
 		man := row.entry.Manifest
 		stamp := man.StartedAt.Local().Format("01-02 15:04")
 
-		// Where it is, in one or two columns, because that is what a panel this
-		// narrow has: `l` on disk, `r` in a remote, `l+r` both. A subset apply
-		// fetches only the files it needs, so a snapshot that is remote-only is
-		// still usable — the marker says what it will COST, not whether it can
-		// be used.
+		// What applying it will COST, rather than where it is: `↓` means the
+		// files are not on this machine and an apply downloads them first.
 		//
-		// Which remote is not on this row and cannot be: two remotes are two
-		// names, and the names are on the Manifest tab, where there is room for
-		// them. This says "somewhere other than here".
-		where := span("l", &mutedStyle)
-		switch {
-		case row.entry.Local() && row.entry.Remote():
-			where = span("l+r", &okStyle)
-		case row.entry.Remote():
-			where = span("r", &accentStyle)
+		// The panel used to say `l`, `r` or `l+r` — location, in the two
+		// columns a panel this narrow has — and the first reader to meet it
+		// asked what `r` meant. Location is three states to learn; the cost is
+		// one, it is the thing being decided when picking a snapshot to apply,
+		// and it needs no legend once seen.
+		//
+		// What that gives up, deliberately: a local-only snapshot and one that
+		// is also uploaded now look the same here. "Is it backed up" is a
+		// different question from "what will this cost me", it is answered by
+		// the Manifest tab's `where` — which NAMES the destinations, where a
+		// letter could not — and by the run that just uploaded it.
+		var where comp.Segment
+		if !row.entry.Local() {
+			where = span("↓", &accentStyle)
 		}
 
 		// An unfinished snapshot cannot be applied — the engine refuses it —

@@ -5,10 +5,9 @@
         │esc        back to the form                                   │
         │                                                              │
         │What a snapshot row means                                     │
-        │l          on this machine only                               │
-        │r          in a remote only — applying downloads it first     │
-        │l+r        both: here and uploaded                            │
+        │↓          not on this machine; applying downloads it first   │
         │✗          it did not finish; it cannot be applied            │
+        │where      the Manifest tab names every place it is           │
         │                                                              │
         │What a connection row means                                   │
         │●          reachable                                          │
@@ -19,5 +18,6 @@
         │guarded    an apply needs the name typed in full              │
         │                                                              │
         │What a set row means                                          │
-        │↓ 8 more                                                      │
+        │4 closed   closed: it can be applied on its own               │
+        │↓ 7 more                                                      │
         ╰──────────────────────────────────────────────────────────────╯

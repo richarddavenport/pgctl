@@ -1,7 +1,8 @@
                                   ╭──────────────────────────────────────────────────────────────╮
                                   │pgctl keys                                                    │
                                   │                                                              │
-                                  │↑ 22 above                                                    │
+                                  │↑ 21 above                                                    │
+                                  │← →        change a choice                                    │
                                   │space      toggle                                             │
                                   │enter      run it, or plan it                                 │
                                   │esc        cancel                                             │
@@ -13,10 +14,9 @@
                                   │esc        back to the form                                   │
                                   │                                                              │
                                   │What a snapshot row means                                     │
-                                  │l          on this machine only                               │
-                                  │r          in a remote only — applying downloads it first     │
-                                  │l+r        both: here and uploaded                            │
+                                  │↓          not on this machine; applying downloads it first   │
                                   │✗          it did not finish; it cannot be applied            │
+                                  │where      the Manifest tab names every place it is           │
                                   │                                                              │
                                   │What a connection row means                                   │
                                   │●          reachable                                          │

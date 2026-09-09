@@ -11,7 +11,7 @@ pgctl  pgctl.yaml
 │ quote                20.0 GB │▏│   11:58:50 product-development  prd/produc… │
 ╰──────────────────────────────╯▏│   11:59:00 claims               pg_dump --… │
 ╭─ [3] Snapshots (1) ──────────╮▏│   11:59:15 claims               prd/claims… │
-│   08-27 22:00       1.9 GB l │▏│   11:59:22 claims               snapshot c… │
+│   08-27 22:00        1.9 GB  │▏│   11:59:22 claims               snapshot c… │
 ╰──────────────────────────────╯▏│                                             │
 ╭─ [4] Sets (1) ───────────────╮▏│                                             │
 │ claims                   2+2 │▏│                                             │

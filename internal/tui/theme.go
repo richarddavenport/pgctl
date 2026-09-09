@@ -30,6 +30,7 @@ var Palette = theme.Default
 // component draws the frames rather than pgctl, so its characters never appear
 // in a literal here for guard.Glyphs to see.
 var Glyphs = theme.DefaultGlyphs.With(
+	'↓', "downwards arrow — a key hint, and on a snapshot row the mark that its files are not on this machine, so applying it downloads them first",
 	'←', "leftwards arrow — the key hint for changing a choice, and → is in the default set; they are a pair or neither reads",
 	'○', "white circle — an environment pgctl has not reached yet, and an unselected database. ● is the filled half of the same question",
 	'▏', "left one-eighth block — the divider comp.Split draws between the panel column and the detail pane",

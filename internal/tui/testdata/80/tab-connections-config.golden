@@ -11,7 +11,7 @@ pgctl  pgctl.yaml
 │ quote                20.0 GB │▏│ HOW THIS RESOLVES                           │
 ╰──────────────────────────────╯▏│   The DSN is handed to libpq unchanged, so  │
 ╭─ [3] Snapshots (1) ──────────╮▏│   ~/.pg_service.conf, ~/.pgpass and the PG* │
-│   08-27 22:00       1.9 GB l │▏│   variables apply exactly as they do to     │
+│   08-27 22:00        1.9 GB  │▏│   variables apply exactly as they do to     │
 ╰──────────────────────────────╯▏│   psql. pgctl never stores a password.      │
 ╭─ [4] Sets (1) ───────────────╮▏│                                             │
 │ claims                   2+2 │▏│ MEANING                                     │

@@ -11,7 +11,7 @@ pgctl  pgctl.yaml
 │ quote                 20.0 GB │▏│ where       local                                                                              │
 ╰───────────────────────────────╯▏│ server      PostgreSQL    pg_dump                                                              │
 ╭─ [3] Snapshots (1) ───────────╮▏│ compression zstd:3   4 jobs                                                                    │
-│   08-27 22:00        1.9 GB l │▏│ source size 20.2 GB                                                                            │
+│   08-27 22:00         1.9 GB  │▏│ source size 20.2 GB                                                                            │
 ╰──────────╭────────────────────────────────────────────────────────────────────────────────────────────────────────────╮          │
 ╭─ [4] Sets│ Delete prd/product-development/20260828T030000Z                                                            │          │
 │ claims   │                                                                                                            │          │
