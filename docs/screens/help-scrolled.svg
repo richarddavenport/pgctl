@@ -8,110 +8,107 @@
 <text x="279.2" y="57.17" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="770.6" y="57.17" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="279.2" y="73.42" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
-<text x="287" y="73.42" textLength="70.2" lengthAdjust="spacing" fill="#7f7f7f" font-weight="600" xml:space="preserve">↑ 3 above</text>
+<text x="287" y="73.42" textLength="78" lengthAdjust="spacing" fill="#7f7f7f" font-weight="600" xml:space="preserve">↑ 22 above</text>
 <text x="770.6" y="73.42" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="279.2" y="89.67" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
-<text x="287" y="89.67" textLength="23.4" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">1-5</text>
-<text x="372.8" y="89.67" textLength="187.2" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">jump straight to a panel</text>
+<text x="287" y="89.67" textLength="39" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">space</text>
+<text x="372.8" y="89.67" textLength="46.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">toggle</text>
 <text x="770.6" y="89.67" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="279.2" y="105.92" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
-<text x="287" y="105.92" textLength="23.4" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">g G</text>
-<text x="372.8" y="105.92" textLength="124.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">first / last row</text>
+<text x="287" y="105.92" textLength="39" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">enter</text>
+<text x="372.8" y="105.92" textLength="140.4" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">run it, or plan it</text>
 <text x="770.6" y="105.92" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="279.2" y="122.17" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
-<text x="287" y="122.17" textLength="23.4" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">[ ]</text>
-<text x="372.8" y="122.17" textLength="296.4" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">previous / next tab of the detail pane</text>
+<text x="287" y="122.17" textLength="23.4" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">esc</text>
+<text x="372.8" y="122.17" textLength="46.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">cancel</text>
 <text x="770.6" y="122.17" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="279.2" y="138.43" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
-<text x="287" y="138.43" textLength="23.4" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">tab</text>
-<text x="372.8" y="138.43" textLength="241.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">focus the detail pane, and back</text>
 <text x="770.6" y="138.43" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="279.2" y="154.68" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
-<text x="287" y="154.68" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">/</text>
-<text x="372.8" y="154.68" textLength="187.2" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">filter the focused panel</text>
+<text x="287" y="154.68" textLength="109.2" lengthAdjust="spacing" fill="#7f7f7f" font-weight="600" xml:space="preserve">Reading a plan</text>
 <text x="770.6" y="154.68" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="279.2" y="170.93" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
-<text x="287" y="170.93" textLength="23.4" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">esc</text>
-<text x="372.8" y="170.93" textLength="273" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">clear the filter, or leave the pane</text>
+<text x="287" y="170.93" textLength="23.4" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">↑ ↓</text>
+<text x="372.8" y="170.93" textLength="312" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">scroll it — nothing has been touched yet</text>
 <text x="770.6" y="170.93" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="279.2" y="187.18" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
+<text x="287" y="187.18" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">w</text>
+<text x="372.8" y="187.18" textLength="343.2" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">widen to the referential closure and re-plan</text>
 <text x="770.6" y="187.18" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="279.2" y="203.43" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
-<text x="287" y="203.43" textLength="39" lengthAdjust="spacing" fill="#7f7f7f" font-weight="600" xml:space="preserve">Doing</text>
+<text x="287" y="203.43" textLength="39" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">enter</text>
+<text x="372.8" y="203.43" textLength="62.4" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">apply it</text>
 <text x="770.6" y="203.43" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="279.2" y="219.68" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
-<text x="287" y="219.68" textLength="46.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">ctrl+p</text>
-<text x="372.8" y="219.68" textLength="312" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">every command, with the key that runs it</text>
+<text x="287" y="219.68" textLength="23.4" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">esc</text>
+<text x="372.8" y="219.68" textLength="124.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">back to the form</text>
 <text x="770.6" y="219.68" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="279.2" y="235.93" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
-<text x="287" y="235.93" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">n</text>
-<text x="372.8" y="235.93" textLength="296.4" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">take a snapshot — choose the databases</text>
 <text x="770.6" y="235.93" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="279.2" y="252.18" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
-<text x="287" y="252.18" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">a</text>
-<text x="372.8" y="252.18" textLength="397.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">apply the selected snapshot — choose target and sc…</text>
+<text x="287" y="252.18" textLength="195" lengthAdjust="spacing" fill="#7f7f7f" font-weight="600" xml:space="preserve">What a snapshot row means</text>
 <text x="770.6" y="252.18" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="279.2" y="268.43" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
-<text x="287" y="268.43" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">m</text>
-<text x="372.8" y="268.43" textLength="304.2" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">move one connection&#39;s data into another</text>
+<text x="287" y="268.43" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">l</text>
+<text x="372.8" y="268.43" textLength="156" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">on this machine only</text>
 <text x="770.6" y="268.43" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="279.2" y="284.68" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
-<text x="287" y="284.68" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">p</text>
-<text x="372.8" y="284.68" textLength="304.2" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">prune snapshots by the retention policy</text>
+<text x="287" y="284.68" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">r</text>
+<text x="372.8" y="284.68" textLength="358.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">in a remote only — applying downloads it first</text>
 <text x="770.6" y="284.68" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="279.2" y="300.93" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
-<text x="287" y="300.93" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">x</text>
-<text x="372.8" y="300.93" textLength="218.4" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">delete the selected snapshot</text>
+<text x="287" y="300.93" textLength="23.4" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">l+r</text>
+<text x="372.8" y="300.93" textLength="179.4" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">both: here and uploaded</text>
 <text x="770.6" y="300.93" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="279.2" y="317.18" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
-<text x="287" y="317.18" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">r</text>
-<text x="372.8" y="317.18" textLength="319.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">reload snapshots and re-probe connections</text>
+<text x="287" y="317.18" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">✗</text>
+<text x="372.8" y="317.18" textLength="304.2" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">it did not finish; it cannot be applied</text>
 <text x="770.6" y="317.18" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="279.2" y="333.43" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="770.6" y="333.43" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="279.2" y="349.68" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
-<text x="287" y="349.68" textLength="70.2" lengthAdjust="spacing" fill="#7f7f7f" font-weight="600" xml:space="preserve">In a form</text>
+<text x="287" y="349.68" textLength="210.6" lengthAdjust="spacing" fill="#7f7f7f" font-weight="600" xml:space="preserve">What a connection row means</text>
 <text x="770.6" y="349.68" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="279.2" y="365.93" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
-<text x="287" y="365.93" textLength="23.4" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">↑ ↓</text>
-<text x="372.8" y="365.93" textLength="148.2" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">move between fields</text>
+<text x="287" y="365.93" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">●</text>
+<text x="372.8" y="365.93" textLength="70.2" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">reachable</text>
 <text x="770.6" y="365.93" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="279.2" y="382.18" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
-<text x="287" y="382.18" textLength="23.4" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">← →</text>
-<text x="372.8" y="382.18" textLength="117" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">change a choice</text>
+<text x="287" y="382.18" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">○</text>
+<text x="372.8" y="382.18" textLength="288.6" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">not reached yet — pgctl has not tried</text>
 <text x="770.6" y="382.18" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="279.2" y="398.43" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
-<text x="287" y="398.43" textLength="39" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">space</text>
-<text x="372.8" y="398.43" textLength="46.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">toggle</text>
+<text x="287" y="398.43" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">⠋</text>
+<text x="372.8" y="398.43" textLength="132.6" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">being reached now</text>
 <text x="770.6" y="398.43" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="279.2" y="414.68" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
-<text x="287" y="414.68" textLength="39" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">enter</text>
-<text x="372.8" y="414.68" textLength="140.4" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">run it, or plan it</text>
+<text x="287" y="414.68" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">✗</text>
+<text x="372.8" y="414.68" textLength="280.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">unreachable — Overview has the error</text>
 <text x="770.6" y="414.68" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="279.2" y="430.93" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
-<text x="287" y="430.93" textLength="23.4" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">esc</text>
-<text x="372.8" y="430.93" textLength="46.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">cancel</text>
+<text x="287" y="430.93" textLength="70.2" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">protected</text>
+<text x="372.8" y="430.93" textLength="265.2" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">never an apply target, no override</text>
 <text x="770.6" y="430.93" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="279.2" y="447.18" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
+<text x="287" y="447.18" textLength="54.6" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">guarded</text>
+<text x="372.8" y="447.18" textLength="288.6" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">an apply needs the name typed in full</text>
 <text x="770.6" y="447.18" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="279.2" y="463.43" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
-<text x="287" y="463.43" textLength="109.2" lengthAdjust="spacing" fill="#7f7f7f" font-weight="600" xml:space="preserve">Reading a plan</text>
 <text x="770.6" y="463.43" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="279.2" y="479.68" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
-<text x="287" y="479.68" textLength="23.4" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">↑ ↓</text>
-<text x="372.8" y="479.68" textLength="312" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">scroll it — nothing has been touched yet</text>
+<text x="287" y="479.68" textLength="156" lengthAdjust="spacing" fill="#7f7f7f" font-weight="600" xml:space="preserve">What a set row means</text>
 <text x="770.6" y="479.68" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="279.2" y="495.93" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
-<text x="287" y="495.93" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">w</text>
-<text x="372.8" y="495.93" textLength="343.2" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">widen to the referential closure and re-plan</text>
+<text x="287" y="495.93" textLength="62.4" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">4 closed</text>
+<text x="372.8" y="495.93" textLength="280.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">closed: it can be applied on its own</text>
 <text x="770.6" y="495.93" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="279.2" y="512.17" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
-<text x="287" y="512.17" textLength="39" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">enter</text>
-<text x="372.8" y="512.17" textLength="62.4" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">apply it</text>
+<text x="287" y="512.17" textLength="23.4" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">4+2</text>
+<text x="372.8" y="512.17" textLength="288.6" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">4 named, 2 dragged in by foreign keys</text>
 <text x="770.6" y="512.17" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="279.2" y="528.42" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
-<text x="287" y="528.42" textLength="23.4" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">esc</text>
-<text x="372.8" y="528.42" textLength="124.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">back to the form</text>
+<text x="287" y="528.42" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">?</text>
+<text x="372.8" y="528.42" textLength="374.4" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">not resolved yet — select it to read the catalog</text>
 <text x="770.6" y="528.42" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="279.2" y="544.67" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="770.6" y="544.67" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>

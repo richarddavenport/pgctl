@@ -173,7 +173,10 @@ because pgctl's refusals are sentences — the tables a selection reaches into,
 the extension a target cannot install — and a header row shared with the config
 path truncated the one message in the tool most worth reading in full.
 
-`?` is every binding, by screen. The footer names only what acts on what is
+`?` is every binding by screen, **and what the markers mean** — `l`, `r`, `l+r`,
+`●`, `○`, `✗`, `4+2`. It is the screen a reader opens when they do not know
+something, and for a while it answered "what can I press" but not "what does
+that mean", so the first person to see a snapshot marked `r` had to ask. The footer names only what acts on what is
 focused right now — a footer that listed every action on every panel would grow
 a letter per feature and read as a menu of things mostly not applicable.
 

@@ -1,26 +1,7 @@
                                   ╭──────────────────────────────────────────────────────────────╮
                                   │pgctl keys                                                    │
                                   │                                                              │
-                                  │↑ 3 above                                                     │
-                                  │1-5        jump straight to a panel                           │
-                                  │g G        first / last row                                   │
-                                  │[ ]        previous / next tab of the detail pane             │
-                                  │tab        focus the detail pane, and back                    │
-                                  │/          filter the focused panel                           │
-                                  │esc        clear the filter, or leave the pane                │
-                                  │                                                              │
-                                  │Doing                                                         │
-                                  │ctrl+p     every command, with the key that runs it           │
-                                  │n          take a snapshot — choose the databases             │
-                                  │a          apply the selected snapshot — choose target and sc…│
-                                  │m          move one connection's data into another            │
-                                  │p          prune snapshots by the retention policy            │
-                                  │x          delete the selected snapshot                       │
-                                  │r          reload snapshots and re-probe connections          │
-                                  │                                                              │
-                                  │In a form                                                     │
-                                  │↑ ↓        move between fields                                │
-                                  │← →        change a choice                                    │
+                                  │↑ 22 above                                                    │
                                   │space      toggle                                             │
                                   │enter      run it, or plan it                                 │
                                   │esc        cancel                                             │
@@ -30,6 +11,25 @@
                                   │w          widen to the referential closure and re-plan       │
                                   │enter      apply it                                           │
                                   │esc        back to the form                                   │
+                                  │                                                              │
+                                  │What a snapshot row means                                     │
+                                  │l          on this machine only                               │
+                                  │r          in a remote only — applying downloads it first     │
+                                  │l+r        both: here and uploaded                            │
+                                  │✗          it did not finish; it cannot be applied            │
+                                  │                                                              │
+                                  │What a connection row means                                   │
+                                  │●          reachable                                          │
+                                  │○          not reached yet — pgctl has not tried              │
+                                  │⠋          being reached now                                  │
+                                  │✗          unreachable — Overview has the error               │
+                                  │protected  never an apply target, no override                 │
+                                  │guarded    an apply needs the name typed in full              │
+                                  │                                                              │
+                                  │What a set row means                                          │
+                                  │4 closed   closed: it can be applied on its own               │
+                                  │4+2        4 named, 2 dragged in by foreign keys              │
+                                  │?          not resolved yet — select it to read the catalog   │
                                   │                                                              │
                                   │While something runs                                          │
                                   │tab        the steps, then the log it came from               │

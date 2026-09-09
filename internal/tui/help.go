@@ -49,6 +49,31 @@ func KeySections() []comp.KeySection {
 			{Key: "enter", Label: "apply it"},
 			{Key: "esc", Label: "back to the form"},
 		}},
+		// The markers, in the screen a reader opens when they do not know
+		// something. `?` answered "what can I press" and not "what does that
+		// mean", so the first person to see a snapshot marked `r` had to ask —
+		// and comp.Hint is a key and a label, which is exactly the shape a
+		// legend is.
+		{Name: "What a snapshot row means", Keys: []comp.Hint{
+			{Key: "l", Label: "on this machine only"},
+			{Key: "r", Label: "in a remote only — applying downloads it first"},
+			{Key: "l+r", Label: "both: here and uploaded"},
+			{Key: "✗", Label: "it did not finish; it cannot be applied"},
+		}},
+		{Name: "What a connection row means", Keys: []comp.Hint{
+			{Key: "●", Label: "reachable"},
+			{Key: "○", Label: "not reached yet — pgctl has not tried"},
+			{Key: "⠋", Label: "being reached now"},
+			{Key: "✗", Label: "unreachable — Overview has the error"},
+			{Key: "protected", Label: "never an apply target, no override"},
+			{Key: "guarded", Label: "an apply needs the name typed in full"},
+		}},
+		{Name: "What a set row means", Keys: []comp.Hint{
+			{Key: "4 closed", Label: "closed: it can be applied on its own"},
+			{Key: "4+2", Label: "4 named, 2 dragged in by foreign keys"},
+			{Key: "?", Label: "not resolved yet — select it to read the catalog"},
+		}},
+
 		{Name: "While something runs", Keys: []comp.Hint{
 			{Key: "tab", Label: "the steps, then the log it came from"},
 			{Key: "q", Label: "leave — it is cancelled, so the failure hooks run"},
