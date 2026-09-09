@@ -14,17 +14,20 @@ REPO="${REPO:-richarddavenport/pgctl}"
 BIN="${BIN:-$HOME/.local/bin/pgctl}"
 VERSION="${VERSION:-latest}"
 
-# The source repository is private, so the release assets are too, and a plain
-# curl gets a 404 that looks exactly like "no such release". gh carries the
-# token this needs and reports the real error, so it is the requirement rather
-# than something to work around. Publishing from a separate public dist repo —
-# what swarmctl does, and issue #5 has to settle the licence first — is what
-# removes it.
-if ! command -v gh >/dev/null; then
-	echo "install.sh: needs the gh CLI, because $REPO is private" >&2
-	echo "  brew install gh && gh auth login" >&2
-	exit 1
-fi
+# Public releases need nothing but curl. gh is the fallback, not the
+# requirement: while the repository was private a plain curl got a 404 that
+# looked exactly like "no such release", and gh is what carries the token and
+# reports the real error. Trying curl first means the common case — somebody who
+# found the tool and has no gh — works.
+fetch() {
+	if command -v curl >/dev/null; then
+		curl -fsSL -o "$2" "$1"
+	elif command -v wget >/dev/null; then
+		wget -qO "$2" "$1"
+	else
+		return 1
+	fi
+}
 
 case "$(uname -s)" in
 	Darwin) os=darwin ;;
@@ -41,14 +44,34 @@ asset="pgctl-$os-$arch"
 tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT
 
+base="https://github.com/$REPO/releases"
 if [ "$VERSION" = latest ]; then
-	VERSION="$(gh release view --repo "$REPO" --json tagName -q .tagName)"
+	# `releases/latest/download/<asset>` redirects, so the tag never has to be
+	# resolved first. The version is read back off the binary at the end.
+	url="$base/latest/download"
+else
+	url="$base/download/$VERSION"
 fi
-echo "fetching $asset from $VERSION"
-gh release download "$VERSION" --repo "$REPO" \
-	--pattern "$asset" --pattern checksums.txt --dir "$tmp"
 
-# The checksum is worth verifying even over HTTPS from a private repo: it
+echo "fetching $asset from $VERSION"
+if ! fetch "$url/$asset" "$tmp/$asset" || ! fetch "$url/checksums.txt" "$tmp/checksums.txt"; then
+	# Either there is no such release, or the repository is private and this
+	# download was a 404 that means "not authorised". gh can tell the
+	# difference, so hand over to it rather than guessing.
+	if ! command -v gh >/dev/null; then
+		echo "install.sh: could not download $asset from $VERSION" >&2
+		echo "  if $REPO is private, this needs the gh CLI:" >&2
+		echo "  brew install gh && gh auth login" >&2
+		exit 1
+	fi
+	if [ "$VERSION" = latest ]; then
+		VERSION="$(gh release view --repo "$REPO" --json tagName -q .tagName)"
+	fi
+	gh release download "$VERSION" --repo "$REPO" \
+		--pattern "$asset" --pattern checksums.txt --dir "$tmp"
+fi
+
+# The checksum is worth verifying even over HTTPS: it
 # catches a truncated download, which is the failure that produces a binary
 # that runs and then does something surprising.
 ( cd "$tmp" && grep " $asset\$" checksums.txt | shasum -a 256 -c - >/dev/null )

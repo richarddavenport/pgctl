@@ -43,9 +43,11 @@ Nothing else. There is no credential store to set up: pgctl connects the way
 curl -fsSL https://raw.githubusercontent.com/richarddavenport/pgctl/master/install.sh | bash
 ```
 
-The repository is private, so `install.sh` fetches the release asset through the
-`gh` CLI rather than plain `curl` — a token is needed either way, and `gh`
-already has one.
+That downloads the release binary for your platform, checks it against the
+release's `checksums.txt`, and puts it in `~/.local/bin/pgctl` (`BIN=…` to put
+it elsewhere, `VERSION=v0.2.0` for a specific release). It needs nothing but
+`curl`; if the download 404s it falls back to the `gh` CLI, which is the one
+thing that can tell "no such release" from "not authorised".
 
 To change pgctl rather than run it, clone it and `make install`. [tuikit] is a
 tagged public module, so nothing else has to be checked out beside it.
