@@ -49,9 +49,18 @@ only for developing both at once, through `go work` or a temporary `replace`,
 and neither is committed.
 
 `internal/tui` was rebuilt on `tuikit new`'s scaffold — decision 19. The
-interface it replaces is in [`_attic/tui`](./_attic), which Go does not compile
-(a directory whose name starts with `_` is invisible to the toolchain) and which
-is the reference for what the screens have to be able to say.
+interface it replaces was kept in the tree for a while and is now only in
+history, at `b1c4f8c` — the tip of the `docs/landscape` branch, which is the
+last commit before the rebuild:
+
+```sh
+git show b1c4f8c:internal/tui/app.go          # one file
+git checkout b1c4f8c -- internal/tui          # all 84, to read and then discard
+```
+
+Its 58 goldens — 29 states at two terminal sizes — are there too, and they are
+what "parity" means if there is ever a question about whether a screen still
+says something it used to.
 
 Three things will fail your change:
 

@@ -233,6 +233,7 @@ of them, and the tab bodies are generated from `paneTabs()` rather than listed.
 `go test ./internal/tui -update-goldens` after an intended layout change, and
 read the diff.
 
-The interface this replaced is in [`_attic/tui`](../_attic) with its own 38
-goldens, unbuilt. It is what "parity" means when there is a question about
-whether a screen still says something it used to.
+The interface this replaced is in history rather than in the tree —
+`git show b1c4f8c:internal/tui/` — with its own 58 goldens over 29 states. It is
+what "parity" means when there is a question about whether a screen still says
+something it used to.

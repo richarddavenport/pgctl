@@ -17,7 +17,7 @@ import (
 // draws clusters into cells, so an escape sequence handed to it is text: the
 // first version of this after the canvas port passed the old styled strings
 // straight through, and with colour on the Connections panel drew a blank row.
-// With colour off it worked, so 38 goldens agreed it was fine —
+// With colour off it worked, so every golden agreed it was fine —
 // TestColourDoesNotChangeTheShape is what caught it, on the first run.
 //
 // Three of the row's fields do work this file used to do by hand:

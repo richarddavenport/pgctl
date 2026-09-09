@@ -438,9 +438,18 @@ substituted underneath where a component happened to fit.
 
 **Restarted.** `tuikit new pgctl` was generated into a scratch directory and its
 `internal/tui` was the starting point rather than the donor. The old interface
-moved to `_attic/tui`, where Go does not compile it — a directory whose name
-starts with `_` is invisible to the toolchain — and its 38 goldens are the
-reference for what the rebuilt one has to be able to say.
+was parked in the tree at `_attic/tui`, where Go does not compile it — a
+directory whose name starts with `_` is invisible to the toolchain — with its 58
+goldens as the reference for what the rebuilt one had to be able to say.
+
+**That parking space is gone**, and the reasoning is worth keeping because it
+applies to the next one. It was 85 files and 592 KB of an interface nobody would
+ever run again, sitting where a reader meets it before they meet the code that
+does run, and every scrub of the repository had to be done twice — the storage
+account name that survived the first pass survived it in there. A copy of
+deleted code is not the only record of it: the old interface is at `b1c4f8c`,
+the commit before this rebuild, at its own original path. `git show` is the
+attic, and it does not need dusting.
 
 **What changed, and none of it is cosmetic.** The key routing is `app.Keys`, so
 the order that makes a filter box typeable is the shape of a struct rather than
@@ -456,7 +465,7 @@ ask most and previously got answered only by pressing the key. And the filter
 and the form's text fields have a caret you can move, which the hand-drawn `▏`
 could never be.
 
-**What it cost.** The 38 goldens were rewritten, and every one of them had to be
+**What it cost.** All 58 goldens were rewritten, and every one of them had to be
 read rather than accepted. Two behaviours went deliberately: `q` no longer
 means "cancel the run" — tuikit reserves it for leaving (its decision 42) — so a
 run in flight puts a question in front of it and answering the question is what
