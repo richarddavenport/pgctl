@@ -18,7 +18,7 @@ LAB_IMAGE ?= postgres:17
 LAB_PORT  ?= 55432
 LAB_NAME  ?= pgctl-lab
 
-.PHONY: install build test test-all lint check frames review watch lab-up lab-down help
+.PHONY: install build test test-all lint check frames review watch lab-up lab-down release release-dry notes help
 
 ## install: build the working tree and replace the pgctl on your PATH
 install:
@@ -82,5 +82,18 @@ lab-down:
 	@docker rm -f -v $(LAB_NAME) >/dev/null 2>&1 || true
 	@echo "removed $(LAB_NAME)"
 
+## notes: print the CHANGELOG section a release would publish (VERSION=v0.1.0)
+notes:
+	@scripts/changelog.sh "$(VERSION)"
+
+## release-dry: build and check a release without publishing (VERSION=v0.1.0)
+release-dry:
+	@scripts/release.sh "$(VERSION)" --dry-run
+
+## release: cut a release from this checkout — the tag must already exist
+release:
+	@scripts/release.sh "$(VERSION)"
+
+## help: list these targets
 help:
 	@grep -E '^## ' $(MAKEFILE_LIST) | sed 's/^## /  /'
