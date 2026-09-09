@@ -1,0 +1,22 @@
+pgctl  pgctl.yaml
+╭─ [1] Connections (4) ────────╮▏╭─────────────────────────────────────────────╮
+│ ● prd              protected │▏│ ‹ Overview · Config ›                       │
+│ ● qat                guarded │▏│                                             │
+│ ● local                      │▏│ prd                                         │
+╰───────╭──────────────────────────────────────────────────────────────╮       │
+╭─ [2] D│ update                                                       │       │
+│ produc│ v0.3.0-9-gabc1234 → v0.4.0                                   │       │
+│ claims│ Replace this binary with v0.4.0, downloaded from the         │       │
+╰───────│ releases and checked against their checksums.                │       │
+╭─ [3] S│                                                              │       │
+│   08-2│ No database is touched: this updates the tool, not anything  │       │
+╰───────│ it has snapshotted.                                          │       │
+╭─ [4] R│                                                              │       │
+│       │  you are running a local build (v0.3.0-9-gabc1234)           │       │
+╰───────│  installing v0.4.0 would replace it with an older binary     │       │
+╭─ [5] S│   enter install · esc cancel                                 │ment/… │
+│ claims╰──────────────────────────────────────────────────────────────╯       │
+╰──────────────────────────────╯▏│                                             │
+╭─ [6] Runs ───────────────────╮▏│                                             │
+│ nothing run yet              │▏│                                             │
+╰──────────────────────────────╯▏╰─────────────────────────────────────────────╯

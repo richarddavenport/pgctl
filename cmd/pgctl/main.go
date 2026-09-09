@@ -36,6 +36,12 @@ var (
 // knows a bare `pgctl` means "show me": no arguments opens the interface,
 // anything else is a command.
 func main() {
+	// Both front ends need the version: the CLI to say what an update would
+	// replace, the interface to draw it in the corner and to compare against
+	// the latest release. Set before anything reads it.
+	cli.Version = version
+	tui.Version = version
+
 	root := cli.Commands()
 	argv := os.Args[1:]
 	if len(argv) == 0 {

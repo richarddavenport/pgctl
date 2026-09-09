@@ -11,19 +11,19 @@ pgctl  pgctl.yaml
 │ quote                 20.0 GB │▏│ databases  3                                                                                   │
 ╰─────────────────╭─ run ────────────────────────────────────────────────────────────────────────────────────────╮                 │
 ╭─ [3] Snapshots (│> p                                                                                           │                 │
-│   08-28 03:00   │every key that acts right now; a greyed row says why it cannot                         5 of 10│                 │
+│   08-28 03:00   │every key that acts right now; a greyed row says why it cannot                         6 of 11│                 │
 ╰─────────────────│──────────────────────────────────────────────────────────────────────────────────────────────│                 │
 ╭─ [4] Restorable │  prune                             p    Operations          report what the retention policy │                 │
-│                 │  detail pane                       tab  Reading             focus it, and back               │                 │
-╰─────────────────│  apply                             a    Operations          restore 1 database of prd/2026082│                 │
-╭─ [5] Sets (1) ──│  snapshot                          n    Operations          read the chosen databases and wri│                 │
-│ claims          │  delete the snapshot               x    Operations          remove it from disk and from stor│                 │
-╰─────────────────│                                                                                              │                 │
-╭─ [6] Runs ──────│                                                                                          5/5 │                 │
-│ nothing run yet │──────────────────────────────────────────────────────────────────────────────────────────────│                 │
-╰─────────────────│  enter run · ↑↓ move · esc close                                                             │                 │
+│                 │  update pgctl                           The tool itself     still asking GitHub what the late│                 │
+╰─────────────────│  detail pane                       tab  Reading             focus it, and back               │                 │
+╭─ [5] Sets (1) ──│  apply                             a    Operations          restore 1 database of prd/2026082│                 │
+│ claims          │  snapshot                          n    Operations          read the chosen databases and wri│                 │
+╰─────────────────│  delete the snapshot               x    Operations          remove it from disk and from stor│                 │
+╭─ [6] Runs ──────│                                                                                              │                 │
+│ nothing run yet │                                                                                          6/6 │                 │
+╰─────────────────│──────────────────────────────────────────────────────────────────────────────────────────────│                 │
+                  │  enter run · ↑↓ move · esc close                                                             │                 │
                   ╰──────────────────────────────────────────────────────────────────────────────────────────────╯                 │
-                                 ▏│                                                                                                │
                                  ▏│                                                                                                │
                                  ▏│                                                                                                │
                                  ▏│                                                                                                │

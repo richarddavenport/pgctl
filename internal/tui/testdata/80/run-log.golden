@@ -20,4 +20,4 @@ pgctl  pgctl.yaml
 ╭─ [6] Runs (2) ───────────────╮▏│                                             │
 │ ⠋ apply → qat           1:41 │▏│                                  following  │
 ╰──────────────────────────────╯▏╰─────────────────────────────────────────────╯
-q stop and leave · ] log · ? keys
+q stop and leave · ] log · ? keys                                         v0.3.0

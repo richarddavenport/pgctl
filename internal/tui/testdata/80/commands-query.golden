@@ -4,19 +4,19 @@ pgctl  pgctl.yaml
 │ ● qat                guarded │▏│                                             │
 │ ╭─ run ────────────────────────────────────────────────────────────────────╮ │
 ╰─│> p                                                                       │ │
-╭─│every key that acts right now; a greyed row says why it cannot     5 of 10│ │
+╭─│every key that acts right now; a greyed row says why it cannot     6 of 11│ │
 │ │──────────────────────────────────────────────────────────────────────────│ │
 │ │  prune                             p    Operations          report what t│ │
-╰─│  detail pane                       tab  Reading             focus it, and│ │
-╭─│  apply                             a    Operations          restore 1 dat│ │
-│ │  snapshot                          n    Operations          read the chos│ │
-╰─│  delete the snapshot               x    Operations          remove it fro│ │
-╭─│                                                                          │ │
-│ │                                                                      5/5 │ │
-╰─│──────────────────────────────────────────────────────────────────────────│ │
-╭─│  enter run · ↑↓ move · esc close                                         │ │
-│ ╰──────────────────────────────────────────────────────────────────────────╯ │
-╰──────────────────────────────╯▏│                                             │
+╰─│  update pgctl                           The tool itself     still asking │ │
+╭─│  detail pane                       tab  Reading             focus it, and│ │
+│ │  apply                             a    Operations          restore 1 dat│ │
+╰─│  snapshot                          n    Operations          read the chos│ │
+╭─│  delete the snapshot               x    Operations          remove it fro│ │
+│ │                                                                          │ │
+╰─│                                                                      6/6 │ │
+╭─│──────────────────────────────────────────────────────────────────────────│ │
+│ │  enter run · ↑↓ move · esc close                                         │ │
+╰─╰──────────────────────────────────────────────────────────────────────────╯ │
 ╭─ [6] Runs ───────────────────╮▏│                                             │
 │ nothing run yet              │▏│                                             │
 ╰──────────────────────────────╯▏╰─────────────────────────────────────────────╯

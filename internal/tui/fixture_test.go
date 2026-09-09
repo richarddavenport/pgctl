@@ -363,3 +363,31 @@ func fixtureTwoDatabases(m *Model) {
 		}))
 	}
 }
+
+// offered puts a release in front of the model without asking GitHub.
+//
+// The check is a network call whose answer changes when somebody publishes, so
+// a frame that ran it would render differently on different days. The world
+// this describes is one release ahead of the build, which is every world in
+// which the notice appears at all.
+//
+// local says the running build is not a release, which is what `make install`
+// stamps and therefore what a developer pressing U always sees. It sets the
+// MODEL's version: an earlier version of this moved the package variable, and
+// the move leaked into ten goldens captured after it.
+// localBuildVersion is what `git describe` gives a checkout past a tag, which
+// is what `make install` stamps.
+const localBuildVersion = "v0.3.0-9-gabc1234"
+
+// nextRelease is one version past what the tests run as. Which number it is
+// does not matter to anything; that it is NEWER is the whole point.
+const nextRelease = "v0.4.0"
+
+func offered(t *testing.T, m *Model, local bool) {
+	t.Helper()
+	if local {
+		m.version = localBuildVersion
+	}
+	m.updateChecked = true
+	m.updateAvail = updateNotice{Version: nextRelease}
+}

@@ -19,6 +19,7 @@
                                   │p          prune snapshots by the retention policy            │
                                   │x          delete the selected snapshot                       │
                                   │r          reload snapshots and re-probe connections          │
+                                  │U          update pgctl itself — shifted, because it is not t…│
                                   │                                                              │
                                   │In a form                                                     │
                                   │↑ ↓        move between fields                                │
@@ -32,6 +33,5 @@
                                   │w          widen to the referential closure and re-plan       │
                                   │enter      apply it                                           │
                                   │esc        back to the form                                   │
-                                  │                                                              │
-                                  │↓ 28 more                                                     │
+                                  │↓ 29 more                                                     │
                                   ╰──────────────────────────────────────────────────────────────╯

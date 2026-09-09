@@ -20,8 +20,13 @@ import (
 // So the goldens are UTC by construction, and the local-time rendering is
 // asserted on its own where the timezone is the subject rather than a
 // background condition.
+// Version is pinned for the same reason as the timezone: it is drawn in the
+// corner of every frame, and "dev" is what a golden captured from a checkout
+// says while a release binary says something else. Pinned to a release, so the
+// local-build case is a deviation a test asks for rather than the default.
 func TestMain(m *testing.M) {
 	time.Local = time.UTC
+	Version = "v0.3.0"
 	os.Exit(m.Run())
 }
 

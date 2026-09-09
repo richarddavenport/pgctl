@@ -1,7 +1,7 @@
 pgctl  pgctl.yaml
 ╭─╭─ run ────────────────────────────────────────────────────────────────────╮─╮
-│ │>   type to search 10 commands                                            │ │
-│ │every key that acts right now; a greyed row says why it cannot    10 of 10│ │
+│ │>   type to search 11 commands                                            │ │
+│ │every key that acts right now; a greyed row says why it cannot    11 of 11│ │
 │ │──────────────────────────────────────────────────────────────────────────│ │
 ╰─│ Operations                                       act on what is selected │ │
 ╭─│  snapshot                    n    read the chosen databases and write a c│ │
@@ -9,14 +9,14 @@ pgctl  pgctl.yaml
 │ │  move                        m    snapshot one connection into another an│ │
 ╰─│  prune                       p    report what the retention policy would │ │
 ╭─│  delete the snapshot              no snapshot selected                   │ │
-│ │ Reading                                               nothing is written │ │
-╰─│  reload                      r    re-list snapshots and re-probe every co│ │
-╭─│  filter                      /    narrow the focused panel               │ │
-│ │  next tab                    ]    what the detail pane is showing        │ │
-╰─│  detail pane                 tab  focus it, and back                     │ │
-╭─│  keys                        ?    every binding, by screen               │ │
-│ │                                                                          │ │
-╰─│                                                                    12/12 │ │
+│ │ The tool itself                                           not the estate │ │
+╰─│  update pgctl                     still asking GitHub what the latest rel│ │
+╭─│ Reading                                               nothing is written │ │
+│ │  reload                      r    re-list snapshots and re-probe every co│ │
+╰─│  filter                      /    narrow the focused panel               │ │
+╭─│  next tab                    ]    what the detail pane is showing        │ │
+│ │  detail pane                 tab  focus it, and back                     │ │
+╰─│                                                                    13/14 │ │
 ╭─│──────────────────────────────────────────────────────────────────────────│ │
 │ │  enter run · ↑↓ move · esc close                                         │ │
 ╰─╰──────────────────────────────────────────────────────────────────────────╯─╯

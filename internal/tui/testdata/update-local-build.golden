@@ -1,0 +1,36 @@
+pgctl  pgctl.yaml
+╭─ [1] Connections (4) ─────────╮▏╭────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ ● prd               protected │▏│ ‹ Overview · Config ›                                                                          │
+│ ● qat                 guarded │▏│                                                                                                │
+│ ● local                       │▏│ prd                                                                                            │
+│ ✗ scratch                     │▏│ protected — never a target                                                                     │
+╰───────────────────────────────╯▏│                                                                                                │
+╭─ [2] Databases (3) ───────────╮▏│ host       prd.example:5432                                                                    │
+│ product-development   11.0 GB │▏│ user       dbadmin                                                                             │
+│ claims                48.0 MB │▏│ server     PostgreSQL 17.4                                                                     │
+│ quote                 20.0 GB │▏│ databases  3                                                                                   │
+╰───────────────────────────────╯▏│ total size 31.0 GB                                                                             │
+╭─ [3] Snapshots (1) ───────────╮▏╭──────────────────────────────────────────────────────────────╮                                 │
+│   08-28 03:00      1db 1.9 GB │▏│ update                                                       │                                 │
+╰───────────────────────────────╯▏│ v0.3.0-9-gabc1234 → v0.4.0                                   │                                 │
+╭─ [4] Restorable ──────────────╮▏│ Replace this binary with v0.4.0, downloaded from the         │                                 │
+│                               │▏│ releases and checked against their checksums.                │                                 │
+╰───────────────────────────────╯▏│                                                              │                                 │
+╭─ [5] Sets (1) ────────────────╮▏│ No database is touched: this updates the tool, not anything  │                                 │
+│ claims                    2+2 │▏│ it has snapshotted.                                          │                                 │
+╰───────────────────────────────╯▏│                                                              │                                 │
+╭─ [6] Runs ────────────────────╮▏│  you are running a local build (v0.3.0-9-gabc1234)           │                                 │
+│ nothing run yet               │▏│  installing v0.4.0 would replace it with an older binary     │                                 │
+╰───────────────────────────────╯▏│   enter install · esc cancel                                 │                                 │
+                                 ▏╰──────────────────────────────────────────────────────────────╯                                 │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏╰────────────────────────────────────────────────────────────────────────────────────────────────╯

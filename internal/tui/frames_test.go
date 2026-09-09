@@ -80,6 +80,35 @@ func states(t *testing.T) []state {
 			r := run(m, w, h)
 			return keys(r, "j", "4", "a")
 		}},
+		// The update screen, and the footer that leads to it. The notice is set
+		// by hand rather than by letting the check run: a frame that reached
+		// GitHub would be a frame that renders differently depending on what
+		// has been released, which is a golden nobody can regenerate twice.
+		{"update", func(w, h int) *app.Runner {
+			m := fixtureModel(t)
+			fixtureSnapshot(t, m)
+			offered(t, m, false)
+			return keys(run(m, w, h), "U")
+		}},
+		// The two cases where installing is not simply an upgrade. Both are
+		// true of this machine as it is: `make install` stamps a git describe,
+		// so a developer pressing U is always in the first one.
+		{"update-local-build", func(w, h int) *app.Runner {
+			m := fixtureModel(t)
+			fixtureSnapshot(t, m)
+			offered(t, m, true)
+			return keys(run(m, w, h), "U")
+		}},
+		// The footer's arrow, with nothing open: this is what somebody
+		// actually sees first, and it is the whole notice.
+		{"update-offered", func(w, h int) *app.Runner {
+			m := fixtureModel(t)
+			fixtureSnapshot(t, m)
+			offered(t, m, false)
+			m.updateAvail.Fresh = true
+			return run(m, w, h)
+		}},
+
 		{"form-move", func(w, h int) *app.Runner { return keys(loaded(w, h), "m") }},
 		{"form-prune", func(w, h int) *app.Runner { return keys(loaded(w, h), "p") }},
 		{"form-delete", func(w, h int) *app.Runner { return keys(loaded(w, h), "3", "x") }},

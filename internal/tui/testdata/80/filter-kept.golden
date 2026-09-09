@@ -20,4 +20,4 @@ pgctl  pgctl.yaml
 ╰──────────────────────────────╯▏│                                             │
                                 ▏│                                             │
                                 ▏╰─────────────────────────────────────────────╯
-esc clear /qat · n snapshot · a apply · m move · p prune · / filter · ? keys
+esc clear /qat · n snapshot · a apply · m move · p prune · ? keys         v0.3.0

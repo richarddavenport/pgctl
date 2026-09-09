@@ -53,16 +53,8 @@ func (m *Model) drawAction(c *comp.Canvas, r comp.Rect) {
 	// The head, a blank, the body, then the two reserved rows.
 	rows := head.rows + 1 + m.bodyRows(inner) + 2
 
-	box := comp.Rect{W: min(inner+6, r.W), H: min(rows+2, r.H)}
-	box.X, box.Y = r.X+(r.W-box.W)/2, r.Y+(r.H-box.H)/2
-
-	// Narrow, not Inset. Pane.Draw already returns the rect INSIDE the border,
-	// so insetting it again takes a row off the top and the bottom as well as a
-	// column off each side — which is what starved the fields the first time
-	// this ran: the box was sized for ten rows of content and handed eight.
-	inside := comp.Pane{Border: &panelFocusBorder, Focus: &panelFocusBorder}.
-		Draw(c, box, id).Narrow(1)
-	if inside.Empty() {
+	inside, ok := m.modalInside(c, r, inner, rows)
+	if !ok {
 		return
 	}
 
@@ -647,4 +639,20 @@ func plural(n int, noun string) string {
 		return fmt.Sprintf("%d indexes", n)
 	}
 	return fmt.Sprintf("%d %ss", n, noun)
+}
+
+// modalInside centres a box of the given content size, draws its border, and
+// returns the rect inside it — shared by every screen that sits over the frame,
+// so they cannot disagree about where a modal is.
+//
+// Narrow, not Inset. Pane.Draw already returns the rect INSIDE the border, so
+// insetting it again takes a row off the top and the bottom as well as a column
+// off each side — which is what starved the fields the first time this ran: the
+// box was sized for ten rows of content and handed eight.
+func (m *Model) modalInside(c *comp.Canvas, r comp.Rect, inner, rows int) (comp.Rect, bool) {
+	box := comp.Rect{W: min(inner+6, r.W), H: min(rows+2, r.H)}
+	box.X, box.Y = r.X+(r.W-box.W)/2, r.Y+(r.H-box.H)/2
+	inside := comp.Pane{Border: &panelFocusBorder, Focus: &panelFocusBorder}.
+		Draw(c, box, comp.Region(regModal)).Narrow(1)
+	return inside, !inside.Empty()
 }

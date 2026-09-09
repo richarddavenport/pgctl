@@ -35,6 +35,7 @@ func KeySections() []comp.KeySection {
 			{Key: "p", Label: "prune snapshots by the retention policy"},
 			{Key: "x", Label: "delete the selected snapshot"},
 			{Key: "r", Label: "reload snapshots and re-probe connections"},
+			{Key: "U", Label: "update pgctl itself — shifted, because it is not the estate"},
 		}},
 		{Name: "In a form", Keys: []comp.Hint{
 			{Key: "↑ ↓", Label: "move between fields"},

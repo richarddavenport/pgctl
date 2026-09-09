@@ -23,7 +23,10 @@ func (m *Model) onMouse(msg tea.MouseMsg) tea.Cmd {
 		// A modal takes the mouse as well as the keyboard. Clicking the panel
 		// behind a confirmation is not an answer to it — and the panel is
 		// exactly what the confirmation is about, so the click is tempting.
-		Blocked: func() bool { return m.action != nil || m.showHelp || m.showCommand || m.leaving },
+		Blocked: func() bool {
+			return m.action != nil || m.showHelp || m.showCommand ||
+				m.leaving || m.updater != nil
+		},
 
 		Press: func(id comp.ID, _ tea.MouseMsg) tea.Cmd {
 			// Clicking a panel's row selects it AND moves focus there, because

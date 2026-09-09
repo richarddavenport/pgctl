@@ -8,6 +8,7 @@ import (
 
 	"github.com/richarddavenport/pgctl/internal/config"
 	"github.com/richarddavenport/pgctl/internal/tui"
+	"github.com/richarddavenport/pgctl/internal/update"
 )
 
 // Commands is pgctl, declared once.
@@ -102,6 +103,22 @@ func Commands() spec.Command {
 				Target: tui.RegConnectionsRow,
 				Key:    "m",
 				Run:    do(runMove),
+			},
+			{
+				Name:  "update",
+				Short: "replace this binary with the latest release",
+				Flags: []spec.Flag{
+					// No --config. Self-update must survive a config it cannot
+					// read: a pgctl.yaml written for a NEWER pgctl would
+					// otherwise lock somebody out of the one command that
+					// fixes it, since every other command loads the config
+					// first and this one needs nothing from it.
+					{Name: "force",
+						Help: "replace a local build with the latest release"},
+					{Name: "repo", Kind: spec.String,
+						Help: "release repository to fetch from (default " + update.DefaultRepo + ")"},
+				},
+				Run: do(runUpdate),
 			},
 			{
 				Name:  "prune",

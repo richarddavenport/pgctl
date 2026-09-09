@@ -20,4 +20,4 @@ pgctl  pgctl.yaml
 ╭─ [6] Runs ───────────────────╮▏│   operations…  212.0 MB     1.3M all      · │
 │ nothing run yet              │▏│                                    16/227 · │
 ╰──────────────────────────────╯▏╰─────────────────────────────────────────────╯
-n snapshot · a apply · m move · p prune · / filter · [ ] tabs · ? keys
+n snapshot · a apply · m move · p prune · / filter · [ ] tabs · ? keys    v0.3.0

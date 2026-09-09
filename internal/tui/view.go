@@ -53,6 +53,8 @@ func (m *Model) Draw(c *comp.Canvas, r comp.Rect) {
 	// what is behind it — the snapshot named in the title is the one selected
 	// in the panel underneath.
 	switch {
+	case m.updater != nil:
+		m.drawUpdate(c, r)
 	case m.action != nil:
 		m.drawAction(c, r)
 	case m.showCommand:
@@ -278,7 +280,7 @@ func (m *Model) drawFooter(c *comp.Canvas, r comp.Rect) {
 	// A modal carries its own keys, on its own bottom row. Repeating them down
 	// here would put the same answer in two places and make the reader choose
 	// which one to trust.
-	if m.action != nil || m.showCommand {
+	if m.action != nil || m.showCommand || m.updater != nil {
 		return
 	}
 
@@ -295,9 +297,20 @@ func (m *Model) drawFooter(c *comp.Canvas, r comp.Rect) {
 		return
 	}
 
-	comp.Bar{Left: []comp.Segment{
-		{Text: fitHints(m.hints(), r.W), Style: &footerStyle},
-	}}.Draw(c, r, id)
+	// The version goes on the right of the hint row, and a newer release is an
+	// arrow beside it rather than a sentence somewhere else. The corner is
+	// where somebody already looks to answer "what am I running", and the
+	// answer "not the latest" belongs in the same place — anywhere else is a
+	// notice that gets read once and then stops being seen.
+	right := versionSegments(m.version, m.updateAvail)
+	width := r.W
+	for _, seg := range right {
+		width -= comp.Width(seg.Text)
+	}
+	comp.Bar{
+		Left:  []comp.Segment{{Text: fitHints(m.hints(), max(0, width-2)), Style: &footerStyle}},
+		Right: right,
+	}.Draw(c, r, id)
 }
 
 // filterHints is what ends a filter, and it is a constant because comp.Hints
@@ -416,4 +429,23 @@ func max(a, b int) int {
 		return a
 	}
 	return b
+}
+
+// versionSegments is the running version, plus what would replace it.
+func versionSegments(running string, up updateNotice) []comp.Segment {
+	segs := []comp.Segment{{Text: running, Style: &footerStyle}}
+	if !up.showable(running) {
+		return segs
+	}
+	segs = append(segs, comp.Segment{Text: " → " + up.Version, Style: &warnStyle})
+	if up.Fresh {
+		// Discovered while this session was running, so nothing on screen
+		// changed except an arrow nobody was looking at. The word is the
+		// difference between "this was true when you started" and "this became
+		// true just now"; it stays until the session ends rather than flashing,
+		// because an update is never urgent and a notice that vanishes is one
+		// you can miss entirely.
+		segs = append(segs, comp.Segment{Text: " new", Style: &accentStyle})
+	}
+	return segs
 }

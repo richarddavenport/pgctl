@@ -1,0 +1,37 @@
+pgctl  pgctl.yaml
+╭─ [1] Connections (4) ─────────╮▏╭────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ ● prd               protected │▏│ ‹ Overview · Config ›                                                                          │
+│ ● qat                 guarded │▏│                                                                                                │
+│ ● local                       │▏│ prd                                                                                            │
+│ ✗ scratch                     │▏│ protected — never a target                                                                     │
+╰───────────────────────────────╯▏│                                                                                                │
+╭─ [2] Databases (3) ───────────╮▏│ host       prd.example:5432                                                                    │
+│ product-development   11.0 GB │▏│ user       dbadmin                                                                             │
+│ claims                48.0 MB │▏│ server     PostgreSQL 17.4                                                                     │
+│ quote                 20.0 GB │▏│ databases  3                                                                                   │
+╰───────────────────────────────╯▏│ total size 31.0 GB                                                                             │
+╭─ [3] Snapshots (1) ───────────╮▏│ checked    just now                                                                            │
+│   08-28 03:00      1db 1.9 GB │▏│                                                                                                │
+╰───────────────────────────────╯▏│ SNAPSHOTS                                                                                      │
+╭─ [4] Restorable ──────────────╮▏│   count  1                                                                                     │
+│                               │▏│   newest 14h ago  prd/product-development/20260828T030000Z                                     │
+╰───────────────────────────────╯▏│                                                                                                │
+╭─ [5] Sets (1) ────────────────╮▏│                                                                                                │
+│ claims                    2+2 │▏│                                                                                                │
+╰───────────────────────────────╯▏│                                                                                                │
+╭─ [6] Runs ────────────────────╮▏│                                                                                                │
+│ nothing run yet               │▏│                                                                                                │
+╰───────────────────────────────╯▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏│                                                                                                │
+                                 ▏╰────────────────────────────────────────────────────────────────────────────────────────────────╯
+n snapshot · a apply · m move · p prune · / filter · [ ] tabs · ctrl+p commands · ? keys                         v0.3.0 → v0.4.0 new

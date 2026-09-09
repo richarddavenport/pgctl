@@ -197,4 +197,5 @@
 <text x="14" y="593.42" textLength="265.2" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">                                 ▏</text>
 <text x="279.2" y="593.42" textLength="764.4" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">╰────────────────────────────────────────────────────────────────────────────────────────────────╯</text>
 <text x="14" y="609.67" textLength="686.4" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">n snapshot · a apply · m move · p prune · / filter · [ ] tabs · ctrl+p commands · ? keys</text>
+<text x="996.8" y="609.67" textLength="46.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">v0.3.0</text>
 </svg>

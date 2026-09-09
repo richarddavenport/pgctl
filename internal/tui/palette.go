@@ -51,6 +51,7 @@ func newCommandPalette() comp.Palette {
 func (m *Model) commandGroups() []comp.PaletteGroup {
 	return []comp.PaletteGroup{
 		{Name: "Operations", Note: "act on what is selected", Items: m.operationItems()},
+		{Name: "The tool itself", Note: "not the estate", Items: m.toolItems()},
 		{Name: "Reading", Note: "nothing is written", Items: []comp.PaletteItem{
 			{Key: "r", Label: "reload",
 				Hint: "re-list snapshots and re-probe every connection pgctl has reached"},
@@ -190,4 +191,24 @@ func (m *Model) drawCommands(c *comp.Canvas, r comp.Rect) {
 	box := comp.Rect{W: min(96, r.W-4), H: min(rows+2, r.H-2)}
 	box.X, box.Y = r.X+(r.W-box.W)/2, r.Y+(r.H-box.H)/2
 	m.commands.Draw(c, box)
+}
+
+// toolItems is what acts on pgctl rather than on a database.
+//
+// Its own group, because a directory that mixed "restore 6 databases" with
+// "update the binary" would put the most destructive thing in the tool beside
+// the most harmless one and rank them by nothing.
+func (m *Model) toolItems() []comp.PaletteItem {
+	up := comp.PaletteItem{Key: "U", Label: "update pgctl",
+		Hint: "install " + m.updateAvail.Version + " — the tool only, no database is touched"}
+	switch {
+	case m.updateAvail.showable(m.version) && m.updateAvail.Fresh:
+		up.Hint = m.updateAvail.Version + " was released while you were here"
+	case m.updateAvail.showable(m.version):
+	case !m.updateChecked:
+		up.Refused, up.Hint = true, "still asking GitHub what the latest release is"
+	default:
+		up.Refused, up.Hint = true, "pgctl "+m.version+" is the latest release"
+	}
+	return []comp.PaletteItem{up}
 }

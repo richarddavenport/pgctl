@@ -20,4 +20,4 @@ pgctl  pgctl.yaml
 ╭─ [6] Runs ───────────────────╮▏│   filtered 1                                │
 │ nothing run yet              │▏│   no data  1                                │
 ╰──────────────────────────────╯▏╰─────────────────────────────────────────────╯
-n snapshot · a apply · m move · p prune · x delete · / filter · ? keys
+n snapshot · a apply · m move · p prune · x delete · / filter · ? keys    v0.3.0

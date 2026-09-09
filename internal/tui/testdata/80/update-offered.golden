@@ -1,0 +1,23 @@
+pgctl  pgctl.yaml
+╭─ [1] Connections (4) ────────╮▏╭─────────────────────────────────────────────╮
+│ ● prd              protected │▏│ ‹ Overview · Config ›                       │
+│ ● qat                guarded │▏│                                             │
+│ ● local                      │▏│ prd                                         │
+╰──────────────────────────────╯▏│ protected — never a target                  │
+╭─ [2] Databases (3) ──────────╮▏│                                             │
+│ product-development  11.0 GB │▏│ host       prd.example:5432                 │
+│ claims               48.0 MB │▏│ user       dbadmin                          │
+╰──────────────────────────────╯▏│ server     PostgreSQL 17.4                  │
+╭─ [3] Snapshots (1) ──────────╮▏│ databases  3                                │
+│   08-28 03:00     1db 1.9 GB │▏│ total size 31.0 GB                          │
+╰──────────────────────────────╯▏│ checked    just now                         │
+╭─ [4] Restorable ─────────────╮▏│                                             │
+│                              │▏│ SNAPSHOTS                                   │
+╰──────────────────────────────╯▏│   count  1                                  │
+╭─ [5] Sets (1) ───────────────╮▏│   newest 14h ago  prd/product-development/… │
+│ claims                   2+2 │▏│                                             │
+╰──────────────────────────────╯▏│                                             │
+╭─ [6] Runs ───────────────────╮▏│                                             │
+│ nothing run yet              │▏│                                             │
+╰──────────────────────────────╯▏╰─────────────────────────────────────────────╯
+n snapshot · a apply · m move · p prune · / filter · ? keys  v0.3.0 → v0.4.0 new

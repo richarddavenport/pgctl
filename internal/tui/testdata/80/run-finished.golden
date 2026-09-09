@@ -20,4 +20,4 @@ pgctl  pgctl.yaml
 ╭─ [6] Runs (2) ───────────────╮▏│                                             │
 │ ✓ snapshot prd          3:22 │▏│                                      11/11  │
 ╰──────────────────────────────╯▏╰─────────────────────────────────────────────╯
-q stop and leave · ] log · ? keys
+q stop and leave · ] log · ? keys                                         v0.3.0

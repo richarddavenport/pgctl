@@ -560,7 +560,7 @@ func TestHelpListsEveryActionKeyAndScrolls(t *testing.T) {
 			documented[k.Key] = true
 		}
 	}
-	for _, key := range []string{"n", "a", "m", "p", "x", "r", "/", "ctrl+p"} {
+	for _, key := range []string{"n", "a", "m", "p", "x", "r", "U", "/", "ctrl+p"} {
 		if !documented[key] {
 			t.Errorf("the help does not document %q", key)
 		}

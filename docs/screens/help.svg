@@ -76,55 +76,57 @@
 <text x="372.8" y="349.68" textLength="319.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">reload snapshots and re-probe connections</text>
 <text x="770.6" y="349.68" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="279.2" y="365.93" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
+<text x="287" y="365.93" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">U</text>
+<text x="372.8" y="365.93" textLength="397.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">update pgctl itself — shifted, because it is not t…</text>
 <text x="770.6" y="365.93" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="279.2" y="382.18" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
-<text x="287" y="382.18" textLength="70.2" lengthAdjust="spacing" fill="#7f7f7f" font-weight="600" xml:space="preserve">In a form</text>
 <text x="770.6" y="382.18" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="279.2" y="398.43" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
-<text x="287" y="398.43" textLength="23.4" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">↑ ↓</text>
-<text x="372.8" y="398.43" textLength="148.2" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">move between fields</text>
+<text x="287" y="398.43" textLength="70.2" lengthAdjust="spacing" fill="#7f7f7f" font-weight="600" xml:space="preserve">In a form</text>
 <text x="770.6" y="398.43" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="279.2" y="414.68" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
-<text x="287" y="414.68" textLength="23.4" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">← →</text>
-<text x="372.8" y="414.68" textLength="117" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">change a choice</text>
+<text x="287" y="414.68" textLength="23.4" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">↑ ↓</text>
+<text x="372.8" y="414.68" textLength="148.2" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">move between fields</text>
 <text x="770.6" y="414.68" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="279.2" y="430.93" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
-<text x="287" y="430.93" textLength="39" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">space</text>
-<text x="372.8" y="430.93" textLength="46.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">toggle</text>
+<text x="287" y="430.93" textLength="23.4" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">← →</text>
+<text x="372.8" y="430.93" textLength="117" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">change a choice</text>
 <text x="770.6" y="430.93" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="279.2" y="447.18" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
-<text x="287" y="447.18" textLength="39" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">enter</text>
-<text x="372.8" y="447.18" textLength="140.4" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">run it, or plan it</text>
+<text x="287" y="447.18" textLength="39" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">space</text>
+<text x="372.8" y="447.18" textLength="46.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">toggle</text>
 <text x="770.6" y="447.18" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="279.2" y="463.43" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
-<text x="287" y="463.43" textLength="23.4" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">esc</text>
-<text x="372.8" y="463.43" textLength="46.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">cancel</text>
+<text x="287" y="463.43" textLength="39" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">enter</text>
+<text x="372.8" y="463.43" textLength="140.4" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">run it, or plan it</text>
 <text x="770.6" y="463.43" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="279.2" y="479.68" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
+<text x="287" y="479.68" textLength="23.4" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">esc</text>
+<text x="372.8" y="479.68" textLength="46.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">cancel</text>
 <text x="770.6" y="479.68" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="279.2" y="495.93" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
-<text x="287" y="495.93" textLength="109.2" lengthAdjust="spacing" fill="#7f7f7f" font-weight="600" xml:space="preserve">Reading a plan</text>
 <text x="770.6" y="495.93" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="279.2" y="512.17" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
-<text x="287" y="512.17" textLength="23.4" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">↑ ↓</text>
-<text x="372.8" y="512.17" textLength="312" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">scroll it — nothing has been touched yet</text>
+<text x="287" y="512.17" textLength="109.2" lengthAdjust="spacing" fill="#7f7f7f" font-weight="600" xml:space="preserve">Reading a plan</text>
 <text x="770.6" y="512.17" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="279.2" y="528.42" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
-<text x="287" y="528.42" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">w</text>
-<text x="372.8" y="528.42" textLength="343.2" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">widen to the referential closure and re-plan</text>
+<text x="287" y="528.42" textLength="23.4" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">↑ ↓</text>
+<text x="372.8" y="528.42" textLength="312" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">scroll it — nothing has been touched yet</text>
 <text x="770.6" y="528.42" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="279.2" y="544.67" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
-<text x="287" y="544.67" textLength="39" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">enter</text>
-<text x="372.8" y="544.67" textLength="62.4" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">apply it</text>
+<text x="287" y="544.67" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">w</text>
+<text x="372.8" y="544.67" textLength="343.2" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">widen to the referential closure and re-plan</text>
 <text x="770.6" y="544.67" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="279.2" y="560.92" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
-<text x="287" y="560.92" textLength="23.4" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">esc</text>
-<text x="372.8" y="560.92" textLength="124.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">back to the form</text>
+<text x="287" y="560.92" textLength="39" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">enter</text>
+<text x="372.8" y="560.92" textLength="62.4" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">apply it</text>
 <text x="770.6" y="560.92" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="279.2" y="577.17" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
+<text x="287" y="577.17" textLength="23.4" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">esc</text>
+<text x="372.8" y="577.17" textLength="124.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">back to the form</text>
 <text x="770.6" y="577.17" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="279.2" y="593.42" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
-<text x="287" y="593.42" textLength="70.2" lengthAdjust="spacing" fill="#7f7f7f" font-weight="600" xml:space="preserve">↓ 28 more</text>
+<text x="287" y="593.42" textLength="70.2" lengthAdjust="spacing" fill="#7f7f7f" font-weight="600" xml:space="preserve">↓ 29 more</text>
 <text x="770.6" y="593.42" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="279.2" y="609.67" textLength="499.2" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">╰──────────────────────────────────────────────────────────────╯</text>
 </svg>

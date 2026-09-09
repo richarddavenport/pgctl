@@ -131,6 +131,23 @@ type Model struct {
 	// action is the modal form in front of everything, when one is open.
 	action *actionModel
 
+	// updater is the update screen, when it is open, and updateAvail is what it
+	// would install. They are separate because the notice outlives the screen:
+	// the footer says a release exists whether or not anybody has opened it.
+	updater       *updateModel
+	updateAvail   updateNotice
+	updateChecked bool
+
+	// version is the running binary's version, copied from the package
+	// variable at construction rather than read from it.
+	//
+	// A field, because it is drawn in the corner of every frame: while it was
+	// read from the global, a test that needed a local-build version had to
+	// move the global, and the move leaked into ten goldens captured after it
+	// in whatever order the tests ran. A frame's version now belongs to the
+	// model the frame was built from.
+	version string
+
 	// leaving is the question in front of q while an operation is in flight.
 	//
 	// q means leave, everywhere, in every tuikit tool — tuikit decision 42, and
@@ -204,6 +221,7 @@ func New(e *engine.Engine) *Model {
 		loading:   map[string]bool{},
 		setInfo:   map[string]*setSummary{},
 		clock:     time.Now,
+		version:   Version,
 	}
 	m.now = m.clock()
 
@@ -345,7 +363,10 @@ func (m *Model) Now(t time.Time) {
 // Init loads what can be loaded without a network round trip, and starts
 // probing the selected connection in the background.
 func (m *Model) Init() tea.Cmd {
-	return tea.Batch(m.loadSnapshots(), m.probeSelected(), tick())
+	// The update check is fired once here and then on its own slower tick. It
+	// is a courtesy and it fails silently, so nothing downstream waits on it.
+	return tea.Batch(m.loadSnapshots(), m.probeSelected(), tick(),
+		checkUpdate(m.version), updateTick())
 }
 
 // Update handles one message.
@@ -355,6 +376,36 @@ func (m *Model) Update(msg tea.Msg) (app.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		m.SetSize(msg.Width, msg.Height)
+		return m, nil
+
+	case updateTickMsg:
+		return m, tea.Batch(checkUpdate(m.version), updateTick())
+
+	case updateAvailableMsg:
+		// Fresh means it appeared while this session was running. Only then,
+		// and only once the first check has already answered: on the first
+		// answer of a session the release was already out, and calling that
+		// "new" would be telling somebody something became true just now when
+		// it had been true for a week.
+		fresh := m.updateChecked && m.updateAvail.Version != msg.version
+		m.updateChecked = true
+		m.updateAvail = updateNotice{Version: msg.version, Fresh: fresh}
+		return m, nil
+
+	case updateAppliedMsg:
+		if m.updater == nil {
+			// The screen was closed while the download ran, which is allowed.
+			// The outcome is not thrown away silently: it goes to the status
+			// line, where a reload or a refusal also lands.
+			m.status = "update installed — restart pgctl to use it"
+			if msg.err != nil {
+				m.status = "update failed: " + msg.err.Error()
+			}
+			return m, nil
+		}
+		m.updater.stage = updateDone
+		m.updater.err = msg.err
+		m.updater.took = m.now.Sub(m.updater.started)
 		return m, nil
 
 	case tickMsg:
@@ -449,6 +500,8 @@ func (m *Model) capture() app.Handled {
 	switch {
 	case m.leaving:
 		return m.leavingKey
+	case m.updater != nil:
+		return m.updateKey
 	case m.action != nil:
 		return m.actionKey
 	case m.showCommand:
@@ -487,6 +540,15 @@ func (m *Model) screenKey(msg tea.KeyMsg) (tea.Cmd, bool) {
 	case "/":
 		m.filtering = true
 		m.filter.Text, m.filter.Cursor = "", 0
+		return nil, true
+
+	case "U":
+		// Shifted, and deliberately not `u`: every unshifted letter on this
+		// screen acts on the estate — a snapshot, an apply, a prune — and
+		// updating acts on the TOOL. A capital is the cheapest way to say
+		// "this one is a different kind of thing", and it cannot be hit by
+		// somebody reaching for `p`.
+		m.openUpdate()
 		return nil, true
 
 	case "ctrl+p":

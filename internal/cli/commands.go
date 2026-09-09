@@ -18,6 +18,7 @@ import (
 	"github.com/richarddavenport/pgctl/internal/engine"
 	"github.com/richarddavenport/pgctl/internal/snapshot"
 	"github.com/richarddavenport/pgctl/internal/tui"
+	"github.com/richarddavenport/pgctl/internal/update"
 )
 
 func runSnapshot(ctx context.Context, c spec.Call) error {
@@ -482,5 +483,60 @@ func runBrowse(_ context.Context, c spec.Call) error {
 	for _, f := range frames {
 		fmt.Fprintln(c.Out, filepath.Join(dir, f.File)) //nolint:errcheck // as above
 	}
+	return nil
+}
+
+// Version is the running binary's version, set from main. "dev" until it is.
+//
+// A variable rather than a parameter threaded through spec: both front ends
+// need it — the CLI to say what it would replace, the interface to draw it in
+// the corner — and neither is the owner.
+var Version = "dev"
+
+// runUpdate replaces this binary with the latest release.
+//
+// The interface's `U` does the same thing through the same package, so there is
+// one implementation of replacing the binary and one set of refusals. What
+// differs is only how the question gets asked.
+func runUpdate(ctx context.Context, c spec.Call) error {
+	token := update.OptionalToken(ctx)
+	rel, err := update.Latest(ctx, token, c.Flag("repo"))
+	if err != nil {
+		return err
+	}
+
+	if !update.Newer(rel.Version, Version) {
+		fmt.Fprintf(c.Out, "pgctl %s is already the latest release\n", Version) //nolint:errcheck // a closed stdout is the caller's business
+		return nil
+	}
+
+	// A local build is not "out of date": it is usually NEWER than the last
+	// release, and replacing it silently throws away whatever was being worked
+	// on. Say what would happen and let the operator decide.
+	if !update.Released(Version) && !c.Bool("force") {
+		//nolint:errcheck // as above
+		fmt.Fprintf(c.Out, "you are running a local build (%s), and the latest release is %s.\n"+
+			"Installing it would replace your build with an older binary.\n"+
+			"Run `pgctl update --force` if that is what you want.\n",
+			Version, rel.Version)
+		return nil
+	}
+
+	// Homebrew updates fine, but brew's own version record does not move with
+	// it and the next `brew upgrade` undoes this. Say so, then do what was
+	// asked — refusing would be worse than a stale record.
+	if path, brewed := update.HomebrewManaged(); brewed {
+		//nolint:errcheck // as above
+		fmt.Fprintf(c.Err, "note: this binary is Homebrew-managed (%s).\n"+
+			"      `brew upgrade pgctl` is the tidier path — it gets the same build\n"+
+			"      and keeps brew's records in step. Updating in place anyway.\n",
+			path)
+	}
+
+	fmt.Fprintf(c.Out, "updating %s -> %s…\n", Version, rel.Version) //nolint:errcheck // as above
+	if err := update.Apply(ctx, token, rel); err != nil {
+		return err
+	}
+	fmt.Fprintf(c.Out, "updated to pgctl %s\n", rel.Version) //nolint:errcheck // as above
 	return nil
 }

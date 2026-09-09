@@ -1,0 +1,22 @@
+pgctl  pgctl.yaml
+╭─ [1] Connections (4) ────────╮▏╭─────────────────────────────────────────────╮
+│ ● prd              protected │▏│ ‹ Overview · Config ›                       │
+│ ● qat                guarded │▏│                                             │
+│ ● local                      │▏│ prd                                         │
+╰──────────────────────────────╯▏│ protected — never a target                  │
+╭─ [2] D╭──────────────────────────────────────────────────────────────╮       │
+│ produc│ update                                                       │       │
+│ claims│ v0.3.0 → v0.4.0                                              │       │
+╰───────│ Replace this binary with v0.4.0, downloaded from the         │       │
+╭─ [3] S│ releases and checked against their checksums.                │       │
+│   08-2│                                                              │       │
+╰───────│ No database is touched: this updates the tool, not anything  │       │
+╭─ [4] R│ it has snapshotted.                                          │       │
+│       │   enter install · esc cancel                                 │       │
+╰───────╰──────────────────────────────────────────────────────────────╯       │
+╭─ [5] Sets (1) ───────────────╮▏│   newest 14h ago  prd/product-development/… │
+│ claims                   2+2 │▏│                                             │
+╰──────────────────────────────╯▏│                                             │
+╭─ [6] Runs ───────────────────╮▏│                                             │
+│ nothing run yet              │▏│                                             │
+╰──────────────────────────────╯▏╰─────────────────────────────────────────────╯
