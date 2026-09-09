@@ -40,6 +40,8 @@ Nothing else. There is no credential store to set up: pgctl connects the way
 ## Installing
 
 ```sh
+brew install richarddavenport/tap/pgctl
+# or
 curl -fsSL https://raw.githubusercontent.com/richarddavenport/pgctl/master/install.sh | bash
 ```
 
@@ -48,6 +50,16 @@ release's `checksums.txt`, and puts it in `~/.local/bin/pgctl` (`BIN=…` to put
 it elsewhere, `VERSION=v0.2.0` for a specific release). It needs nothing but
 `curl`; if the download 404s it falls back to the `gh` CLI, which is the one
 thing that can tell "no such release" from "not authorised".
+
+**Keeping it current.** `pgctl update` fetches the latest release, verifies it
+against the release checksums, and replaces the binary in place — or press `U`
+in the interface, which does the same thing. The version is drawn in the bottom
+right of every screen with an arrow beside it when there is a newer one, so
+"what am I running" and "is that current" are answered in the same place. A
+Homebrew install is better upgraded with `brew upgrade pgctl`, which gets the
+identical binary and keeps brew's records in step; pgctl says so if you update
+it the other way. What changed in each release is in
+[`CHANGELOG.md`](./CHANGELOG.md).
 
 To change pgctl rather than run it, clone it and `make install`. [tuikit] is a
 tagged public module, so nothing else has to be checked out beside it.

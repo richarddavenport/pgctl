@@ -797,3 +797,80 @@ database would meet the same thing.
 people restore one of, rather than the thing a refresh happens to contain. If
 that happens the run does not go away — it is what the storage already holds —
 it just stops being the default selection.
+
+## 27. The tool updates itself, from its own repository
+
+pgctl is installed as a binary on a laptop, and until now the only way to learn
+that a newer one existed was to remember to look. That is the same problem the
+snapshots had before decision 1: a thing whose state you have to hold in your
+head is a thing that goes stale.
+
+**The version is drawn bottom-right on every screen, and a newer release is an
+arrow beside it** — `v0.1.0 → v0.2.0`, with `new` when it appeared while the
+session was running. The corner is where somebody already looks to answer "what
+am I running", so the answer "not the latest" belongs in the same place. A
+notice anywhere else is read once and then stops being seen.
+
+**`U` installs it, and `pgctl update` does the same thing headlessly**, through
+one `internal/update` package. Both refuse in the same three places, which is
+decision 8's argument about front ends applied to something that is not a
+refusal about data.
+
+### Releases come from this repository, not a mirror
+
+swarmctl publishes to a separate `swarmctl-dist` repo, and has to: its source is
+private, so install and update would otherwise need a GitHub token. pgctl's
+source is public as of decision 26's release preparation, so the mirror would be
+a second place to publish that can half-fail — and swarmctl has been bitten by
+exactly that, with `update` on a new version while Homebrew served the old one.
+
+One repository, `richarddavenport/pgctl`, which is what `release.yml` already
+published to and what `install.sh` already fetched from. This answers the open
+question on issue 7.
+
+### Three departures from the tool this was ported from
+
+**The check uses an optional credential.** swarmctl's returns before making a
+request when there is no token, which is right for a private repo and means its
+notice never appears for anybody who has not run `gh auth login` — most of the
+people who install a release binary. A check every five minutes is 12 requests
+an hour against an unauthenticated limit of 60.
+
+**The download is verified before it replaces anything.** `install.sh` already
+checked the release checksums, with a comment saying a truncated download is the
+failure that produces a binary which runs and then does something surprising.
+The path that replaces the binary you are RUNNING cannot be the laxer of the
+two, so `Apply` reads `checksums.txt`, refuses a mismatch, and leaves the old
+binary untouched. It also writes the replacement beside the target so the final
+rename is atomic: there is no moment at which half a pgctl is on the PATH.
+
+**A local build is never silently replaced.** `make install` stamps a git
+describe, so a developer's binary is usually NEWER than the last release.
+`update.Released` tells a release apart from `v0.1.0-9-gabc1234`, the update
+refuses without `--force`, and the check does not even offer one — an update the
+tool would then decline is worse than saying nothing, and with the version in
+the footer the two would sit side by side contradicting each other.
+
+### What it does not do
+
+**It does not restart.** Replacing the binary of a running process is safe on
+Unix — the kernel holds the open inode — but the running code is still the old
+code, and a screen that claimed otherwise would be lying. So it says the session
+is still the old version and what to do about it.
+
+**It does not update Homebrew's records.** A brew-installed binary updates in
+place, and `brew list --versions` then reports the version it installed until
+the next `brew upgrade` overwrites the file. Both front ends say so and then do
+what was asked: refusing would be worse than a stale record, and the tap and the
+release come from one script, so `brew upgrade` gets the identical binary.
+
+**It does not decide the version or write the notes.** A tag with no
+`CHANGELOG.md` section fails the release, in both the workflow and
+`scripts/release.sh`, because the alternative is generated commit titles — and
+the tool this came from published those, so the real notes were written by hand
+afterwards when they were written at all.
+
+**What would have to change to reverse this.** pgctl becoming something
+installed by a package manager somebody else operates, at which point
+self-update is the wrong layer and the footer's arrow should point at
+`brew upgrade` rather than at itself.

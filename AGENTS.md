@@ -12,7 +12,7 @@ respect the foreign keys between them.
 
 - [`README.md`](./README.md) — what the tool does and how it is configured.
 - [`design/decisions.md`](./design/decisions.md) — **read before changing how
-  anything behaves.** Twenty-six numbered decisions, each with the reasoning that
+  anything behaves.** Twenty-seven numbered decisions, each with the reasoning that
   produced it. A change that contradicts one is not forbidden, but it has to say
   so rather than quietly reverse it — decision 19 supersedes 18 and says which
   part.
@@ -108,6 +108,31 @@ project two bug reports about screens that were already fixed.
 The `*_probe_test.go` files are not assertions but instruments: they render
 frames or print measurements for a person to look at. `render_probe_test.go` and
 `screenshot_probe_test.go` found three layout bugs that assertions had not.
+
+## Releasing it
+
+A release is a tag, and everything else follows from it:
+
+```sh
+# 1. write the CHANGELOG.md section — the release refuses to publish without it
+make notes VERSION=v0.2.0        # prints what would be published, or fails
+# 2. tag it
+git tag -a v0.2.0 -m 'pgctl v0.2.0' && git push origin v0.2.0
+# 3. either let .github/workflows/release.yml do it, or:
+make release-dry VERSION=v0.2.0  # build all four platforms, publish nothing
+make release VERSION=v0.2.0      # publish, then point the Homebrew tap at it
+```
+
+`scripts/release.sh` exists because a release that only a working CI can produce
+is a release you cannot ship on a bad day. It refuses before uploading anything
+— dirty tree, tag not at HEAD, already released, `make check`, missing notes,
+unreachable tap — and the tap check is the one worth knowing about: a release is
+two writes, and discovering the second cannot proceed after the first has landed
+leaves `pgctl update` on a version Homebrew does not serve.
+
+Once published, an existing install picks it up with `pgctl update` or `U` in
+the interface. Decision 27 is why that comes from this repository rather than a
+separate dist one, and what the update deliberately does not do.
 
 ## Keeping up with tuikit
 

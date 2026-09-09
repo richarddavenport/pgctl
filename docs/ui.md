@@ -88,6 +88,24 @@ So a restore is: stand on the target, `[4]`, `a`. The form's target is already
 the connection you are standing on and every database of the snapshot is already
 chosen; `enter` plans it.
 
+## The corner says what you are running
+
+The bottom right of every screen carries the version, and `v0.1.0 → v0.2.0` when
+a newer release exists — with `new` after it if that release appeared while the
+session was open. `U` installs it, in its own group in `ctrl+p` because it acts
+on the TOOL and every unshifted letter on that screen acts on the estate.
+
+The screen it opens says what installing will do and, in the two cases where it
+is not simply an upgrade, why it might not be what you want: a local build from
+`make install` is usually newer than the last release, and a Homebrew-managed
+binary updates fine but leaves brew's records stale. It does not restart
+anything — the running process is still the old binary, and the screen says so
+rather than implying the session was upgraded.
+
+The check runs once at startup and every five minutes after, needs no GitHub
+credential, and fails silently. It is a courtesy notice; an error about it would
+be noise in front of the actual work.
+
 ## What the markers mean
 
 A connection's first column is its reachability, and it is a **shape** as well
