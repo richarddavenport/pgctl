@@ -1,6 +1,6 @@
 pgctl  pgctl.yaml
 ╭─ 1 Connections /zz ──────────╮▏╭─────────────────────────────────────────────╮
-│ none declared                │▏│ ‹ Overview · Databases · Config ›           │
+│ none declared                │▏│ ‹ Overview · Config ›                       │
 ╰──────────────────────────────╯▏│                                             │
 ╭─ 2 Databases ────────────────╮▏│ no connections declared in pgctl.yaml       │
 │ none                         │▏│                                             │

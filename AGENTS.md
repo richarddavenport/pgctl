@@ -11,7 +11,7 @@ respect the foreign keys between them.
 
 - [`README.md`](./README.md) — what the tool does and how it is configured.
 - [`design/decisions.md`](./design/decisions.md) — **read before changing how
-  anything behaves.** Twenty-three numbered decisions, each with the reasoning that
+  anything behaves.** Twenty-four numbered decisions, each with the reasoning that
   produced it. A change that contradicts one is not forbidden, but it has to say
   so rather than quietly reverse it — decision 19 supersedes 18 and says which
   part.

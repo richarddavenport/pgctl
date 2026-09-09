@@ -1,6 +1,6 @@
 pgctl  pgctl.yaml
 ╭─ 1 Connections (1) /q ───────╮▏╭─────────────────────────────────────────────╮
-│ ● qat                guarded │▏│ ‹ Overview · Databases · Config ›           │
+│ ● qat                guarded │▏│ ‹ Overview · Config ›                       │
 ╰──────────────────────────────╯▏│                                             │
 ╭─ 2 Databases (1) ────────────╮▏│ qat                                         │
 │ product-development   9.0 GB │▏│ guarded                                     │

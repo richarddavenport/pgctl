@@ -20,7 +20,11 @@ import (
 // buys, beyond the colour the canvas was stripping: the label column takes what
 // its widest label needs, per block, instead of pgctl's hardcoded fourteen —
 // which every label longer than fourteen quietly pushed out of line.
-func (m *Model) viewConnectionTab(tab, width int) paneContent {
+// The width is not a parameter any more: the Databases tab was the only thing
+// on this pane that laid out a table, and panel 2 already said everything it
+// said. What is left — Overview and Config — is comp.Detail, which wraps to the
+// rect it is given and needs no width from a caller.
+func (m *Model) viewConnectionTab(tab int) paneContent {
 	conn, ok := m.selectedConn()
 	if !ok {
 		return facts(m.detail(comp.Block{
@@ -30,19 +34,7 @@ func (m *Model) viewConnectionTab(tab, width int) paneContent {
 	probe := m.probes[conn.Name]
 
 	switch tab {
-	case 1: // Databases
-		if probe == nil || !probe.Reachable {
-			return facts(m.unreachable(conn.Name, probe))
-		}
-		rows := make([][]comp.Segment, 0, len(probe.Databases))
-		for _, db := range probe.Databases {
-			rows = append(rows, cells(text(db.Name), text(engine.HumanBytes(db.Bytes))))
-		}
-		return paneContent{lines: tableRows(width,
-			[]string{"DATABASE", "SIZE"},
-			[]comp.Column{{Fill: true}, {Width: 12, Right: true}}, rows)}
-
-	case 2: // Config
+	case 1: // Config
 		// A flag that is OFF is muted, so a column of them reads as "these two
 		// are set" rather than as four equal facts. The style is the Fact's,
 		// which is the only place it can be: a Value reaches the canvas as

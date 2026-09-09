@@ -26,10 +26,8 @@
 <text x="357.2" y="57.17" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" font-weight="600" xml:space="preserve">e</text>
 <text x="365" y="57.17" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" font-weight="600" xml:space="preserve">w</text>
 <text x="380.6" y="57.17" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">·</text>
-<text x="388.4" y="57.17" textLength="78" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve"> Databases</text>
-<text x="474.2" y="57.17" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">·</text>
-<text x="482" y="57.17" textLength="54.6" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve"> Config</text>
-<text x="544.4" y="57.17" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">›</text>
+<text x="388.4" y="57.17" textLength="54.6" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve"> Config</text>
+<text x="450.8" y="57.17" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">›</text>
 <text x="1035.8" y="57.17" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="14" y="73.42" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="29.6" y="73.42" textLength="7.8" lengthAdjust="spacing" fill="#00cd00" xml:space="preserve">●</text>

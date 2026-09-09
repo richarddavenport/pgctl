@@ -14,7 +14,13 @@ import (
 func (m *Model) paneTabs() []string {
 	switch m.focus {
 	case panelConnections:
-		return []string{"Overview", "Databases", "Config"}
+		// No Databases tab. Panel 2 IS the list of this connection's databases,
+		// with the same names and the same sizes, and the Overview tab already
+		// counts them — so the tab was the same fact a third time, with a
+		// cursor of its own. Two database lists on screen with two cursors, one
+		// of which meant nothing, is what made "what am I snapshotting?"
+		// unanswerable.
+		return []string{"Overview", "Config"}
 	case panelDatabases:
 		return []string{"Tables", "Rules", "Foreign keys"}
 	case panelSnapshots:
@@ -215,7 +221,7 @@ func facts(d comp.Detail) paneContent { return paneContent{detail: &d} }
 func (m *Model) paneBody(tab, width int) paneContent {
 	switch m.focus {
 	case panelConnections:
-		return m.viewConnectionTab(tab, width)
+		return m.viewConnectionTab(tab)
 	case panelDatabases:
 		return m.viewDatabaseTab(tab, width)
 	case panelSnapshots:

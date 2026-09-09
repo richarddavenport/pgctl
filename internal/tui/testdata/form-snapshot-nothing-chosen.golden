@@ -1,30 +1,30 @@
 pgctl  pgctl.yaml
 ╭─ 1 Connections (3) ───────────╮▏╭────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ ● prd               protected │▏│ ‹ Overview · Databases · Config ›                                                              │
+│ ● prd               protected │▏│ ‹ Overview · Config ›                                                                          │
 │ ● qat                 guarded │▏│                                                                                                │
 │ ✗ scratch                     │▏│ prd                                                                                            │
 ╰───────────────────────────────╯▏│ protected — never a target                                                                     │
 ╭─ 2 Databases (3) ─────────────╮▏│                                                                                                │
 │ product-development   11.0 GB │▏│ host       prd.example:5432                                                                    │
 │ claims                48.0 MB │▏│ user       mbpiadmin                                                                           │
-│ quote                 20.0 GB │▏│ server     PostgreSQL 17.4                                                                     │
-╰───────────────────────────────╯▏│ databases  3                                                                                   │
-╭─ 3 Snapsh╭────────────────────────────────────────────────────────────────────────────────────────────────────────────╮          │
-│   08-27 2│ Take a snapshot of prd/product-development                                                                 │          │
+│ quote    ╭────────────────────────────────────────────────────────────────────────────────────────────────────────────╮          │
+╰──────────│ Take a snapshot of prd                                                                                     │          │
+╭─ 3 Snapsh│                                                                                                            │          │
+│   08-27 2│ Reads the chosen databases and writes a compressed copy. Nothing is written to prd. Choose where they go:  │          │
+╰──────────│ keeping them here, sending them away, or both.                                                             │          │
+╭─ 4 Sets (│                                                                                                            │          │
+│ claims   │  choose at least one destination — space chooses, and more than one is fine                                │          │
 ╰──────────│                                                                                                            │          │
-╭─ 4 Sets (│ Reads product-development and writes a compressed copy. Nothing is written to prd. Choose where it goes:   │          │
-│ claims   │ keeping it here, sending it away, or both.                                                                 │          │
-╰──────────│                                                                                                            │          │
-╭─ 5 Runs ─│  choose at least one destination — space chooses, and more than one is fine                                │          │
-│ nothing r│                                                                                                            │          │
-╰──────────│   Where it goes  nothing chosen yet                                                                        │          │
-           │ ▸ ○   local           keep it on this machine, in .pgctl/snapshots                                         │          │
+╭─ 5 Runs ─│   Databases      1 of 3                                                                                    │          │
+│ nothing r│ ▸ ●   product-development                                                                                  │          │
+╰──────────│   ○   claims                                                                                               │          │
+           │   ○   quote                                                                                                │          │
+           │   Where it goes  nothing chosen yet                                                                        │          │
+           │   ○   local           keep it on this machine, in .pgctl/snapshots                                         │          │
            │   ○   snapshots       upload it to the pg-snapshots container                                              │          │
-           │ nothing chosen yet — enter will refuse                                                                     │          │
-           │   ↑↓ move · space choose · a all · enter take it · esc cancel                                              │          │
+           │ product-development alone                                                                                  │          │
+           │   ↑↓ move · space choose · a all · tab field · enter take it · esc cancel                                  │          │
            ╰────────────────────────────────────────────────────────────────────────────────────────────────────────────╯          │
-                                 ▏│                                                                                                │
-                                 ▏│                                                                                                │
                                  ▏│                                                                                                │
                                  ▏│                                                                                                │
                                  ▏│                                                                                                │

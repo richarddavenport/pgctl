@@ -37,7 +37,7 @@ so moving between panels changes the questions the pane can answer:
 
 | panel | tabs |
 |---|---|
-| Connections | Overview · Databases · Config |
+| Connections | Overview · Config |
 | Databases | Tables · Rules · Foreign keys |
 | Snapshots | Manifest · Tables · Warnings · Drift |
 | Sets | Members · Closure · Load order |
@@ -88,20 +88,33 @@ chosen rather than remember it. `enter` runs it, `esc` cancels, and the keys are
 on the form's own bottom row rather than in the frame's footer: the one place a
 reader looks when a box appears in front of them should say how to leave it.
 
-**A form does not ask what the panels already said.** `n` snapshots the database
-selected in panel 2, on the connection selected in panel 1, and says so in its
-title; `m` moves that same database. Neither offers a list to choose from,
-because the panels are that choice, and two ways to say one thing are two ways
-that can disagree — which is how an earlier version came to offer one server's
-name beside another server's databases. Move the panel cursor to change it.
+**A panel selection is a DEFAULT, not an answer.** `n` opens with panel 2's
+database chosen and every other one on the connection offered beside it; `↑↓`
+moves, `space` chooses, `a` takes all — which is what the nightly does. The
+connection is *not* asked: panel 1 is the only statement of which server this
+is, and the field that used to ask it once offered one server's name beside
+another server's database names.
 
-**It does ask where the snapshot goes**, because no panel says that: the config
-declares the destinations and the answer differs from one run to the next. One
-toggle per destination, **nothing pre-ticked**, and `enter` with none ticked is
-a refusal rather than a default — a snapshot is gigabytes and a shared account
-is not somewhere to end up by accident. Ticking a remote and *not* `local` is
-the "do not fill my laptop" answer: it uploads, and then deletes the local copy.
-A config with no remotes has one destination and the form asks nothing at all.
+That distinction was learned rather than designed. For a while the form asked
+nothing and took panel 2's cursor as the answer, and in use it was
+unanswerable — there were **two** lists of databases on screen, panel 2 and the
+Connections pane's own Databases tab, each with its own cursor, and `n` acted on
+one while the reader was looking at the other. The duplicate tab is gone, and
+the form asks anyway, because a snapshot covering several databases is a thing
+people want and no single cursor can say it.
+
+`m` still moves one database, from the panel. A move drops and reloads a
+database on the target, so six at once is an hour of somebody's environment
+being unusable.
+
+**It also asks where the snapshot goes**, because no panel says that: the config
+declares the destinations and the answer differs from one run to the next.
+Nothing is pre-chosen, and `enter` with nothing chosen is a refusal rather than
+a default — a snapshot is gigabytes and a shared account is not somewhere to end
+up by accident. Choosing a remote and *not* `local` is the "do not fill my
+laptop" answer: it uploads, then deletes the local copy, and the row under the
+list says so. A config with no remotes has one destination and is not asked
+about.
 
 The cost is that the interface takes one database at a time. `pgctl snapshot
 --from <conn> --to-storage <where>` with no `--db` still covers every declared

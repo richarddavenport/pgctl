@@ -1,6 +1,6 @@
 pgctl  pgctl.yaml
 ╭─ 1 Connections (3) ──────────╮▏╭─────────────────────────────────────────────╮
-│ ● prd              protected │▏│ ‹ Overview · Databases · Config ›           │
+│ ● prd              protected │▏│ ‹ Overview · Config ›                       │
 │ ● qat                guarded │▏│                                             │
 │ ╭─ run ────────────────────────────────────────────────────────────────────╮ │
 ╰─│> p                                                                       │ │

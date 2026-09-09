@@ -283,8 +283,18 @@ func (m *Model) drawFields(c *comp.Canvas, r comp.Rect) {
 
 			rows := m.multiRows(f)
 			if h := min(len(rows), r.Bottom()-y+1); h >= 1 {
+				focused := i == a.cursor
 				m.multiList.Select(f.choice)
-				m.multiList.Focused = i == a.cursor
+				m.multiList.Focused = focused
+				// The marker only where the keys act. comp.List draws it
+				// against its cursor row whether or not the list is focused, so
+				// a form with two multi-selects showed two ▸ and a reader had
+				// to guess which one their arrows were moving — the same
+				// ambiguity as the field-row marker, one level along.
+				m.multiList.Marker = "  "
+				if focused {
+					m.multiList.Marker = "▸ "
+				}
 				m.multiList.Draw(c, comp.Rect{X: r.X, Y: y, W: r.W, H: h}, rows)
 				y += h
 			}
@@ -377,9 +387,33 @@ func (m *Model) actionHelp() string {
 		return f.reason
 	}
 	if f.kind == fieldMulti {
-		return m.destinationConsequence()
+		// What the current selection MEANS, per field, in the row that would
+		// otherwise repeat the keys. The keys are on the hint line already.
+		if f.key == "destinations" {
+			return m.destinationConsequence()
+		}
+		return databaseConsequence(m.chosenDatabases(), len(f.options))
 	}
 	return f.help
+}
+
+// databaseConsequence is what the chosen databases add up to.
+//
+// It says the SIZE of the thing, not the count, because that is the fact a
+// reader is deciding on: `product-development` is 71 GB on the real server and
+// the other five together are under 4. "3 of 6" says nothing about the twenty
+// minutes.
+func databaseConsequence(chosen []string, total int) string {
+	switch {
+	case len(chosen) == 0:
+		return "nothing chosen yet — enter will refuse"
+	case len(chosen) == total:
+		return "every database on this connection, in one snapshot set"
+	case len(chosen) == 1:
+		return chosen[0] + " alone"
+	default:
+		return strings.Join(chosen, ", ") + " — one snapshot set, one timestamp"
+	}
 }
 
 // destinationConsequence is what the current selection MEANS, in the row that

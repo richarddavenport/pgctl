@@ -255,6 +255,32 @@ func filtered[T any](items []T, focused bool, filter string, name func(T) string
 	return out
 }
 
+// databaseNames is what the selected connection actually has, which is what the
+// snapshot form offers.
+//
+// From the PROBE, not from the config: the config no longer claims to know what
+// databases exist (decision 8a), so an unreachable connection has nothing to
+// offer and says so rather than offering a list that might be wrong.
+//
+// Unfiltered by the / filter, deliberately. The filter narrows the panel a
+// reader is looking through; a form built from it would silently offer three of
+// six databases because somebody had typed "cl" a minute ago.
+func (m *Model) databaseNames() []string {
+	conn, ok := m.selectedConn()
+	if !ok {
+		return nil
+	}
+	p := m.probes[conn.Name]
+	if p == nil || !p.Reachable {
+		return nil
+	}
+	out := make([]string, 0, len(p.Databases))
+	for _, db := range p.Databases {
+		out = append(out, db.Name)
+	}
+	return out
+}
+
 // liveKey identifies a cached live table listing.
 func liveKey(connection, database string) string { return connection + "/" + database }
 

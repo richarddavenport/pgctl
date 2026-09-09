@@ -633,3 +633,54 @@ nothing.
 a config format — a `sops:` block, key paths, a file type — would be decision 8
 happening again, and the answer then is the same: it is not pgctl's job to know
 how a team encrypts a file.
+
+## 24. A panel selection is a default, not an answer
+
+The forms used to ask which connection AND which database, and decision-shaped
+reasoning removed both in one day: the panels are a hierarchy, a row of
+Connections with a database selected under it is already a complete statement of
+what an operation is about, and a form that asks again is a second way to say
+one thing that can disagree with the first. The connection field had in fact
+disagreed — it offered one server's name beside another server's database names.
+
+**That was right about the connection and wrong about the database**, and the
+evidence was a person using it and not being able to answer "what am I
+snapshotting?":
+
+> I think I know why I'm so confused about what I'm snapshotting… I am on
+> claims, but in the other pane I'm on product-development but the modal reads
+> "Take a snapshot of prd/claims". I don't know what the pane that is labeled
+> Overview · Databases · Config, that pane's "Databases" is for.
+
+Two causes, and only the second is the interesting one.
+
+**The duplicate list.** The Connections pane had a Databases tab listing the
+connection's databases with their sizes — which is exactly what panel 2 is, and
+what the Overview tab already counts. Three statements of one fact, two of them
+with cursors, and the cursor that meant something was not the one in the pane a
+reader was working in. The tab is deleted. Nothing was lost: `databases 6` and
+`total size` are on Overview, and the sizes are in panel 2.
+
+**The missing question.** Even with one list, taking the cursor as the answer
+cannot express a snapshot of several databases — and `pgctl snapshot --from prd`
+with no `--db` has always covered every declared database, so the interface was
+strictly less able than the CLI it is a peer of. The nightly's whole shape is
+"every database, one timestamp".
+
+So the form asks, with the panel's selection **chosen by default**. That keeps
+what the panel-decides design got right — looking at one database is a statement
+of intent, and six is rarely what somebody means when they were looking at one —
+and gives up nothing: `a` takes all, and the run is one snapshot set with one
+timestamp, which is what `<env>/latest` has to be able to mean.
+
+**The connection stays unasked**, and the asymmetry is the decision rather than
+an inconsistency. Panel 1 has one cursor, there is nothing to combine, and the
+failure it prevents actually happened. Databases have a plural answer; a
+connection does not.
+
+**What this cost.** The multi-select comp does not have (tuikit 49), for the
+second time in one tool — deleted with the connection field in the morning,
+rebuilt for destinations in the afternoon, and now serving both. `m` is left
+asking for one database from the panel, deliberately: a move drops and reloads
+the target, and six at once is an hour of an environment being unusable. If that
+turns out to be wrong in use, it should change the way this did.

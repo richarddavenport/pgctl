@@ -185,54 +185,97 @@ func newText(key, label, help string) formField {
 	return formField{key: key, label: label, kind: fieldText, help: help}
 }
 
-// openSnapshot builds the snapshot form: WHERE the snapshot should go, and
-// nothing else.
+// openSnapshot builds the snapshot form: WHICH databases, and WHERE they go.
 //
-// Which database is not a question, and that is the same argument
-// actionModel.conn makes one level up. The panels are a hierarchy: a row of
-// Connections with a database selected under it is already a complete statement
-// of what this is about, and a form that asked again would be a second way to
-// say the same thing — two ways that can disagree, which is how the connection
-// field came to offer one server's name beside another server's databases.
+// Both are asked, and the panel selection is the DEFAULT rather than the answer.
+// That is a reversal, recorded as decision 24, and the reasoning it reverses was
+// good: the panels are a hierarchy, a form that asks what a panel already said
+// is a second way to say one thing, and two ways can disagree.
 //
-// Where it GOES is the opposite case: no panel says it, the config declares
-// several possibilities, and the answer is different from one run to the next —
-// this one goes to the shared account so a colleague can restore it, the next
-// stays here because it is a test. So it is asked, every time, with nothing
-// pre-ticked.
+// What broke it in use is that "which database" was NOT unambiguously said. Two
+// lists of databases were on screen — panel 2, and the Connections pane's own
+// Databases tab — each with its own cursor, and only one of them meant anything:
+// `n` acted on panel 2's `claims` while the pane's cursor sat on
+// `product-development` and the modal said `prd/claims`. The duplicate tab is
+// gone, and the form asks anyway, because a snapshot covering SEVERAL databases
+// is a thing people want and no single cursor can express it.
 //
-// What it costs: the TUI takes one database at a time. `pgctl snapshot --from
-// <conn>` with no --db still covers every declared database, which is what the
-// nightly runs.
+// The connection is still not asked. That half of the principle holds: panel 1
+// is the only statement of which server this is, there is nothing to combine,
+// and the failure it prevents is real — the connection field once offered one
+// server's name beside another server's database names.
 func (m *Model) openSnapshot() {
 	conn, ok := m.selectedConn()
 	if !ok {
 		m.err = fmt.Errorf("no connections declared in %s", m.cfg.Source)
 		return
 	}
-	db, ok := m.selectedDatabase()
-	if !ok {
+	databases := m.databaseNames()
+	if len(databases) == 0 {
 		m.err = m.noDatabase(conn)
 		return
 	}
 
-	explain := "Reads " + db.Name + " and writes a compressed copy. " +
+	fields := []formField{m.databaseField(databases)}
+	explain := "Reads the chosen databases and writes a compressed copy. " +
 		"Nothing is written to " + conn.Name + "."
-	fields := m.destinationFields()
-	if len(fields) == 0 {
-		explain += " No storage remotes are declared, so it stays on this machine."
+	if dests := m.destinationFields(); len(dests) > 0 {
+		fields = append(fields, dests...)
+		explain += " Choose where they go: keeping them here, sending them away, or both."
 	} else {
-		explain += " Choose where it goes: keeping it here, sending it away, or both."
+		explain += " No storage remotes are declared, so they stay on this machine."
 	}
 
 	m.action = &actionModel{
-		kind:     actionSnapshot,
-		conn:     conn.Name,
-		database: db.Name,
-		title:    "Take a snapshot of " + conn.Name + "/" + db.Name,
-		explain:  explain,
-		fields:   fields,
+		kind:    actionSnapshot,
+		conn:    conn.Name,
+		title:   "Take a snapshot of " + conn.Name,
+		explain: explain,
+		fields:  fields,
 	}
+}
+
+// databaseField is the multi-select of what to cover.
+//
+// Defaulted to the database under panel 2's cursor, which is the whole of what
+// the old "the panel decides" design got right: looking at one database is a
+// statement of intent, and six is rarely what somebody means when they were
+// looking at one. `a` takes all of them, which is what the nightly does and what
+// `pgctl snapshot --from prd` with no --db has always done.
+func (m *Model) databaseField(databases []string) formField {
+	f := formField{
+		key:      "databases",
+		label:    "Databases",
+		kind:     fieldMulti,
+		options:  databases,
+		selected: map[int]bool{},
+	}
+	if db, ok := m.selectedDatabase(); ok {
+		for i, name := range databases {
+			if name == db.Name {
+				f.selected[i], f.choice = true, i
+			}
+		}
+	}
+	return f
+}
+
+// chosenDatabases is the databases chosen on the form.
+func (m *Model) chosenDatabases() []string {
+	if m.action == nil {
+		return nil
+	}
+	f := m.action.field("databases")
+	if f == nil {
+		return nil
+	}
+	var out []string
+	for i, name := range f.options {
+		if f.selected[i] {
+			out = append(out, name)
+		}
+	}
+	return out
 }
 
 // destinationFields is the one field a snapshot form has: where it goes.
@@ -398,6 +441,11 @@ func (m *Model) openMove() {
 		return
 	}
 
+	// One database, from panel 2, and NOT a multi-select like the snapshot
+	// form's. A move drops and reloads a database on the target: doing six at
+	// once is an hour of somebody's environment being unusable, and the panel
+	// cursor is a fine way to say which one. Ask if this turns out to be wrong
+	// in use, the way the snapshot form's did.
 	db, hasDB := m.selectedDatabase()
 	if !hasDB {
 		m.err = m.noDatabase(from)

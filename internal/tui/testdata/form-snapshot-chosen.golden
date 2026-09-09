@@ -1,6 +1,6 @@
 pgctl  pgctl.yaml
 ╭─ 1 Connections (3) ───────────╮▏╭────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ ● prd               protected │▏│ ‹ Overview · Databases · Config ›                                                              │
+│ ● prd               protected │▏│ ‹ Overview · Config ›                                                                          │
 │ ● qat                 guarded │▏│                                                                                                │
 │ ✗ scratch                     │▏│ prd                                                                                            │
 ╰───────────────────────────────╯▏│ protected — never a target                                                                     │
@@ -8,22 +8,22 @@ pgctl  pgctl.yaml
 │ product-development   11.0 GB │▏│ host       prd.example:5432                                                                    │
 │ claims                48.0 MB │▏│ user       mbpiadmin                                                                           │
 │ quote                 20.0 GB │▏│ server     PostgreSQL 17.4                                                                     │
-╰───────────────────────────────╯▏│ databases  3                                                                                   │
-╭─ 3 Snapshots (1) ─────────────╮▏│ total size 31.0 GB                                                                             │
-│   08-27 2╭────────────────────────────────────────────────────────────────────────────────────────────────────────────╮          │
-╰──────────│ Take a snapshot of prd/product-development                                                                 │          │
-╭─ 4 Sets (│                                                                                                            │          │
-│ claims   │ Reads product-development and writes a compressed copy. Nothing is written to prd. Choose where it goes:   │          │
-╰──────────│ keeping it here, sending it away, or both.                                                                 │          │
-╭─ 5 Runs ─│                                                                                                            │          │
-│ nothing r│   Where it goes  1 of 2                                                                                    │          │
-╰──────────│   ○   local           keep it on this machine, in .pgctl/snapshots                                         │          │
-           │ ▸ ●   snapshots       upload it to the pg-snapshots container                                              │          │
-           │ uploaded, and then the copy here is deleted                                                                │          │
-           │   ↑↓ move · space choose · a all · enter take it · esc cancel                                              │          │
+╰──────────╭────────────────────────────────────────────────────────────────────────────────────────────────────────────╮          │
+╭─ 3 Snapsh│ Take a snapshot of prd                                                                                     │          │
+│   08-27 2│                                                                                                            │          │
+╰──────────│ Reads the chosen databases and writes a compressed copy. Nothing is written to prd. Choose where they go:  │          │
+╭─ 4 Sets (│ keeping them here, sending them away, or both.                                                             │          │
+│ claims   │                                                                                                            │          │
+╰──────────│   Databases      2 of 3                                                                                    │          │
+╭─ 5 Runs ─│   ●   product-development                                                                                  │          │
+│ nothing r│ ▸ ●   claims                                                                                               │          │
+╰──────────│   ○   quote                                                                                                │          │
+           │   Where it goes  nothing chosen yet                                                                        │          │
+           │   ○   local           keep it on this machine, in .pgctl/snapshots                                         │          │
+           │   ○   snapshots       upload it to the pg-snapshots container                                              │          │
+           │ product-development, claims — one snapshot set, one timestamp                                              │          │
+           │   ↑↓ move · space choose · a all · tab field · enter take it · esc cancel                                  │          │
            ╰────────────────────────────────────────────────────────────────────────────────────────────────────────────╯          │
-                                 ▏│                                                                                                │
-                                 ▏│                                                                                                │
                                  ▏│                                                                                                │
                                  ▏│                                                                                                │
                                  ▏│                                                                                                │

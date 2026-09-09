@@ -27,7 +27,13 @@ func (m *Model) submitAction() tea.Cmd {
 	a := m.action
 	switch a.kind {
 	case actionSnapshot:
-		connection, database := a.conn, a.database
+		connection := a.conn
+		databases := m.chosenDatabases()
+		if len(databases) == 0 {
+			a.err = fmt.Errorf("choose at least one database — space chooses, " +
+				"and a takes all of them")
+			return nil
+		}
 		destinations := m.chosenDestinations()
 		if len(destinations) == 0 {
 			// No default, so no answer is an unanswered question rather than
@@ -40,19 +46,26 @@ func (m *Model) submitAction() tea.Cmd {
 		m.action = nil
 		e := m.engine
 		explain := fmt.Sprintf("Copying %s from %s to %s.",
-			database, connection, strings.Join(destinations, " and "))
-		// No total: how many tables a dump will find is not known until
-		// pg_dump has read the catalog. See runRecord.total.
-		return m.start("snapshot "+connection+"/"+database, explain, 0,
+			strings.Join(databases, ", "), connection, strings.Join(destinations, " and "))
+		// No total: how many tables a dump will find is not known until pg_dump
+		// has read the catalog. See runRecord.total.
+		return m.start(snapshotKind(connection, databases), explain, 0,
 			func(ctx context.Context, report engine.Reporter) (string, error) {
-				if _, err := e.Dump(ctx, engine.DumpRequest{
-					Connection: connection, Database: database,
-					At: nowFunc(), Destinations: destinations,
-				}, report); err != nil {
-					return "", err
+				// ONE timestamp for every database in the run, so a snapshot of
+				// six databases is one set rather than six unrelated ones —
+				// which is what `<env>/latest` has to be able to mean.
+				at := nowFunc()
+				for _, db := range databases {
+					if _, err := e.Dump(ctx, engine.DumpRequest{
+						Connection: connection, Database: db,
+						At: at, Destinations: destinations,
+					}, report); err != nil {
+						return "", err
+					}
 				}
 				return fmt.Sprintf("snapshotted %s from %s to %s",
-					database, connection, strings.Join(destinations, " and ")), nil
+					strings.Join(databases, ", "), connection,
+					strings.Join(destinations, " and ")), nil
 			})
 
 	case actionApply:
@@ -207,6 +220,18 @@ func (m *Model) executePlan(plan *engine.Plan) tea.Cmd {
 			return fmt.Sprintf("applied %s to %s",
 				plan.Snapshot.ID, plan.Target.Conn.Name), nil
 		})
+}
+
+// snapshotKind names the run for the Runs panel, which is 28 columns wide.
+//
+// One database is named; several are counted. "snapshot prd/claims,
+// product-development, quote" truncates to "snapshot prd/claims, produc" and
+// reads as a snapshot of something called that.
+func snapshotKind(connection string, databases []string) string {
+	if len(databases) == 1 {
+		return "snapshot " + connection + "/" + databases[0]
+	}
+	return fmt.Sprintf("snapshot %s (%d dbs)", connection, len(databases))
 }
 
 // nowFunc is a seam for tests.

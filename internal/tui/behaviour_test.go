@@ -258,14 +258,20 @@ func TestAGuardedTargetIsNotAppliedWithoutItsName(t *testing.T) {
 	}
 }
 
-// The forms do not ask what the panels already said.
+// The snapshot form asks WHICH databases, defaulted to the panel's.
 //
-// Which connection and which database are the panel selections, and a form that
-// asked again would be a second way to say the same thing — two ways that can
-// disagree. The connection field went first (it offered one server's name beside
-// another server's databases); the databases multi-select went the same way, and
-// this is what holds both closed.
-func TestTheSnapshotFormDoesNotAskWhatThePanelsSaid(t *testing.T) {
+// A reversal, recorded as decision 24. The form used to take panel 2's cursor
+// as the answer, and in use that was unanswerable: two lists of databases were
+// on screen with two cursors — panel 2, and the Connections pane's own
+// Databases tab — and `n` acted on one while the reader was looking at the
+// other. The duplicate tab is gone AND the form asks, because a snapshot
+// covering several databases is a thing people want and no single cursor says
+// it.
+//
+// The connection is still not asked: panel 1 is the only statement of which
+// server this is, and the field that used to ask offered one server's name
+// beside another server's database names.
+func TestTheSnapshotFormDefaultsToThePanelsDatabase(t *testing.T) {
 	m := loadedModel(t)
 	press(t, m, "2", "down")
 	db, _ := m.selectedDatabase()
@@ -277,26 +283,42 @@ func TestTheSnapshotFormDoesNotAskWhatThePanelsSaid(t *testing.T) {
 	if m.action == nil {
 		t.Fatal("n did not open the snapshot form")
 	}
-	for _, key := range []string{"connection", "databases"} {
-		if f := m.action.field(key); f != nil {
-			t.Errorf("the snapshot form asks for %q; the panel selection is that", key)
-		}
+	if f := m.action.field("connection"); f != nil {
+		t.Error("the snapshot form asks for a connection; panel 1 is that")
 	}
-	if m.action.conn == "" || m.action.database != "claims" {
-		t.Errorf("the form recorded %q/%q, want the panel's prd/claims",
-			m.action.conn, m.action.database)
-	}
-	// And it says so, because a form that acts on something it does not name is
-	// worse than one that asks.
-	if !strings.Contains(m.action.title, "claims") {
-		t.Errorf("title = %q, does not name the database it will snapshot", m.action.title)
+	if m.action.conn != "prd" {
+		t.Errorf("the form recorded connection %q", m.action.conn)
 	}
 
-	// Moving the panel cursor is how you change it, so the next form is about
-	// the next database.
+	f := m.action.field("databases")
+	if f == nil {
+		t.Fatal("the snapshot form does not ask which databases")
+	}
+	if len(f.options) != len(m.databaseNames()) {
+		t.Errorf("the form offers %d databases, want all %d the server has",
+			len(f.options), len(m.databaseNames()))
+	}
+	// Defaulted to the panel's, and to that one alone: looking at one database
+	// is a statement of intent, and six is rarely what somebody means.
+	if got := m.chosenDatabases(); len(got) != 1 || got[0] != "claims" {
+		t.Errorf("databases = %v, want just the panel's claims", got)
+	}
+	// And the cursor starts on it, so space unchooses what you were looking at
+	// rather than something else.
+	if f.options[f.choice] != "claims" {
+		t.Errorf("the cursor starts on %q, want the panel's claims", f.options[f.choice])
+	}
+
+	// Moving the panel cursor moves the default.
 	press(t, m, "esc", "up", "n")
-	if m.action.database != "product-development" {
-		t.Errorf("after moving the cursor the form is about %q", m.action.database)
+	if got := m.chosenDatabases(); len(got) != 1 || got[0] != "product-development" {
+		t.Errorf("databases = %v after moving the cursor", got)
+	}
+
+	// `a` takes all of them, which is what the nightly does.
+	press(t, m, "a")
+	if got := m.chosenDatabases(); len(got) != len(m.databaseNames()) {
+		t.Errorf("`a` chose %v, want every database", got)
 	}
 }
 
@@ -344,13 +366,13 @@ func TestTheSnapshotFormAsksWhereWithNoDefault(t *testing.T) {
 		t.Fatal("n did not open the snapshot form")
 	}
 
-	// ONE field — a choice with every destination in it, local first, in config
-	// order. Not a toggle each: "local no / snapshots yes" is two settings a
-	// reader has to combine themselves, and this is one question.
-	if len(m.action.fields) != 1 || m.action.fields[0].kind != fieldMulti {
-		t.Fatalf("%d fields, want one multi-select", len(m.action.fields))
+	// ONE field for the destinations — a choice with every one in it, local
+	// first, in config order. Not a toggle each: "local no / snapshots yes" is
+	// two settings a reader has to combine themselves, and this is one question.
+	f := m.action.field("destinations")
+	if f == nil || f.kind != fieldMulti {
+		t.Fatal("the form does not offer the destinations as one choice")
 	}
-	f := m.action.fields[0]
 	if strings.Join(f.options, ",") != "local,snapshots" {
 		t.Errorf("options = %v, want every destination, local first", f.options)
 	}
@@ -359,7 +381,9 @@ func TestTheSnapshotFormAsksWhereWithNoDefault(t *testing.T) {
 	}
 
 	// Enter with nothing chosen is a refusal that says how to answer, and the
-	// form stays open on it.
+	// form stays open on it. The cursor goes to the destinations field first,
+	// since the databases field is answered by default.
+	press(t, m, "tab")
 	press(t, m, "enter")
 	if m.active != nil {
 		t.Fatal("enter started a snapshot with no destination")
@@ -393,10 +417,10 @@ func TestTheSnapshotFormAsksNothingWhenThereIsOneDestination(t *testing.T) {
 	m.cfg.Storage.Remotes = nil
 
 	press(t, m, "n")
-	if len(m.action.fields) != 0 {
-		t.Errorf("%d fields offered for a single destination", len(m.action.fields))
+	if f := m.action.field("destinations"); f != nil {
+		t.Error("a destination was asked for when there is only one place to go")
 	}
-	if !strings.Contains(m.action.explain, "stays on this machine") {
+	if !strings.Contains(m.action.explain, "stay on this machine") {
 		t.Errorf("explain = %q, does not say where it goes", m.action.explain)
 	}
 	if got := m.chosenDestinations(); len(got) != 1 || got[0] != config.LocalStorage {

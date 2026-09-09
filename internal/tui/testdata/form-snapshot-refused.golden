@@ -1,6 +1,6 @@
 pgctl  pgctl.yaml
 ╭─ 1 Connections (3) ───────────╮▏╭────────────────────────────────────────────────╭──────────────────────────────────────────────╮╮
-│ ● prd               protected │▏│ ‹ Overview · Databases · Config ›              │refused                                       ││
+│ ● prd               protected │▏│ ‹ Overview · Config ›                          │refused                                       ││
 │ ● qat                 guarded │▏│                                                │                                              ││
 │ ✗ scratch                     │▏│ scratch                                        │scratch is unreachable, so there is no        ││
 ╰───────────────────────────────╯▏│                                                │database to act on: dial tcp 127.0.0.1:5432:  ││
