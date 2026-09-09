@@ -118,10 +118,19 @@ A release is a tag, and everything else follows from it:
 make notes VERSION=v0.2.0        # prints what would be published, or fails
 # 2. tag it
 git tag -a v0.2.0 -m 'pgctl v0.2.0' && git push origin v0.2.0
-# 3. either let .github/workflows/release.yml do it, or:
+# 3. push the tag and let .github/workflows/release.yml publish it, then:
+make tap VERSION=v0.2.0          # point Homebrew at what CI published
+# or do both from here, for the days GitHub has no runners:
 make release-dry VERSION=v0.2.0  # build all four platforms, publish nothing
-make release VERSION=v0.2.0      # publish, then point the Homebrew tap at it
+make release VERSION=v0.2.0      # publish, then point the tap at it
 ```
+
+**Either route, the tap is a separate step that has to happen.** The workflow
+publishes binaries and knows nothing about Homebrew; `release.sh` does both and
+then refuses to run for a version already published. So taking the ordinary
+route — push the tag, let CI do it — and stopping there leaves the tap on the
+previous version with nothing on screen to say so. `make tap` is that step, and
+`scripts/release.sh` calls the same script.
 
 `scripts/release.sh` exists because a release that only a working CI can produce
 is a release you cannot ship on a bad day. It refuses before uploading anything

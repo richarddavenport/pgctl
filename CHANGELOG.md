@@ -12,6 +12,52 @@ each entry rather than assumed.
 
 ## [Unreleased]
 
+## [0.2.0]
+
+pgctl can now tell you it is out of date, and fix that itself.
+
+### Added
+
+- **The version is in the bottom right of every screen**, with `→ v0.3.0`
+  beside it when a newer release exists and `new` if it appeared while the
+  session was open. The corner is where you already look to answer "what am I
+  running", so "is that current" is answered in the same place.
+- **`U` installs it**, from a screen that says what will happen first. It does
+  not restart anything: replacing a running binary is safe, but the running code
+  is still the old code, so the screen tells you to quit and start again rather
+  than implying the session was upgraded. It is in `ctrl+p` too, in its own
+  group — every other letter on that screen acts on your databases and this one
+  acts on the tool.
+- **`pgctl update`** does the same thing headlessly, through the same code, so
+  both refuse in the same places. `--force` is needed to replace a local build
+  with a release, because a build from `make install` is usually newer than the
+  last release and replacing it silently throws away what you were working on.
+- **Homebrew**: `brew install richarddavenport/tap/pgctl`. The formula is
+  generated from the published release, so `brew upgrade` and `pgctl update` get
+  the identical binary. Updating a brew-installed pgctl in place works but
+  leaves brew's records stale until the next `brew upgrade`; pgctl says so and
+  then does what you asked.
+- **This file.** A release now refuses to publish without a section for its tag,
+  so release notes describe what changed rather than listing commit titles.
+
+### Changed
+
+- `install.sh` needs only `curl` — it fetches the release directly and falls
+  back to the `gh` CLI only for the one case that requires it. Verified against
+  a real release rather than reasoned about.
+- Every update is checked against the release's `checksums.txt` before anything
+  is replaced, and a mismatch leaves the existing binary untouched. The
+  replacement is written beside the target so the final rename is atomic: there
+  is no moment at which half a pgctl is on your PATH.
+- The update check needs no GitHub credential and fails silently. It is a
+  courtesy notice; an error about it would be noise in front of your actual work.
+
+### Note for anyone on 0.1.0
+
+0.1.0 has no `update` command, so this one release has to be installed the way
+you installed that one — `install.sh`, or `brew install`. From 0.2.0 onward,
+`pgctl update` and `U` are enough.
+
 ## [0.1.0]
 
 The first release. pgctl moves PostgreSQL data between environments: nightly
@@ -66,5 +112,6 @@ are libpq DSNs and credentials come from `~/.pgpass` or `~/.pg_service.conf`.
 Once installed, `pgctl update` fetches the next release and `U` in the
 interface does the same thing.
 
-[Unreleased]: https://github.com/richarddavenport/pgctl/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/richarddavenport/pgctl/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/richarddavenport/pgctl/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/richarddavenport/pgctl/releases/tag/v0.1.0

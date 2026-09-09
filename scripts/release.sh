@@ -160,13 +160,9 @@ gh release create "$version" "$out"/pgctl-* "$out/checksums.txt" --repo "$repo" 
 # unnoticed.
 # ---------------------------------------------------------------------------
 say "updating the tap"
-tap=$(mktemp -d)
-git clone -q "$tap_url" "$tap"
-"$repo_root/scripts/update-tap.sh" "$version" "$tap"
-git -C "$tap" add Formula/pgctl.rb
-git -C "$tap" commit -qm "pgctl $version"
-git -C "$tap" push -q
-rm -rf "$tap"
+# The same script `make tap` runs, so the two release routes cannot leave the
+# tap in different states.
+"$repo_root/scripts/tap.sh" "$version"
 
 say "done"
 echo "  release: https://github.com/$repo/releases/tag/$version"

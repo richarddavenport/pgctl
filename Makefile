@@ -18,7 +18,7 @@ LAB_IMAGE ?= postgres:17
 LAB_PORT  ?= 55432
 LAB_NAME  ?= pgctl-lab
 
-.PHONY: install build test test-all lint check frames review watch lab-up lab-down release release-dry notes help
+.PHONY: install build test test-all lint check frames review watch lab-up lab-down release release-dry notes tap help
 
 ## install: build the working tree and replace the pgctl on your PATH
 install:
@@ -93,6 +93,10 @@ release-dry:
 ## release: cut a release from this checkout — the tag must already exist
 release:
 	@scripts/release.sh "$(VERSION)"
+
+## tap: point Homebrew at an already-published release (after the CI workflow)
+tap:
+	@scripts/tap.sh "$(VERSION)"
 
 ## help: list these targets
 help:

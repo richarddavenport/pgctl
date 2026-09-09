@@ -5,6 +5,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/richarddavenport/tuikit/comp"
 	"github.com/richarddavenport/tuikit/harness"
 )
 
@@ -209,6 +210,30 @@ func TestThePaletteOffersTheUpdateAndRefusesWithTheReason(t *testing.T) {
 	// And its key is the key, so the directory cannot drift from the keyboard.
 	if item.Key != "U" {
 		t.Errorf("key = %q, want U", item.Key)
+	}
+}
+
+// The version survives a terminal much wider or narrower than the goldens.
+//
+// The goldens are 132 and 80 columns. A real terminal is whatever somebody has
+// dragged their window to — 250 columns in the report that prompted this — and
+// at that size the hint line and the version are nowhere near each other, which
+// is the arrangement no golden covers.
+func TestTheVersionSurvivesAnyTerminalWidth(t *testing.T) {
+	m := loadedModel(t)
+	offered(t, m, false)
+
+	for _, w := range []int{250, 400, 100, 60, 40} {
+		lines := harness.Lines(harness.Strip(run(m, w, 50).View()))
+		got := strings.TrimRight(lines[len(lines)-1], " ")
+		// comp.Width, not len: `→` is three bytes and `·` is two, so a byte
+		// count reports every one of these lines as nine columns too wide.
+		if comp.Width(got) > w {
+			t.Errorf("at %d columns the footer is %d wide: %q", w, comp.Width(got), got)
+		}
+		if !strings.Contains(got, "v0.4.0") {
+			t.Errorf("at %d columns the footer does not offer the release: %q", w, got)
+		}
 	}
 }
 
