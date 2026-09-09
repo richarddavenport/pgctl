@@ -15,8 +15,12 @@ func Commands() spec.Command {
 	return spec.Command{
 		Name:  "pgctl",
 		Short: "move PostgreSQL data between environments",
-		Long: "A snapshot may be named in full (prd/product-development/20260828T030000Z),\n" +
-			"by its timestamp alone when that is unambiguous, or as <env>/latest.",
+		// A RUN id, because that is what a snapshot is — decision 26. The text
+		// this replaces named a single-database id as the canonical form, which
+		// is the shape that made `apply prd/latest` restore one database.
+		Long: "A snapshot is one run: every database taken at one instant, named\n" +
+			"prd/20260828T030000Z, or <env>/latest for the newest complete one.\n" +
+			"A single database of it is prd/product-development/20260828T030000Z.",
 		Commands: []spec.Command{
 			{
 				Name:  "browse",

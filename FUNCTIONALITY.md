@@ -1,8 +1,9 @@
 # pgctl — functional inventory
 
-What pgctl does, with no reference to its interface. Written as the input to a
-rebuild: everything here is behaviour that has to survive, whatever the front
-end looks like.
+What pgctl does, with no reference to its interface — the behaviour that has to
+survive whatever the front end looks like. It began as the input to the
+interface rebuild (decision 19) and is kept current after it, so a claim here
+that the engine does not implement is a bug in this file.
 
 ## Configuration
 
@@ -27,18 +28,25 @@ end looks like.
 
 ## Commands
 
-- `snapshot --from <conn> [--db] [--no-push]` — dump every declared database.
-- `ls [--from]` — snapshots on disk and in blob storage.
+- `snapshot --from <conn> [--db] [--to-storage <dest,…|all>]` — dump every
+  declared database as one RUN. `--to-storage` is required once a remote is
+  declared: there is no default destination.
+- `ls [--from]` — snapshot runs on disk and in every remote, one row per run.
 - `plan <snapshot> --to <conn> [--set|--tables] [--widen]` — what an apply would
   do; refuses rather than guesses.
-- `apply <snapshot> --to <conn> [--set|--tables] [--widen] [--yes|--confirm <env>]`.
+- `apply <snapshot> --to <conn> [--db] [--set|--tables] [--widen]
+  [--yes|--confirm <env>]` — one plan per database of the run, `--db` to narrow.
 - `move --from --to [--db] [--set|--tables] [--widen] [--keep]` — snapshot plus
   restore; the staged snapshot is discarded unless `--keep`.
 - `prune [--from] [--apply]` — reports by default, deletes with `--apply`.
 
-Snapshot naming: full id (`env/db/20260828T030000Z`), bare timestamp when
-unambiguous, or `env/latest`. Shell completion for connection names and snapshot
-ids, config-only — a completion never probes a server.
+Snapshot naming: a RUN id (`env/20260828T030000Z`) is the thing a command names
+— every database taken at that instant, decision 26. `env/latest` is the newest
+COMPLETE run of that connection, and a bare timestamp works when it is
+unambiguous. A single-database id (`env/db/20260828T030000Z`) still resolves, as
+a run of one, so a script that names one keeps working. Shell completion for
+connection names and snapshot ids, config-only — a completion never probes a
+server.
 
 ## Snapshotting
 
@@ -85,8 +93,14 @@ ids, config-only — a completion never probes a server.
     `pg_available_extensions`, since one the target could install is not a
     problem);
   - the target database does not exist, or the credentials do not work.
-- Warnings: applying a snapshot back to the environment it came from; foreign-key
-  drift; a filtered table with no sidecar, which will load empty.
+- Warnings: applying a snapshot back to the environment it came from;
+  foreign-key drift.
+- **Not a warning, and it should be:** a manifest saying a table is `filtered`
+  whose sidecar file is absent fails MID-APPLY, when `copyTableIn` opens it —
+  after that table has been truncated. `Plan` checks the snapshot for missing
+  tables and does not check for missing sidecar FILES. This file claimed a
+  warning here ("will load empty") that the engine has never emitted; the claim
+  is gone, the gap is not.
 - A guarded target requires its exact name via `--confirm`; `--yes` does not
   waive it.
 

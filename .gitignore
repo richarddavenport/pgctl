@@ -3,3 +3,6 @@ bin/
 # Snapshots land here by default and are measured in gigabytes.
 .pgctl/
 snapshots/
+
+# Finder leaves these in every directory it is shown.
+.DS_Store
