@@ -9,7 +9,7 @@ pgctl  pgctl.yaml
 │ claims               48.0 MB │▏│   operations…  223.0 MB     1.3M all      · │
 ╰──────────────────────────────╯▏│   operations…  222.0 MB     1.3M all      · │
 ╭─ [3] Snapshots (1) ──────────╮▏│   operations…  221.0 MB     1.3M all      · │
-│   08-27 22:00     1db 1.9 GB │▏│   operations…  220.0 MB     1.3M all      · │
+│   08-28 03:00     1db 1.9 GB │▏│   operations…  220.0 MB     1.3M all      · │
 ╰──────────────────────────────╯▏│   operations…  219.0 MB     1.3M all      · │
 ╭─ [4] Restorable ─────────────╮▏│   operations…  218.0 MB     1.3M all      · │
 │                              │▏│   operations…  217.0 MB     1.3M all      · │

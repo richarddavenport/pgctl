@@ -11,7 +11,7 @@ pgctl  pgctl.yaml
 │ quote                 20.0 GB │▏│   operations.policy_contract_detail_003                           221.0 MB     1.3M all      · │
 ╰───────────────────────────────╯▏│   operations.policy_contract_detail_004                           220.0 MB     1.3M all      · │
 ╭─ [3] Snapshots (1) ───────────╮▏│   operations.policy_contract_detail_005                           219.0 MB     1.3M all      · │
-│   08-27 22:00      1db 1.9 GB │▏│   operations.policy_contract_detail_006                           218.0 MB     1.3M all      · │
+│   08-28 03:00      1db 1.9 GB │▏│   operations.policy_contract_detail_006                           218.0 MB     1.3M all      · │
 ╰───────────────────────────────╯▏│   operations.policy_contract_detail_007                           217.0 MB     1.3M all      · │
 ╭─ [4] Restorable ──────────────╮▏│   operations.policy_contract_detail_008                           216.0 MB     1.3M all      · │
 │                               │▏│   operations.policy_contract_detail_009                           215.0 MB     1.3M all      · │

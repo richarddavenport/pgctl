@@ -36,11 +36,18 @@ func TestIntrospectAgainstRealServer(t *testing.T) {
 	if cat.ServerVersion < 160000 {
 		t.Fatalf("server version %d: pgctl needs 16 or newer for zstd", cat.ServerVersion)
 	}
+	// An empty cluster is a mis-aimed test rather than a broken query, and the
+	// message has to say which: CI pointed this at a `postgres:17` service
+	// container's own `postgres` database and read "no tables found" as if the
+	// catalog query had failed.
 	if len(cat.Tables) == 0 {
-		t.Fatal("no tables found")
+		t.Fatal("no tables in PGCTL_TEST_DSN's database — this test reads a " +
+			"populated one; internal/pg/testdata/seed.sql builds the smallest " +
+			"schema that exercises it")
 	}
 	if len(cat.FKs) == 0 {
-		t.Fatal("no foreign keys found — the constraint query is probably wrong")
+		t.Fatal("tables but no foreign keys: either the constraint query is " +
+			"wrong or the database has none, and only one of those is a bug")
 	}
 
 	// Every foreign key must name tables the table query also returned,

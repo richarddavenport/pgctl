@@ -11,10 +11,10 @@ pgctl  pgctl.yaml
 │ quote    │                                                                                                            │          │
 ╰──────────│ REFUSED, and skipped: 1 database                                                                           │          │
 ╭─ [3] Snap│ hasura — snapshot prd/hasura/20260828T030000Z does not contain hdb_catalog.hdb_version — it predates a     │          │
-│   08-27 2│ migration that created it                                                                                  │          │
+│   08-28 0│ migration that created it                                                                                  │          │
 ╰──────────│                                                                                                            │          │
 ╭─ [4] Rest│ REPLACE 6 tables in 1 database on qat                                                                      │          │
-│          │ from prd/20260828T030000Z taken 2026-08-27 22:00, 2.3 GB of source data                                    │          │
+│          │ from prd/20260828T030000Z taken 2026-08-28 03:00, 2.3 GB of source data                                    │          │
 ╰──────────│                                                                                                            │          │
 ╭─ [5] Sets│ product-development — 6 tables, 2.3 GB                                                                     │          │
 │ claims   │ widened to include 2 more: operations.policy_contract, public.address                                      │          │

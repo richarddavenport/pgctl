@@ -4,14 +4,14 @@ pgctl  pgctl.yaml
 │ ● qat                 guarded │▏│                                                                                                │
 │ ● local                       │▏│ prd/20260828T030000Z                                                                           │
 │ ✗ scratch                     │▏│                                                                                                │
-╰───────────────────────────────╯▏│ taken       2026-08-27 22:00  14h ago                                                          │
+╰───────────────────────────────╯▏│ taken       2026-08-28 03:00  14h ago                                                          │
 ╭─ [2] Databases (3) ───────────╮▏│ from        prd                                                                                │
 │ product-development   11.0 GB │▏│ state       complete                                                                           │
 │ claims                48.0 MB │▏│ databases   1                                                                                  │
 │ quote    ╭────────────────────────────────────────────────────────────────────────────────────────────────────────────╮          │
 ╰──────────│ Apply prd/20260828T030000Z                                                                                 │          │
 ╭─ [3] Snap│                                                                                                            │          │
-│   08-27 2│ Replaces data on the target, one database at a time. 1 database taken 14h ago. The plan is shown before    │          │
+│   08-28 0│ Replaces data on the target, one database at a time. 1 database taken 14h ago. The plan is shown before    │          │
 ╰──────────│ anything is touched.                                                                                       │          │
 ╭─ [4] Rest│                                                                                                            │          │
 │          │   Target                  ‹ qat  (guarded — needs its name typed) ›  (1/3)                                 │          │

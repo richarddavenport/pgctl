@@ -79,6 +79,14 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
+      # The catalog test reads a POPULATED database — that is the whole point of
+      # it — so the service container gets a schema first. Without this the
+      # test failed with "no tables found", which reads like a broken query and
+      # was an empty cluster.
+      - name: seed a schema to introspect
+        env:
+          PGPASSWORD: pgctl
+        run: psql -h 127.0.0.1 -U postgres -d postgres -v ON_ERROR_STOP=1 -f internal/pg/testdata/seed.sql
       - name: catalog queries against a real server
         env:
           PGCTL_TEST_DSN: postgres://postgres:pgctl@127.0.0.1:5432/postgres

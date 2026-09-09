@@ -11,7 +11,7 @@ pgctl  pgctl.yaml
 │ quote                 20.0 GB │▏│ databases  3                                                                                   │
 ╰─────────────────╭─ run ────────────────────────────────────────────────────────────────────────────────────────╮                 │
 ╭─ [3] Snapshots (│> p                                                                                           │                 │
-│   08-27 22:00   │every key that acts right now; a greyed row says why it cannot                         5 of 10│                 │
+│   08-28 03:00   │every key that acts right now; a greyed row says why it cannot                         5 of 10│                 │
 ╰─────────────────│──────────────────────────────────────────────────────────────────────────────────────────────│                 │
 ╭─ [4] Restorable │  prune                             p    Operations          report what the retention policy │                 │
 │                 │  detail pane                       tab  Reading             focus it, and back               │                 │

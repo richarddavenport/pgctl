@@ -9,7 +9,7 @@ pgc╭────────────────────────�
 │ c│ hdb_catalog.hdb_version — it predates a migration that created it      │  │
 ╰──│                                                                        │  │
 ╭─ │ REPLACE 6 tables in 1 database on qat                                  │  │
-│  │ from prd/20260828T030000Z taken 2026-08-27 22:00, 2.3 GB of source     │  │
+│  │ from prd/20260828T030000Z taken 2026-08-28 03:00, 2.3 GB of source     │  │
 ╰──│ data                                                                   │  │
 ╭─ │                                                                        │  │
 │  │ product-development — 6 tables, 2.3 GB                                 │  │

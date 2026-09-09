@@ -11,7 +11,7 @@ pgctl  pgctl.yaml
 │ quote    │ Take a snapshot of prd                                                                                     │          │
 ╰──────────│                                                                                                            │          │
 ╭─ [3] Snap│ Reads the chosen databases and writes a compressed copy. Nothing is written to prd. Choose where they go:  │          │
-│   08-27 2│ keeping them here, sending them away, or both.                                                             │          │
+│   08-28 0│ keeping them here, sending them away, or both.                                                             │          │
 ╰──────────│                                                                                                            │          │
 ╭─ [4] Rest│  choose at least one destination — space chooses, and more than one is fine                                │          │
 │          │                                                                                                            │          │

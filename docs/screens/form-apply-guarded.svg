@@ -58,7 +58,7 @@
 <text x="14" y="122.17" textLength="257.4" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">╰───────────────────────────────╯</text>
 <text x="271.4" y="122.17" textLength="7.8" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">▏</text>
 <text x="279.2" y="122.17" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
-<text x="294.8" y="122.17" textLength="288.6" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">taken       2026-08-27 22:00  14h ago</text>
+<text x="294.8" y="122.17" textLength="288.6" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">taken       2026-08-28 03:00  14h ago</text>
 <text x="1035.8" y="122.17" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="14" y="138.43" textLength="15.6" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">╭─</text>
 <text x="29.6" y="138.43" textLength="140.4" lengthAdjust="spacing" fill="#7f7f7f" font-weight="600" xml:space="preserve"> [2] Databases (3)</text>
@@ -96,7 +96,7 @@
 <text x="950" y="219.68" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="1035.8" y="219.68" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="14" y="235.93" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
-<text x="45.2" y="235.93" textLength="54.6" lengthAdjust="spacing" fill="#ff00ff" font-weight="600" xml:space="preserve">08-27 2</text>
+<text x="45.2" y="235.93" textLength="54.6" lengthAdjust="spacing" fill="#ff00ff" font-weight="600" xml:space="preserve">08-28 0</text>
 <text x="99.8" y="235.93" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="107.6" y="235.93" textLength="811.2" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve"> Replaces data on the target, one database at a time. 1 database taken 14h ago. The plan is shown before</text>
 <text x="950" y="235.93" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>

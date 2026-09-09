@@ -54,7 +54,7 @@
 <text x="14" y="122.17" textLength="257.4" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">╰───────────────────────────────╯</text>
 <text x="271.4" y="122.17" textLength="7.8" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">▏</text>
 <text x="279.2" y="122.17" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
-<text x="294.8" y="122.17" textLength="78" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">  11:57:40</text>
+<text x="294.8" y="122.17" textLength="78" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">  16:57:40</text>
 <text x="380.6" y="122.17" textLength="210.6" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">81 foreign keys, 31 indexes</text>
 <text x="1035.8" y="122.17" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="14" y="138.43" textLength="15.6" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">╭─</text>
@@ -62,7 +62,7 @@
 <text x="177.8" y="138.43" textLength="93.6" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">───────────╮</text>
 <text x="271.4" y="138.43" textLength="7.8" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">▏</text>
 <text x="279.2" y="138.43" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
-<text x="294.8" y="138.43" textLength="78" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">  11:57:50</text>
+<text x="294.8" y="138.43" textLength="78" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">  16:57:50</text>
 <text x="380.6" y="138.43" textLength="234" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">111 user triggers on 33 tables</text>
 <text x="1035.8" y="138.43" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="14" y="154.68" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
@@ -70,7 +70,7 @@
 <text x="263.6" y="154.68" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="271.4" y="154.68" textLength="7.8" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">▏</text>
 <text x="279.2" y="154.68" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
-<text x="294.8" y="154.68" textLength="78" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">  11:58:00</text>
+<text x="294.8" y="154.68" textLength="78" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">  16:58:00</text>
 <text x="380.6" y="154.68" textLength="179.4" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">children before parents</text>
 <text x="1035.8" y="154.68" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="14" y="170.93" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
@@ -78,7 +78,7 @@
 <text x="263.6" y="170.93" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="271.4" y="170.93" textLength="7.8" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">▏</text>
 <text x="279.2" y="170.93" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
-<text x="294.8" y="170.93" textLength="78" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">  11:58:10</text>
+<text x="294.8" y="170.93" textLength="78" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">  16:58:10</text>
 <text x="380.6" y="170.93" textLength="202.8" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">42 archive entries, 4 jobs</text>
 <text x="1035.8" y="170.93" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="14" y="187.18" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
@@ -86,13 +86,13 @@
 <text x="263.6" y="187.18" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="271.4" y="187.18" textLength="7.8" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">▏</text>
 <text x="279.2" y="187.18" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
-<text x="294.8" y="187.18" textLength="78" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">  11:58:20</text>
+<text x="294.8" y="187.18" textLength="78" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">  16:58:20</text>
 <text x="380.6" y="187.18" textLength="257.4" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">claims.policy_claim  483,187 rows</text>
 <text x="1035.8" y="187.18" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="14" y="203.43" textLength="257.4" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">╰───────────────────────────────╯</text>
 <text x="271.4" y="203.43" textLength="7.8" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">▏</text>
 <text x="279.2" y="203.43" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
-<text x="294.8" y="203.43" textLength="78" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">  11:58:30</text>
+<text x="294.8" y="203.43" textLength="78" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">  16:58:30</text>
 <text x="380.6" y="203.43" textLength="234" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">claims.claim_detail  1.2M rows</text>
 <text x="1035.8" y="203.43" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="14" y="219.68" textLength="15.6" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">╭─</text>
@@ -100,11 +100,11 @@
 <text x="177.8" y="219.68" textLength="93.6" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">───────────╮</text>
 <text x="271.4" y="219.68" textLength="7.8" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">▏</text>
 <text x="279.2" y="219.68" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
-<text x="294.8" y="219.68" textLength="78" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">  11:58:35</text>
+<text x="294.8" y="219.68" textLength="78" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">  16:58:35</text>
 <text x="380.6" y="219.68" textLength="124.8" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">504 MB of 1.9 GB</text>
 <text x="1035.8" y="219.68" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="14" y="235.93" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
-<text x="45.2" y="235.93" textLength="210.6" lengthAdjust="spacing" fill="#ff00ff" font-weight="600" xml:space="preserve">08-27 22:00      1db 1.9 GB</text>
+<text x="45.2" y="235.93" textLength="210.6" lengthAdjust="spacing" fill="#ff00ff" font-weight="600" xml:space="preserve">08-28 03:00      1db 1.9 GB</text>
 <text x="263.6" y="235.93" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="271.4" y="235.93" textLength="7.8" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">▏</text>
 <text x="279.2" y="235.93" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>

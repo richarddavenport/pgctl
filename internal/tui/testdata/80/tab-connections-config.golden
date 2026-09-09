@@ -9,7 +9,7 @@ pgctl  pgctl.yaml
 │ claims               48.0 MB │▏│ maintenance postgres                        │
 ╰──────────────────────────────╯▏│                                             │
 ╭─ [3] Snapshots (1) ──────────╮▏│ HOW THIS RESOLVES                           │
-│   08-27 22:00     1db 1.9 GB │▏│   The DSN is handed to libpq unchanged, so  │
+│   08-28 03:00     1db 1.9 GB │▏│   The DSN is handed to libpq unchanged, so  │
 ╰──────────────────────────────╯▏│   ~/.pg_service.conf, ~/.pgpass and the PG* │
 ╭─ [4] Restorable ─────────────╮▏│   variables apply exactly as they do to     │
 │                              │▏│   psql. pgctl never stores a password.      │

@@ -11,7 +11,7 @@ pgctl  pgctl.yaml
 │ quote                 20.0 GB │▏│ databases  3                                                                                   │
 ╰───────────────────────────────╯▏│ total size 31.0 GB                                                                             │
 ╭─ [3] Snapshots (1) ───────────╮▏│ checked    just now                                                                            │
-│   08-27 2╭────────────────────────────────────────────────────────────────────────────────────────────────────────────╮          │
+│   08-28 0╭────────────────────────────────────────────────────────────────────────────────────────────────────────────╮          │
 ╰──────────│ Prune snapshots                                                                                            │          │
 ╭─ [4] Rest│                                                                                                            │          │
 │          │ Retention: 2 daily, 0 weekly, 0 monthly. An incomplete snapshot is never kept, and the newest always is.   │          │

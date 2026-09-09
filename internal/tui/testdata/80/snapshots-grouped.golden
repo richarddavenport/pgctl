@@ -4,12 +4,12 @@ pgctl  pgctl.yaml
 │ ● qat                guarded │▏│                                             │
 │ ● local                      │▏│ prd/20260828T030000Z                        │
 ╰──────────────────────────────╯▏│                                             │
-╭─ [2] Databases (3) ──────────╮▏│ taken       2026-08-27 22:00  14h ago       │
+╭─ [2] Databases (3) ──────────╮▏│ taken       2026-08-28 03:00  14h ago       │
 │ product-development  11.0 GB │▏│ from        prd                             │
 │ claims               48.0 MB │▏│ state       complete                        │
 ╰──────────────────────────────╯▏│ databases   1                               │
 ╭─ [3] Snapshots (2) ──────────╮▏│ size        1.9 GB                          │
-│   08-27 22:00     1db 1.9 GB │▏│ tables      3                               │
+│   08-28 03:00     1db 1.9 GB │▏│ tables      3                               │
 ╰──────────────────────────────╯▏│ where       local                           │
 ╭─ [4] Restorable ─────────────╮▏│ server      PostgreSQL    pg_dump           │
 │                              │▏│ compression zstd:3   4 jobs                 │
