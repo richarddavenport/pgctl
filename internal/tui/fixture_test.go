@@ -96,7 +96,8 @@ func fixtureModel(t *testing.T) *Model {
 	// path here leaked into a frame: the local destination's help says where the
 	// snapshot would be kept, and under test that was a path with the test's
 	// name and a run counter in it, so the golden changed on every run.
-	cfg.Storage.Dir = "snapshots"
+	// The path a real config writes, so a frame quoting it reads like one.
+	cfg.Storage.Dir = ".pgctl/snapshots"
 
 	m := New(engine.New(cfg))
 	m.Now(epoch)

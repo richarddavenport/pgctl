@@ -67,10 +67,11 @@ type Model struct {
 	// keeps them honest. None of it is assignable from here, which is the
 	// point: the invariant between a cursor and an offset is the whole
 	// component, and every version of it pgctl wrote by hand had a bug in it.
-	lists    [panelCount]comp.List
-	paneList comp.List
-	logPane  comp.LogPane
-	split    comp.Split
+	lists     [panelCount]comp.List
+	paneList  comp.List
+	multiList comp.List
+	logPane   comp.LogPane
+	split     comp.Split
 
 	// planView is the plan preview, and it is a Viewer rather than a List
 	// because a plan is a DOCUMENT: it opens at the top, has nothing to
@@ -219,6 +220,24 @@ func New(e *engine.Engine) *Model {
 		NoCursor:   true,
 		Status:     &mutedStyle,
 		EmptyStyle: &mutedStyle,
+	}
+	// The options of a multi-select field in a modal. Its cursor is the FIELD's,
+	// so this list is only ever Selected, never Moved — and the ●/○ is a status
+	// column so it keeps its own colour under the highlight: whether an option
+	// is in is the state, and the cursor is where you are. Two facts, and the
+	// selection must not eat one of them.
+	m.multiList = comp.List{
+		Name:        regModalOptions,
+		StatusWidth: 2,
+		Marker:      "▸ ",
+		Blank:       "  ",
+		Selected:    &selectedStyle,
+		Unfocused:   &currentStyle,
+		Status:      &mutedStyle,
+		EmptyStyle:  &mutedStyle,
+		// The field's own row carries the count, so the list's status row would
+		// say it twice — in a modal, where the row is an option.
+		NoStatus: true,
 	}
 	m.paneList = comp.List{
 		Name:       regBody,

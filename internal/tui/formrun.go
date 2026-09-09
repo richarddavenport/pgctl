@@ -33,8 +33,8 @@ func (m *Model) submitAction() tea.Cmd {
 			// No default, so no answer is an unanswered question rather than
 			// "local". A snapshot is gigabytes and where it goes is not
 			// something to infer from silence.
-			a.err = fmt.Errorf("tick at least one destination: %s",
-				strings.Join(m.cfg.Destinations(), ", "))
+			a.err = fmt.Errorf("choose at least one destination — space chooses, " +
+				"and more than one is fine")
 			return nil
 		}
 		m.action = nil

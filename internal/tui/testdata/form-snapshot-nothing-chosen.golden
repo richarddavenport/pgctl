@@ -9,20 +9,20 @@ pgctl  pgctl.yaml
 │ claims                48.0 MB │▏│ user       mbpiadmin                                                                           │
 │ quote                 20.0 GB │▏│ server     PostgreSQL 17.4                                                                     │
 ╰───────────────────────────────╯▏│ databases  3                                                                                   │
-╭─ 3 Snapshots (1) ─────────────╮▏│ total size 31.0 GB                                                                             │
-│   08-27 2╭────────────────────────────────────────────────────────────────────────────────────────────────────────────╮          │
-╰──────────│ Take a snapshot of prd/product-development                                                                 │          │
-╭─ 4 Sets (│                                                                                                            │          │
-│ claims   │ Reads product-development and writes a compressed copy. Nothing is written to prd. Choose where it goes:   │          │
-╰──────────│ keeping it here, sending it away, or both.                                                                 │          │
-╭─ 5 Runs ─│                                                                                                            │          │
-│ nothing r│   Where it goes  nothing chosen yet                                                                        │          │
-╰──────────│ ▸ ○   local           keep it on this machine, in .pgctl/snapshots                                         │          │
+╭─ 3 Snapsh╭────────────────────────────────────────────────────────────────────────────────────────────────────────────╮          │
+│   08-27 2│ Take a snapshot of prd/product-development                                                                 │          │
+╰──────────│                                                                                                            │          │
+╭─ 4 Sets (│ Reads product-development and writes a compressed copy. Nothing is written to prd. Choose where it goes:   │          │
+│ claims   │ keeping it here, sending it away, or both.                                                                 │          │
+╰──────────│                                                                                                            │          │
+╭─ 5 Runs ─│  choose at least one destination — space chooses, and more than one is fine                                │          │
+│ nothing r│                                                                                                            │          │
+╰──────────│   Where it goes  nothing chosen yet                                                                        │          │
+           │ ▸ ○   local           keep it on this machine, in .pgctl/snapshots                                         │          │
            │   ○   snapshots       upload it to the pg-snapshots container                                              │          │
            │ nothing chosen yet — enter will refuse                                                                     │          │
            │   ↑↓ move · space choose · a all · enter take it · esc cancel                                              │          │
            ╰────────────────────────────────────────────────────────────────────────────────────────────────────────────╯          │
-                                 ▏│                                                                                                │
                                  ▏│                                                                                                │
                                  ▏│                                                                                                │
                                  ▏│                                                                                                │

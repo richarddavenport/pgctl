@@ -74,6 +74,16 @@ func states(t *testing.T) []state {
 		{"form-prune", func(w, h int) *app.Runner { return keys(loaded(w, h), "p") }},
 		{"form-delete", func(w, h int) *app.Runner { return keys(loaded(w, h), "3", "x") }},
 
+		// The destination chooser with something chosen, and with the refusal
+		// on it. Both matter: the ●/○ pair is the whole affordance, and the
+		// refusal is what a reader sees if they press enter first.
+		{"form-snapshot-chosen", func(w, h int) *app.Runner {
+			return keys(loaded(w, h), "n", "down", "space")
+		}},
+		{"form-snapshot-nothing-chosen", func(w, h int) *app.Runner {
+			return keys(loaded(w, h), "n", "enter")
+		}},
+
 		// The snapshot form on a connection with nothing to act on: a refusal
 		// naming which of the three reasons it is, rather than an empty form.
 		{"form-snapshot-refused", func(w, h int) *app.Runner {

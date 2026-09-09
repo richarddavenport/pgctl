@@ -16,10 +16,10 @@ pgctl  pgctl.yaml
 │ claims   │ Reads product-development and writes a compressed copy. Nothing is written to prd. Choose where it goes:   │          │
 ╰──────────│ keeping it here, sending it away, or both.                                                                 │          │
 ╭─ 5 Runs ─│                                                                                                            │          │
-│ nothing r│   Where it goes  nothing chosen yet                                                                        │          │
-╰──────────│ ▸ ○   local           keep it on this machine, in .pgctl/snapshots                                         │          │
-           │   ○   snapshots       upload it to the pg-snapshots container                                              │          │
-           │ nothing chosen yet — enter will refuse                                                                     │          │
+│ nothing r│   Where it goes  1 of 2                                                                                    │          │
+╰──────────│   ○   local           keep it on this machine, in .pgctl/snapshots                                         │          │
+           │ ▸ ●   snapshots       upload it to the pg-snapshots container                                              │          │
+           │ uploaded, and then the copy here is deleted                                                                │          │
            │   ↑↓ move · space choose · a all · enter take it · esc cancel                                              │          │
            ╰────────────────────────────────────────────────────────────────────────────────────────────────────────────╯          │
                                  ▏│                                                                                                │

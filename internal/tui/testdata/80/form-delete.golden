@@ -12,7 +12,7 @@ pgctl  pgctl.yaml
 ╭─ │                                                                        │  │
 │  │ ▸ Yes, delete it  no                                                   │  │
 ╰──│ space toggles                                                          │  │
-╭─ │   ↑↓ field · space toggle · enter delete it · esc cancel               │  │
+╭─ │   space toggle · enter delete it · esc cancel                          │  │
 │ c╰────────────────────────────────────────────────────────────────────────╯  │
 ╰──────────────────────────────╯▏│   whole        1                            │
 ╭─ 5 Runs ─────────────────────╮▏│   filtered     1                            │

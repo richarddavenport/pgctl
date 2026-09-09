@@ -344,20 +344,22 @@ func TestTheSnapshotFormAsksWhereWithNoDefault(t *testing.T) {
 		t.Fatal("n did not open the snapshot form")
 	}
 
-	// One toggle per destination, local first, in config order.
-	var labels []string
-	for _, f := range m.action.fields {
-		labels = append(labels, f.label)
+	// ONE field — a choice with every destination in it, local first, in config
+	// order. Not a toggle each: "local no / snapshots yes" is two settings a
+	// reader has to combine themselves, and this is one question.
+	if len(m.action.fields) != 1 || m.action.fields[0].kind != fieldMulti {
+		t.Fatalf("%d fields, want one multi-select", len(m.action.fields))
 	}
-	if strings.Join(labels, ",") != "local,snapshots" {
-		t.Errorf("fields = %v, want a toggle per destination", labels)
+	f := m.action.fields[0]
+	if strings.Join(f.options, ",") != "local,snapshots" {
+		t.Errorf("options = %v, want every destination, local first", f.options)
 	}
 	if got := m.chosenDestinations(); len(got) != 0 {
-		t.Errorf("%v is pre-ticked; nothing should be", got)
+		t.Errorf("%v is pre-chosen; nothing should be", got)
 	}
 
-	// Enter with nothing ticked is a refusal that names the choices, and the
-	// form stays open on them.
+	// Enter with nothing chosen is a refusal that says how to answer, and the
+	// form stays open on it.
 	press(t, m, "enter")
 	if m.active != nil {
 		t.Fatal("enter started a snapshot with no destination")
@@ -365,15 +367,21 @@ func TestTheSnapshotFormAsksWhereWithNoDefault(t *testing.T) {
 	if m.action == nil {
 		t.Fatal("the form closed without doing anything")
 	}
-	if m.action.err == nil || !strings.Contains(m.action.err.Error(), "snapshots") {
-		t.Errorf("err = %v, want a refusal naming the destinations", m.action.err)
+	if m.action.err == nil || !strings.Contains(m.action.err.Error(), "space") {
+		t.Errorf("err = %v, want a refusal that says which key chooses", m.action.err)
 	}
 
-	// Ticking the remote alone is the "do not fill my laptop" answer, and it
-	// is expressible: local is simply not among them.
+	// The arrows move within the list and space chooses, so the remote alone is
+	// reachable — the "do not fill my laptop" answer, where local is simply not
+	// among them.
 	press(t, m, "down", "space")
 	if got := m.chosenDestinations(); len(got) != 1 || got[0] != "snapshots" {
 		t.Errorf("destinations = %v, want the remote alone", got)
+	}
+	// And `a` takes everything, for the "keep it here and upload it" case.
+	press(t, m, "a")
+	if got := m.chosenDestinations(); len(got) != 2 {
+		t.Errorf("destinations = %v, want both", got)
 	}
 }
 

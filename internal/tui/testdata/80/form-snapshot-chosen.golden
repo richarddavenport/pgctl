@@ -10,10 +10,10 @@ pgctl  pgctl.yaml
 │ q│ written to prd. Choose where it goes: keeping it here, sending it      │  │
 ╰──│ away, or both.                                                         │  │
 ╭─ │                                                                        │  │
-│  │   Where it goes  nothing chosen yet                                    │  │
-╰──│ ▸ ○   local           keep it on this machine, in .pgctl/snapshots     │  │
-╭─ │   ○   snapshots       upload it to the pg-snapshots container          │  │
-│ c│ nothing chosen yet — enter will refuse                                 │  │
+│  │   Where it goes  1 of 2                                                │  │
+╰──│   ○   local           keep it on this machine, in .pgctl/snapshots     │  │
+╭─ │ ▸ ●   snapshots       upload it to the pg-snapshots container          │  │
+│ c│ uploaded, and then the copy here is deleted                            │  │
 ╰──│   ↑↓ move · space choose · a all · enter take it · esc cancel          │… │
 ╭─ ╰────────────────────────────────────────────────────────────────────────╯  │
 │ nothing run yet              │▏│                                             │

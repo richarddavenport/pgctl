@@ -49,11 +49,12 @@ const (
 
 	// The overlays. They are regions so that a script can assert a modal is
 	// open rather than inferring it from the text that happens to be on screen.
-	regModal      comp.Name = "modal"
-	regConfirmBox comp.Name = "confirm"
-	regHelp       comp.Name = "help"
-	regToast      comp.Name = "toast"
-	regFilter     comp.Name = "filter"
+	regModal        comp.Name = "modal"
+	regModalOptions comp.Name = "modal.option"
+	regConfirmBox   comp.Name = "confirm"
+	regHelp         comp.Name = "help"
+	regToast        comp.Name = "toast"
+	regFilter       comp.Name = "filter"
 
 	// The command directory, and the menu that is the same list on a row.
 	regCommands    comp.Name = "commands"

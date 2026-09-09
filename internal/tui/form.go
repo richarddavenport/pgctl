@@ -34,16 +34,23 @@ const (
 
 // fieldKind is how one row of a form behaves.
 //
-// All four are comp.Field's: text, choice, toggle, and a text field with a Must
-// phrase. There was a fifth — multi, any number of a list — for the databases a
-// snapshot covered, drawn by hand because comp.Field picks exactly one. It is
-// gone: the panel selection is which database, so the form does not ask. That
-// deleted pgctl's side of tuikit issue 49's multi-select half, and the issue is
-// commented to say so.
+// Four of the five are comp.Field's: text, choice, toggle, and a text field with
+// a Must phrase. The fifth — multi, ANY NUMBER of a list — is drawn by hand,
+// because comp.Field picks exactly one. That is tuikit issue 49, and this is the
+// second screen in this tool to need it.
+//
+// It is worth recording that it was deleted and came back. The databases
+// multi-select went because the panels already said which database, and the
+// conclusion drawn at the time was that pgctl no longer needed a multi-select at
+// all. Destinations arrived the same day: nobody's panel says where a snapshot
+// should go, "both" is a real answer, and rendering that as two independent
+// yes/no toggles reads as two settings rather than one choice — which is the
+// complaint that produced this comment.
 type fieldKind int
 
 const (
 	fieldChoice  fieldKind = iota // one of a list
+	fieldMulti                    // any number of a list
 	fieldToggle                   // on or off
 	fieldText                     // typed
 	fieldConfirm                  // the connection's name, typed exactly
@@ -61,6 +68,11 @@ type formField struct {
 	choice  int
 	on      bool
 	text    string
+
+	// selected is which options of a fieldMulti are in. A map rather than a
+	// slice of bools so that a field built from a config's order does not have
+	// to be rebuilt when the order changes.
+	selected map[int]bool
 
 	// caret is where typing lands in a text field, as a rune index. The form
 	// draws it and app.EditAt moves it; without one, a typo in a table list is
@@ -209,6 +221,8 @@ func (m *Model) openSnapshot() {
 	fields := m.destinationFields()
 	if len(fields) == 0 {
 		explain += " No storage remotes are declared, so it stays on this machine."
+	} else {
+		explain += " Choose where it goes: keeping it here, sending it away, or both."
 	}
 
 	m.action = &actionModel{
@@ -221,15 +235,21 @@ func (m *Model) openSnapshot() {
 	}
 }
 
-// destinationFields is one toggle per declared destination, all off.
+// destinationFields is the one field a snapshot form has: where it goes.
 //
-// A toggle each rather than a choice of combinations: with two remotes a single
-// choice field has seven options ("here", "here and A", "here and B", "here and
-// both", "A only"…), which is a list nobody reads, and it grows exponentially
-// with the config. Toggles grow by one row per destination and say the same
-// thing.
+// ONE field holding every destination, not a toggle per destination. The
+// toggles were the first attempt and they were wrong for a reason worth
+// keeping: "local no / snapshots yes" is two settings a reader has to combine
+// themselves, and this is one question with two answers available. A reader
+// looking at it said so — *"this ticking didn't make sense to me"* — and they
+// were right that the shape, not the wording, was the problem.
 //
-// None is pre-ticked because there is no default — see openSnapshot — and
+// So the rows carry ● and ○, which is the same in/out pair the Connections
+// panel marks reachability with, and the cursor moves down them. What that
+// costs is a hand-drawn field: comp.Field picks exactly one of a list, which is
+// tuikit issue 49.
+//
+// Nothing is chosen because there is no default — see openSnapshot — and
 // nothing at all is offered when there is only one place a snapshot can go:
 // asking a question with a single answer is a keystroke charged for nothing.
 func (m *Model) destinationFields() []formField {
@@ -241,34 +261,43 @@ func (m *Model) destinationFields() []formField {
 	// thing in a message about where gigabytes went, and the wrong thing here:
 	// it is a temp directory under test, so a golden of this screen changed on
 	// every run.
-	fields := []formField{newToggle(destinationKey(config.LocalStorage), config.LocalStorage,
-		"keep it on this machine, in "+m.cfg.Storage.Dir)}
+	options := []string{config.LocalStorage}
+	hints := []string{"keep it on this machine, in " + m.cfg.Storage.Dir}
 	for _, r := range m.cfg.Remotes() {
-		fields = append(fields, newToggle(destinationKey(r.Name), r.Name,
-			"upload it to the "+r.Container+" container"))
+		options = append(options, r.Name)
+		hints = append(hints, "upload it to the "+r.Container+" container")
 	}
-	return fields
+
+	return []formField{{
+		key:      "destinations",
+		label:    "Where it goes",
+		kind:     fieldMulti,
+		options:  options,
+		labels:   hints,
+		selected: map[int]bool{},
+		// No help text: for a multi-select the help row says what the current
+		// selection MEANS, which the keys and the rows cannot. See
+		// destinationConsequence.
+
+	}}
 }
 
-// destinationKey is a destination's field key, namespaced so a remote called
-// "widen" cannot collide with a flag.
-func destinationKey(name string) string { return "storage:" + name }
-
-// chosenDestinations is the destinations ticked on the form.
+// chosenDestinations is the destinations chosen on the form.
 //
-// A form with no destination fields has exactly one place to put a snapshot,
-// and says so: local. Otherwise it is what the operator ticked, and an empty
-// answer is refused rather than defaulted — see openSnapshot.
+// A form with no destination field has exactly one place to put a snapshot, and
+// says so: local. Otherwise it is what the operator chose, and an empty answer
+// is refused rather than defaulted — see openSnapshot.
 func (m *Model) chosenDestinations() []string {
 	if m.action == nil {
 		return nil
 	}
-	if len(m.cfg.Remotes()) == 0 {
+	f := m.action.field("destinations")
+	if f == nil {
 		return []string{config.LocalStorage}
 	}
 	var out []string
-	for _, name := range m.cfg.Destinations() {
-		if m.action.enabled(destinationKey(name)) {
+	for i, name := range f.options {
+		if f.selected[i] {
 			out = append(out, name)
 		}
 	}
@@ -569,14 +598,28 @@ func (m *Model) actionKey(msg tea.KeyMsg) (tea.Cmd, bool) {
 	case "esc", "ctrl+c":
 		m.action = nil
 		return nil, true
-	case "up", "shift+tab":
+	case "shift+tab":
 		a.cursor = a.prevEnabled(a.cursor)
 		return nil, true
-	case "down", "tab":
+	case "tab":
 		a.cursor = a.nextEnabled(a.cursor)
 		return nil, true
 	case "enter":
 		return m.submitAction(), true
+	case "up", "down":
+		// The arrows move between FIELDS, except inside a multi-select, where
+		// they move between its options — see the fieldMulti case below. A list
+		// whose rows do not answer to ↑↓ is a list you have to be told how to
+		// operate.
+		if a.cursor < len(a.fields) && a.fields[a.cursor].kind == fieldMulti {
+			break
+		}
+		if key == "up" {
+			a.cursor = a.prevEnabled(a.cursor)
+		} else {
+			a.cursor = a.nextEnabled(a.cursor)
+		}
+		return nil, true
 	}
 
 	if a.cursor >= len(a.fields) {
@@ -596,6 +639,23 @@ func (m *Model) actionKey(msg tea.KeyMsg) (tea.Cmd, bool) {
 			f.choice = (f.choice + 1) % len(f.options)
 		}
 		m.syncAction()
+	case fieldMulti:
+		// The arrows move within the list, because it IS a list and a vertical
+		// list answers to vertical keys. tab still moves between fields, which
+		// is what keeps this unambiguous on a form that has others.
+		switch key {
+		case " ":
+			f.choice = clamp(f.choice, len(f.options)-1)
+			f.selected[f.choice] = !f.selected[f.choice]
+		case "up", "k":
+			f.choice = clamp(f.choice-1, len(f.options)-1)
+		case "down", "j":
+			f.choice = clamp(f.choice+1, len(f.options)-1)
+		case "a":
+			for i := range f.options {
+				f.selected[i] = true
+			}
+		}
 	case fieldToggle:
 		if key == " " || key == "left" || key == "right" {
 			f.on = !f.on

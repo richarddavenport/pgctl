@@ -1,0 +1,22 @@
+pgctl  pgctl.yaml
+╭─ 1 Connections (3) ──────────╮▏╭─────────────────────────────────────────────╮
+│ ● prd              protected │▏│ ‹ Overview · Databases · Config ›           │
+│ ●╭────────────────────────────────────────────────────────────────────────╮  │
+│ ✗│ Take a snapshot of prd/product-development                             │  │
+╰──│                                                                        │  │
+╭─ │ Reads product-development and writes a compressed copy. Nothing is     │  │
+│ p│ written to prd. Choose where it goes: keeping it here, sending it      │  │
+│ c│ away, or both.                                                         │  │
+│ q│                                                                        │  │
+╰──│  choose at least one destination — space chooses, and more than one i… │  │
+╭─ │                                                                        │  │
+│  │                                                                        │  │
+╰──│   Where it goes  nothing chosen yet                                    │  │
+╭─ │ ▸ ○   local           keep it on this machine, in .pgctl/snapshots     │  │
+│ c│   ○   snapshots       upload it to the pg-snapshots container          │  │
+╰──│ nothing chosen yet — enter will refuse                                 │… │
+╭─ │   ↑↓ move · space choose · a all · enter take it · esc cancel          │  │
+│ n╰────────────────────────────────────────────────────────────────────────╯  │
+╰──────────────────────────────╯▏│                                             │
+                                ▏│                                             │
+                                ▏╰─────────────────────────────────────────────╯

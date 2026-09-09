@@ -8,6 +8,7 @@ import (
 
 	"github.com/richarddavenport/tuikit/comp"
 
+	"github.com/richarddavenport/pgctl/internal/config"
 	"github.com/richarddavenport/pgctl/internal/engine"
 )
 
@@ -115,9 +116,15 @@ func (m *Model) actionHead(width int) actionHead {
 		// A refusal, in the box that caused it. Its own block, so the blank
 		// line before it separates the reason from the description of the thing
 		// that was refused.
-		d.Blocks = append(d.Blocks, comp.Block{Text: a.err.Error()})
+		//
+		// A FACT rather than prose, because comp.Detail has one ValueStyle for
+		// every block: setting it to danger painted the explain line red as
+		// well, so a form that had refused something described itself as if the
+		// description were the problem. Fact.Style paints one value.
+		d.Blocks = append(d.Blocks, comp.Block{
+			Facts: []comp.Fact{{Value: a.err.Error(), Style: &dangerStyle}},
+		})
 		rows += 1 + len(comp.Wrap(a.err.Error(), width))
-		d.ValueStyle = &dangerStyle
 	}
 	return actionHead{detail: d, rows: rows}
 }
@@ -134,10 +141,16 @@ func (m *Model) bodyRows(width int) int {
 		return min(len(m.planLines(width)), 18) + 1
 	}
 
-	// One row per field, and that is the whole of it now that no field draws
-	// options of its own underneath. The multi-select was the reason this
-	// function had to know anything about a component's layout.
-	return len(a.fields)
+	rows := 0
+	for _, f := range a.fields {
+		rows++
+		if f.kind == fieldMulti {
+			// Its options, drawn underneath. No extra row: the list is
+			// NoStatus, because the field's own row carries the count.
+			rows += len(f.options)
+		}
+	}
+	return rows
 }
 
 // drawActionBody is the middle of the modal: the fields, the wait, or the plan.
@@ -171,15 +184,13 @@ func (m *Model) drawActionBody(c *comp.Canvas, r comp.Rect, id comp.ID) {
 	}
 }
 
-// drawFields is the form.
+// drawFields is the form, split wherever a multi-select needs its options drawn
+// beneath it.
 //
-// One comp.Form for every field, which it was not until the databases
-// multi-select was deleted: that field had to draw its own options directly
-// underneath itself, so the field list was split into runs and drawn as several
-// forms, each carrying the cursor only if the cursor was inside it — and the
-// label column had to be measured across all of them, because left to itself
-// each run measured only its own labels and "Upload to storage" started seven
-// columns right of "Databases".
+// One label column across every run, measured over ALL the fields: left to
+// itself each run measures only its own labels, so a form split for a
+// multi-select had its later labels start seven columns right of its earlier
+// ones and read as two forms.
 func (m *Model) drawFields(c *comp.Canvas, r comp.Rect) {
 	a := m.action
 
@@ -187,9 +198,51 @@ func (m *Model) drawFields(c *comp.Canvas, r comp.Rect) {
 	for _, f := range a.fields {
 		labelWidth = max(labelWidth, comp.Width(f.label))
 	}
+	base := comp.Form{
+		Focused:    true,
+		Marker:     "▸ ",
+		Blank:      "  ",
+		LabelWidth: labelWidth,
+		Label:      &mutedStyle,
+		FocusLabel: &accentStyle,
+		Muted:      &mutedStyle,
+		Danger:     &dangerStyle,
+		CursorFG:   &cursorFG,
+		CursorBG:   &cursorBG,
+	}
 
-	fields := make([]comp.Field, 0, len(a.fields))
-	for _, f := range a.fields {
+	y := r.Y
+	var run []comp.Field
+	runFrom := 0
+	flush := func(upto int) {
+		if len(run) == 0 {
+			run, runFrom = nil, upto
+			return
+		}
+		form := base
+		form.Fields = run
+		form.Cursor = a.cursor - runFrom
+		form.Focused = form.Cursor >= 0 && form.Cursor < len(run)
+		if form.Focused && a.cursor < len(a.fields) {
+			// A multi-select's row is NOT drawn as focused, even when it is: the
+			// marker and the accent belong to the option row below, which is
+			// where the keys act. Two markers on screen and a reader has to work
+			// out which one their arrows are moving — the first version of this
+			// had both, and that ambiguity is what made the databases version
+			// hard to use for the same reason in reverse.
+			if a.fields[a.cursor].kind == fieldMulti {
+				form.Focused = false
+			}
+			form.Caret = a.fields[a.cursor].caret
+		}
+		if h := min(len(run), r.Bottom()-y+1); h > 0 {
+			form.Draw(c, comp.Rect{X: r.X, Y: y, W: r.W, H: h}, regModal)
+			y += h
+		}
+		run, runFrom = nil, upto
+	}
+
+	for i, f := range a.fields {
 		field := comp.Field{Label: f.label, Disabled: f.disabled}
 		switch f.kind {
 		case fieldChoice:
@@ -217,28 +270,84 @@ func (m *Model) drawFields(c *comp.Canvas, r comp.Rect) {
 			if target := a.value("target"); target != "" {
 				field.Must = target
 			}
-		}
-		fields = append(fields, field)
-	}
+		case fieldMulti:
+			// The field's row is the label and the count; its options are drawn
+			// underneath it as a list, because that is what a set of choices
+			// looks like. The row carries NO cursor marker even when focused —
+			// the marker is on the option, which is where the keys act, and two
+			// markers is how a reader loses track of which one they are moving.
+			field.Kind = comp.FieldChoice
+			field.Choices, field.Choice = []string{m.multiSummary(f)}, 0
+			run = append(run, field)
+			flush(i + 1)
 
-	form := comp.Form{
-		Fields:     fields,
-		Cursor:     a.cursor,
-		Focused:    true,
-		Marker:     "▸ ",
-		Blank:      "  ",
-		LabelWidth: labelWidth,
-		Label:      &mutedStyle,
-		FocusLabel: &accentStyle,
-		Muted:      &mutedStyle,
-		Danger:     &dangerStyle,
-		CursorFG:   &cursorFG,
-		CursorBG:   &cursorBG,
+			rows := m.multiRows(f)
+			if h := min(len(rows), r.Bottom()-y+1); h >= 1 {
+				m.multiList.Select(f.choice)
+				m.multiList.Focused = i == a.cursor
+				m.multiList.Draw(c, comp.Rect{X: r.X, Y: y, W: r.W, H: h}, rows)
+				y += h
+			}
+			continue
+		}
+		run = append(run, field)
 	}
-	if a.cursor < len(a.fields) {
-		form.Caret = a.fields[a.cursor].caret
+	flush(len(a.fields))
+}
+
+// multiSummary is a multi-select as one line, for the field's own row.
+func (m *Model) multiSummary(f formField) string {
+	on := 0
+	for i := range f.options {
+		if f.selected[i] {
+			on++
+		}
 	}
-	form.Draw(c, r, regModal)
+	switch {
+	case on == 0:
+		return "nothing chosen yet"
+	case on == len(f.options):
+		return fmt.Sprintf("all %d", on)
+	default:
+		return fmt.Sprintf("%d of %d", on, len(f.options))
+	}
+}
+
+// multiRows are the options under a multi-select.
+//
+// ● in, ○ out, as the row's STATUS — a fixed column whose colour survives the
+// selection highlight, because whether an option is chosen and where the cursor
+// is are two different facts and the highlight must not eat one of them. The
+// same in/out pair the Connections panel marks reachability with: one question
+// shape should not have two glyphs.
+//
+// The hint travels with its option rather than only appearing in the help row,
+// because the whole point of a list is that you can compare the choices without
+// visiting each one.
+func (m *Model) multiRows(f formField) []comp.Row {
+	out := make([]comp.Row, 0, len(f.options))
+	for i, opt := range f.options {
+		mark, style := "○", &mutedStyle
+		if f.selected[i] {
+			mark, style = "●", &okStyle
+		}
+		row := comp.Row{
+			Key:         opt,
+			Status:      mark,
+			StatusStyle: style,
+			Depth:       1,
+			Text:        opt,
+		}
+		if i < len(f.labels) && f.labels[i] != "" {
+			row.Spans = []comp.Segment{
+				{Text: comp.Pad(opt, 14) + "  "},
+				{Text: f.labels[i], Style: &mutedStyle},
+			}
+			row.Text = comp.Pad(opt, 14) + "  " + f.labels[i]
+		}
+		out = append(out, row)
+	}
+	return out
 }
 
 // choiceLabel is the selected choice, with the chevrons that say it cycles and
@@ -267,7 +376,42 @@ func (m *Model) actionHelp() string {
 	if f.disabled && f.reason != "" {
 		return f.reason
 	}
+	if f.kind == fieldMulti {
+		return m.destinationConsequence()
+	}
 	return f.help
+}
+
+// destinationConsequence is what the current selection MEANS, in the row that
+// would otherwise repeat the keys.
+//
+// The keys are on the hint line already; what a reader cannot get from the rows
+// is that unchoosing local does not merely skip an upload, it deletes the copy
+// on this machine once the upload succeeds. That is the one consequence in this
+// form worth a sentence, and it changes as the cursor never moves — so it
+// belongs here rather than beside an option.
+func (m *Model) destinationConsequence() string {
+	chosen := m.chosenDestinations()
+	local := false
+	remotes := 0
+	for _, name := range chosen {
+		if name == config.LocalStorage {
+			local = true
+			continue
+		}
+		remotes++
+	}
+
+	switch {
+	case len(chosen) == 0:
+		return "nothing chosen yet — enter will refuse"
+	case local && remotes > 0:
+		return "kept on this machine and uploaded"
+	case local:
+		return "stays on this machine; nothing is uploaded"
+	default:
+		return "uploaded, and then the copy here is deleted"
+	}
 }
 
 // actionHintList is the keys on the modal's bottom row, for the stage it is in.
@@ -288,10 +432,20 @@ func (m *Model) actionHintList() []comp.Hint {
 	}
 
 	hints := []comp.Hint{{Key: "↑↓", Label: "field"}}
+	if len(a.fields) == 1 {
+		hints = nil
+	}
 	if a.cursor < len(a.fields) {
 		switch a.fields[a.cursor].kind {
 		case fieldChoice:
 			hints = append(hints, comp.Hint{Key: "←→", Label: "change"})
+		case fieldMulti:
+			hints = append([]comp.Hint{{Key: "↑↓", Label: "move"}},
+				comp.Hint{Key: "space", Label: "choose"},
+				comp.Hint{Key: "a", Label: "all"})
+			if len(a.fields) > 1 {
+				hints = append(hints, comp.Hint{Key: "tab", Label: "field"})
+			}
 		case fieldToggle:
 			hints = append(hints, comp.Hint{Key: "space", Label: "toggle"})
 		case fieldText, fieldConfirm:
