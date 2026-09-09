@@ -7,8 +7,8 @@ pgctl  pgctl.yaml
 ╭─ 2 Databases (3) ─────────────╮▏│                                                                                                │
 │ product-development   11.0 GB │▏│ host       prd.example:5432                                                                    │
 │ claims          ╭─ run ────────────────────────────────────────────────────────────────────────────────────────╮                 │
-│ quote           │>   type to search 9 commands                                                                 │                 │
-╰─────────────────│every key that acts right now; a greyed row says why it cannot                          9 of 9│                 │
+│ quote           │>   type to search 10 commands                                                                │                 │
+╰─────────────────│every key that acts right now; a greyed row says why it cannot                        10 of 10│                 │
 ╭─ 3 Snapshots ───│──────────────────────────────────────────────────────────────────────────────────────────────│                 │
 │ none on prd — pr│ Operations                                                           act on what is selected │                 │
 ╰─────────────────│  snapshot                    n    read the chosen databases and write a compressed copy      │                 │
@@ -19,14 +19,14 @@ pgctl  pgctl.yaml
 │ nothing run yet │ Reading                                                                   nothing is written │                 │
 ╰─────────────────│  reload                      r    re-list snapshots and re-probe every connection pgctl has r│                 │
                   │  filter                      /    narrow the focused panel                                   │                 │
-                  │  detail pane                 tab  focus it, then cycle its tabs                              │                 │
+                  │  next tab                    ]    what the detail pane is showing                            │                 │
+                  │  detail pane                 tab  focus it, and back                                         │                 │
                   │  keys                        ?    every binding, by screen                                   │                 │
                   │                                                                                              │                 │
-                  │                                                                                        11/11 │                 │
+                  │                                                                                        12/12 │                 │
                   │──────────────────────────────────────────────────────────────────────────────────────────────│                 │
                   │  enter run · ↑↓ move · esc close                                                             │                 │
                   ╰──────────────────────────────────────────────────────────────────────────────────────────────╯                 │
-                                 ▏│                                                                                                │
                                  ▏│                                                                                                │
                                  ▏│                                                                                                │
                                  ▏│                                                                                                │

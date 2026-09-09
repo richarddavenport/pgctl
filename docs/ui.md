@@ -26,9 +26,11 @@ showing. That is why the reachability marker comes first on a connection row:
 it answers "can I reach it" before the name answers "which is it", and an
 unreachable connection changes what the whole column means.
 
-`1`–`5` jump to a panel, `J`/`K` move between them, `↑↓`/`jk` move within one,
-`/` filters the focused panel only — filtering all five from one box would empty
-the panels above and below the one being searched, which reads as data loss.
+`h`/`l` move between the panels and `j`/`k` within one, the way they do in
+lazygit, lazydocker and swarmctl — the arrows do the same thing, `1`–`5` jump
+straight to a panel, and `g`/`G` go to the first and last row. `/` filters the
+focused panel only: filtering all five from one box would empty the panels above
+and below the one being searched, which reads as data loss.
 
 ## The detail pane belongs to the focused panel
 
@@ -43,11 +45,16 @@ so moving between panels changes the questions the pane can answer:
 | Sets | Members · Closure · Load order |
 | Runs | Steps · Log |
 
-`tab` moves focus into the pane and then cycles its tabs; the selected tab is
-remembered per panel, so returning to a panel returns to the tab you were
-reading. The chevrons around the strip say that it cycles. A tab longer than the
-pane scrolls, and the bar down its right edge says where in it you are — a
-213-table manifest is the normal case here, not an edge one.
+`[` and `]` cycle the tabs, from either side of the divide — which tab the pane
+shows is a question about what you are reading, so flipping from Manifest to
+Warnings while your cursor stays on the snapshot you are choosing is the
+ordinary way to use it. `tab` crosses the divide when you want to scroll the
+pane itself, and comes back.
+
+The selected tab is remembered per panel, so returning to a panel returns to the
+tab you were reading. The chevrons around the strip say that it cycles. A tab
+longer than the pane scrolls, and the bar down its right edge says where in it
+you are — a 213-table manifest is the normal case here, not an edge one.
 
 The **Rules** tab is the one worth a word here, because it is the only tab that
 shows *config* rather than *state*: a rule says how much of a table a snapshot

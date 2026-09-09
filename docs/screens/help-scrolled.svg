@@ -8,23 +8,23 @@
 <text x="279.2" y="57.17" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="770.6" y="57.17" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="279.2" y="73.42" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
-<text x="287" y="73.42" textLength="70.2" lengthAdjust="spacing" fill="#7f7f7f" font-weight="600" xml:space="preserve">↑ 4 above</text>
+<text x="287" y="73.42" textLength="70.2" lengthAdjust="spacing" fill="#7f7f7f" font-weight="600" xml:space="preserve">↑ 3 above</text>
 <text x="770.6" y="73.42" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="279.2" y="89.67" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
-<text x="287" y="89.67" textLength="23.4" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">g G</text>
-<text x="372.8" y="89.67" textLength="124.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">first / last row</text>
+<text x="287" y="89.67" textLength="23.4" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">1-5</text>
+<text x="372.8" y="89.67" textLength="187.2" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">jump straight to a panel</text>
 <text x="770.6" y="89.67" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="279.2" y="105.92" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
-<text x="287" y="105.92" textLength="23.4" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">tab</text>
-<text x="372.8" y="105.92" textLength="327.6" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">focus the detail pane, then cycle its tabs</text>
+<text x="287" y="105.92" textLength="23.4" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">g G</text>
+<text x="372.8" y="105.92" textLength="124.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">first / last row</text>
 <text x="770.6" y="105.92" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="279.2" y="122.17" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
-<text x="287" y="122.17" textLength="70.2" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">shift+tab</text>
-<text x="372.8" y="122.17" textLength="93.6" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">previous tab</text>
+<text x="287" y="122.17" textLength="23.4" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">[ ]</text>
+<text x="372.8" y="122.17" textLength="296.4" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">previous / next tab of the detail pane</text>
 <text x="770.6" y="122.17" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="279.2" y="138.43" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
-<text x="287" y="138.43" textLength="39" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">← / h</text>
-<text x="372.8" y="138.43" textLength="163.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">leave the detail pane</text>
+<text x="287" y="138.43" textLength="23.4" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">tab</text>
+<text x="372.8" y="138.43" textLength="241.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">focus the detail pane, and back</text>
 <text x="770.6" y="138.43" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="279.2" y="154.68" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="287" y="154.68" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">/</text>

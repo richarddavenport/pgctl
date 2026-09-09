@@ -55,7 +55,8 @@ func (m *Model) commandGroups() []comp.PaletteGroup {
 			{Key: "r", Label: "reload",
 				Hint: "re-list snapshots and re-probe every connection pgctl has reached"},
 			{Key: "/", Label: "filter", Hint: "narrow the focused panel"},
-			{Key: "tab", Label: "detail pane", Hint: "focus it, then cycle its tabs"},
+			{Key: "]", Label: "next tab", Hint: "what the detail pane is showing"},
+			{Key: "tab", Label: "detail pane", Hint: "focus it, and back"},
 			{Key: "?", Label: "keys", Hint: "every binding, by screen"},
 		}},
 	}

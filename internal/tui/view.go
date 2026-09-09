@@ -339,7 +339,7 @@ func (m *Model) hints() []comp.Hint {
 	if m.active != nil {
 		return []comp.Hint{
 			{Key: "q", Label: "stop and leave"},
-			{Key: "tab", Label: "log"},
+			{Key: "]", Label: "log"},
 			{Key: "?", Label: "keys"},
 		}
 	}
@@ -354,6 +354,7 @@ func (m *Model) hints() []comp.Hint {
 	}
 	return append(hints,
 		comp.Hint{Key: "/", Label: "filter"},
+		comp.Hint{Key: "[ ]", Label: "tabs"},
 		comp.Hint{Key: "ctrl+p", Label: "commands"},
 		comp.Hint{Key: "?", Label: "keys"},
 	)

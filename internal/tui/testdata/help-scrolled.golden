@@ -1,11 +1,11 @@
                                   ╭──────────────────────────────────────────────────────────────╮
                                   │pgctl keys                                                    │
                                   │                                                              │
-                                  │↑ 4 above                                                     │
+                                  │↑ 3 above                                                     │
+                                  │1-5        jump straight to a panel                           │
                                   │g G        first / last row                                   │
-                                  │tab        focus the detail pane, then cycle its tabs         │
-                                  │shift+tab  previous tab                                       │
-                                  │← / h      leave the detail pane                              │
+                                  │[ ]        previous / next tab of the detail pane             │
+                                  │tab        focus the detail pane, and back                    │
                                   │/          filter the focused panel                           │
                                   │esc        clear the filter, or leave the pane                │
                                   │                                                              │

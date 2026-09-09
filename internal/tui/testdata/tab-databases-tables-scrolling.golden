@@ -34,4 +34,4 @@ pgctl  pgctl.yaml
                                  ▏│   operations.policy_contract_detail_026                           198.0 MB     1.2M all      · │
                                  ▏│                                                                                       30/227 · │
                                  ▏╰────────────────────────────────────────────────────────────────────────────────────────────────╯
-n snapshot · a apply · m move · p prune · / filter · ctrl+p commands · ? keys
+n snapshot · a apply · m move · p prune · / filter · [ ] tabs · ctrl+p commands · ? keys

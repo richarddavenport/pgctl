@@ -4,10 +4,10 @@ pgctl  pgctl.yaml
 │ ● qat                guarded │▏│                                             │
 │ ╭─ run ────────────────────────────────────────────────────────────────────╮ │
 ╰─│> p                                                                       │ │
-╭─│every key that acts right now; a greyed row says why it cannot      5 of 9│ │
+╭─│every key that acts right now; a greyed row says why it cannot     5 of 10│ │
 │ │──────────────────────────────────────────────────────────────────────────│ │
 │ │  prune                             p    Operations          report what t│ │
-│ │  detail pane                       tab  Reading             focus it, the│ │
+│ │  detail pane                       tab  Reading             focus it, and│ │
 ╰─│  apply                             a    Operations          replace data │ │
 ╭─│  snapshot                          n    Operations          read the chos│ │
 │ │  delete the snapshot               x    Operations          remove it fro│ │

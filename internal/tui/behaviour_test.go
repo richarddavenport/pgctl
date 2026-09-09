@@ -743,3 +743,85 @@ func TestTheRulesTabNamesTheRuleThatDecidesNothing(t *testing.T) {
 		t.Errorf("a rule that wins is reported as shadowed:\n%s", rules)
 	}
 }
+
+// The keymap is the lazygit family's, because a family is worth more than any
+// one tool's preference.
+//
+// h and l between the panels, j and k within one, [ and ] through the detail
+// pane's tabs, tab across the divide. It replaces J/K for panels and tab-then-
+// cycle for tabs, which were this tool's own inventions — and tuikit decision
+// 42's argument for reserving four keys is the same argument one level up: all
+// of the value is in being the same everywhere.
+func TestTheKeymapMovesLikeItsFamily(t *testing.T) {
+	m := loadedModel(t)
+
+	// l and h step through the panels.
+	press(t, m, "l")
+	if m.focus != panelDatabases {
+		t.Errorf("l left focus on panel %d, want the next one", m.focus)
+	}
+	press(t, m, "h")
+	if m.focus != panelConnections {
+		t.Errorf("h left focus on panel %d, want the previous one", m.focus)
+	}
+	// And they clamp rather than wrapping: a panel column is a hierarchy read
+	// downwards, so falling off the end and reappearing at the top would move a
+	// reader somewhere they did not ask to be.
+	press(t, m, "h", "h")
+	if m.focus != panelConnections {
+		t.Errorf("h wrapped past the first panel to %d", m.focus)
+	}
+
+	// j and k move within the focused panel.
+	press(t, m, "j")
+	if m.cursor(panelConnections) != 1 {
+		t.Errorf("j left the cursor on row %d", m.cursor(panelConnections))
+	}
+	press(t, m, "k")
+	if m.cursor(panelConnections) != 0 {
+		t.Errorf("k left the cursor on row %d", m.cursor(panelConnections))
+	}
+
+	// [ and ] cycle the detail pane's tabs WITHOUT focusing it: which tab the
+	// pane shows is a question about what you are reading, and flipping it
+	// while the cursor stays on the row you are choosing is the ordinary way to
+	// use it.
+	tabs := len(m.paneTabs())
+	press(t, m, "]")
+	if m.paneFocus {
+		t.Error("] moved focus into the pane; it should only change the tab")
+	}
+	if m.tabs[panelConnections] != 1 {
+		t.Errorf("] selected tab %d, want the next one", m.tabs[panelConnections])
+	}
+	press(t, m, "[")
+	if m.tabs[panelConnections] != 0 {
+		t.Errorf("[ selected tab %d, want the previous one", m.tabs[panelConnections])
+	}
+	// The strip cycles, which is what the chevrons around it say.
+	press(t, m, "[")
+	if m.tabs[panelConnections] != tabs-1 {
+		t.Errorf("[ from the first tab selected %d, want the last of %d",
+			m.tabs[panelConnections], tabs)
+	}
+
+	// tab crosses the divide, both ways.
+	press(t, m, "tab")
+	if !m.paneFocus {
+		t.Error("tab did not focus the detail pane")
+	}
+	press(t, m, "tab")
+	if m.paneFocus {
+		t.Error("tab did not come back out of the detail pane")
+	}
+
+	// Moving to another panel means working in it, so it takes focus out of the
+	// pane — the same thing 1-5 have always done.
+	press(t, m, "tab", "l")
+	if m.paneFocus {
+		t.Error("l left focus in the detail pane")
+	}
+	if m.focus != panelDatabases {
+		t.Errorf("l from inside the pane went to panel %d", m.focus)
+	}
+}

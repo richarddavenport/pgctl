@@ -2,13 +2,12 @@
                                   │pgctl keys                                                    │
                                   │                                                              │
                                   │Moving                                                        │
-                                  │1-5        jump to a panel                                    │
-                                  │↑ ↓ / j k  move within a panel                                │
-                                  │J K        next / previous panel                              │
+                                  │h l / ← →  previous / next panel                              │
+                                  │j k / ↑ ↓  move within a panel                                │
+                                  │1-5        jump straight to a panel                           │
                                   │g G        first / last row                                   │
-                                  │tab        focus the detail pane, then cycle its tabs         │
-                                  │shift+tab  previous tab                                       │
-                                  │← / h      leave the detail pane                              │
+                                  │[ ]        previous / next tab of the detail pane             │
+                                  │tab        focus the detail pane, and back                    │
                                   │/          filter the focused panel                           │
                                   │esc        clear the filter, or leave the pane                │
                                   │                                                              │
@@ -33,5 +32,6 @@
                                   │w          widen to the referential closure and re-plan       │
                                   │enter      apply it                                           │
                                   │esc        back to the form                                   │
-                                  │↓ 5 more                                                      │
+                                  │                                                              │
+                                  │↓ 4 more                                                      │
                                   ╰──────────────────────────────────────────────────────────────╯

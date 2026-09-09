@@ -684,3 +684,38 @@ rebuilt for destinations in the afternoon, and now serving both. `m` is left
 asking for one database from the panel, deliberately: a move drops and reloads
 the target, and six at once is an hour of an environment being unusable. If that
 turns out to be wrong in use, it should change the way this did.
+
+## 25. The keymap is the lazygit family's, not this tool's
+
+pgctl navigated with `J`/`K` between panels and `tab` to enter the detail pane
+and then cycle its tabs. Both were invented here, and the second was two keys
+wearing one label — whether `tab` moved focus or changed a tab depended on where
+focus already was.
+
+**h and l between panels, j and k within one, `[` and `]` through the tabs.**
+Asked for, in these words: *"With lazygit and lazydocker and swarmctl we use the
+h/l keys to navigate panes… j/k for up and down within the pane. The `[` and `]`
+keys cycle through the details."*
+
+That is the same argument tuikit's decision 42 makes for reserving four keys,
+one level up. Its reasoning is that all of the value is in being the same
+everywhere — *"a reader who has used one of these tools presses `q` expecting to
+leave, and a tool where `q` means 'queue' has set a trap using the other tools'
+credibility"* — and the family here is wider than tuikit: this operator's day
+has lazygit and lazydocker in it, and a tool that navigates differently is a
+tool whose keys have to be learned rather than known.
+
+**`[` and `]` work without focusing the pane**, which is the part that is better
+rather than merely conventional. Which tab the pane shows is a question about
+what you are READING, and the version that required focus made reading a
+snapshot's warnings a four-key job: tab in, cycle, cycle, tab out. Now the
+cursor stays on the row you are choosing while the pane changes what it says
+about it.
+
+**What went.** `J`/`K` and `shift+tab`, and `tab`'s second meaning. `1`-`5`,
+`g`/`G` and the arrow keys are unchanged — the arrows do what `h`/`j`/`k`/`l`
+do, because a reader who has not learned the letters should not be stuck.
+
+**What would have to change to reverse this.** The family changing, which is not
+something this repo gets a vote on. If lazygit rebinds `[`/`]`, the argument
+that produced this decision is the argument for following it.

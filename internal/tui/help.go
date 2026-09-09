@@ -18,13 +18,12 @@ import (
 func KeySections() []comp.KeySection {
 	return []comp.KeySection{
 		{Name: "Moving", Keys: []comp.Hint{
-			{Key: "1-5", Label: "jump to a panel"},
-			{Key: "↑ ↓ / j k", Label: "move within a panel"},
-			{Key: "J K", Label: "next / previous panel"},
+			{Key: "h l / ← →", Label: "previous / next panel"},
+			{Key: "j k / ↑ ↓", Label: "move within a panel"},
+			{Key: "1-5", Label: "jump straight to a panel"},
 			{Key: "g G", Label: "first / last row"},
-			{Key: "tab", Label: "focus the detail pane, then cycle its tabs"},
-			{Key: "shift+tab", Label: "previous tab"},
-			{Key: "← / h", Label: "leave the detail pane"},
+			{Key: "[ ]", Label: "previous / next tab of the detail pane"},
+			{Key: "tab", Label: "focus the detail pane, and back"},
 			{Key: "/", Label: "filter the focused panel"},
 			{Key: "esc", Label: "clear the filter, or leave the pane"},
 		}},

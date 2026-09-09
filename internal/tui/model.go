@@ -443,24 +443,18 @@ func (m *Model) screenKey(msg tea.KeyMsg) (tea.Cmd, bool) {
 		return m.onSelectionChanged(), true
 
 	case "tab":
-		// Tab cycles the right pane's tabs when the pane has focus, and moves
-		// focus into it when it does not.
-		if !m.paneFocus {
-			m.paneFocus = true
-			return nil, true
-		}
-		m.tabs[m.focus] = (m.tabs[m.focus] + 1) % len(m.paneTabs())
-		m.paneList.Reset()
-		return m.paneLoad(), true
-
-	case "shift+tab":
-		if m.paneFocus {
-			tabs := len(m.paneTabs())
-			m.tabs[m.focus] = (m.tabs[m.focus] + tabs - 1) % tabs
-			m.paneList.Reset()
-			return m.paneLoad(), true
-		}
+		// Tab is the ONE key that crosses the divide, in both directions. It
+		// used to also cycle the pane's tabs once focus was there, which made
+		// it two keys wearing one label: the tabs are `[` and `]` now, and they
+		// work from either side.
+		m.paneFocus = !m.paneFocus
 		return nil, true
+
+	case "]":
+		return m.cycleTab(1), true
+
+	case "[":
+		return m.cycleTab(-1), true
 
 	case "/":
 		m.filtering = true
@@ -545,11 +539,12 @@ func (m *Model) navigate(key string) (tea.Cmd, bool) {
 		}
 		return m.onSelectionChanged(), true
 
+	// h and l move between the panels, the way they do in lazygit, lazydocker
+	// and swarmctl. Moving to a panel means working in it, so focus comes back
+	// out of the detail pane — which is what 1-5 have always done, and this is
+	// the same act one step at a time.
 	case "left", "h":
-		if m.paneFocus {
-			m.paneFocus = false
-			return nil, true
-		}
+		m.paneFocus = false
 		if m.focus > 0 {
 			m.focus--
 			m.clearFilter()
@@ -557,8 +552,12 @@ func (m *Model) navigate(key string) (tea.Cmd, bool) {
 		return m.onSelectionChanged(), true
 
 	case "right", "l":
-		m.paneFocus = true
-		return nil, true
+		m.paneFocus = false
+		if m.focus < panelCount-1 {
+			m.focus++
+			m.clearFilter()
+		}
+		return m.onSelectionChanged(), true
 
 	case "g", "home":
 		m.setCursor(0)
@@ -568,21 +567,25 @@ func (m *Model) navigate(key string) (tea.Cmd, bool) {
 		m.setCursor(m.panelLen(m.focus) - 1)
 		return m.onSelectionChanged(), true
 
-	case "J":
-		if m.focus < panelCount-1 {
-			m.focus++
-			m.clearFilter()
-		}
-		return m.onSelectionChanged(), true
-
-	case "K":
-		if m.focus > 0 {
-			m.focus--
-			m.clearFilter()
-		}
-		return m.onSelectionChanged(), true
 	}
 	return nil, false
+}
+
+// cycleTab moves the detail pane's tab strip, from either side of the divide.
+//
+// Without needing focus, deliberately: which tab the pane shows is a question
+// about what you are reading, and flipping from Manifest to Warnings while the
+// cursor stays on the snapshot you are choosing is the ordinary way to use it.
+// The version that required focus made reading a snapshot a four-key job — tab
+// in, cycle, cycle, tab out.
+func (m *Model) cycleTab(by int) tea.Cmd {
+	tabs := len(m.paneTabs())
+	if tabs == 0 {
+		return nil
+	}
+	m.tabs[m.focus] = ((m.tabs[m.focus]+by)%tabs + tabs) % tabs
+	m.paneList.Reset()
+	return m.paneLoad()
 }
 
 func (m *Model) setCursor(i int) {

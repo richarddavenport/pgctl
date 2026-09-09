@@ -1,7 +1,7 @@
 pgctl  pgctl.yaml
 ╭─╭─ run ────────────────────────────────────────────────────────────────────╮─╮
-│ │>   type to search 9 commands                                             │ │
-│ │every key that acts right now; a greyed row says why it cannot      9 of 9│ │
+│ │>   type to search 10 commands                                            │ │
+│ │every key that acts right now; a greyed row says why it cannot    10 of 10│ │
 │ │──────────────────────────────────────────────────────────────────────────│ │
 ╰─│ Operations                                       act on what is selected │ │
 ╭─│  snapshot                    n    read the chosen databases and write a c│ │
@@ -12,11 +12,11 @@ pgctl  pgctl.yaml
 ╭─│ Reading                                               nothing is written │ │
 │ │  reload                      r    re-list snapshots and re-probe every co│ │
 ╰─│  filter                      /    narrow the focused panel               │ │
-╭─│  detail pane                 tab  focus it, then cycle its tabs          │ │
-│ │  keys                        ?    every binding, by screen               │ │
-╰─│                                                                          │ │
-╭─│                                                                    11/11 │ │
-│ │──────────────────────────────────────────────────────────────────────────│ │
-╰─│  enter run · ↑↓ move · esc close                                         │ │
-  ╰──────────────────────────────────────────────────────────────────────────╯ │
-                                ▏╰─────────────────────────────────────────────╯
+╭─│  next tab                    ]    what the detail pane is showing        │ │
+│ │  detail pane                 tab  focus it, and back                     │ │
+╰─│  keys                        ?    every binding, by screen               │ │
+╭─│                                                                          │ │
+│ │                                                                    12/12 │ │
+╰─│──────────────────────────────────────────────────────────────────────────│ │
+  │  enter run · ↑↓ move · esc close                                         │ │
+  ╰──────────────────────────────────────────────────────────────────────────╯─╯

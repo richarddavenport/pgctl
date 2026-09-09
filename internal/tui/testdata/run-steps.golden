@@ -34,4 +34,4 @@ pgctl  pgctl.yaml
                                  ▏│                                                                                                │
                                  ▏│                                                                                                │
                                  ▏╰────────────────────────────────────────────────────────────────────────────────────────────────╯
-q stop and leave · tab log · ? keys
+q stop and leave · ] log · ? keys

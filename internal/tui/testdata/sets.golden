@@ -34,4 +34,4 @@ pgctl  pgctl.yaml
                                  ▏│                                                                                                │
                                  ▏│                                                                                         11/11  │
                                  ▏╰────────────────────────────────────────────────────────────────────────────────────────────────╯
-n snapshot · a apply · m move · p prune · / filter · ctrl+p commands · ? keys
+n snapshot · a apply · m move · p prune · / filter · [ ] tabs · ctrl+p commands · ? keys

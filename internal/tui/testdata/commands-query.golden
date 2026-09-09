@@ -11,10 +11,10 @@ pgctl  pgctl.yaml
 ╰───────────────────────────────╯▏│ databases  3                                                                                   │
 ╭─ 3 Snapshots (1)╭─ run ────────────────────────────────────────────────────────────────────────────────────────╮                 │
 │   08-27 22:00   │> p                                                                                           │                 │
-╰─────────────────│every key that acts right now; a greyed row says why it cannot                          5 of 9│                 │
+╰─────────────────│every key that acts right now; a greyed row says why it cannot                         5 of 10│                 │
 ╭─ 4 Sets (1) ────│──────────────────────────────────────────────────────────────────────────────────────────────│                 │
 │ claims          │  prune                             p    Operations          report what the retention policy │                 │
-╰─────────────────│  detail pane                       tab  Reading             focus it, then cycle its tabs    │                 │
+╰─────────────────│  detail pane                       tab  Reading             focus it, and back               │                 │
 ╭─ 5 Runs ────────│  apply                             a    Operations          replace data with prd/product-dev│                 │
 │ nothing run yet │  snapshot                          n    Operations          read the chosen databases and wri│                 │
 ╰─────────────────│  delete the snapshot               x    Operations          remove it from disk and from stor│                 │
