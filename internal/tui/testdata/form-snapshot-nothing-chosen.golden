@@ -1,22 +1,22 @@
 pgctl  pgctl.yaml
-╭─ 1 Connections (4) ───────────╮▏╭────────────────────────────────────────────────────────────────────────────────────────────────╮
+╭─ [1] Connections (4) ─────────╮▏╭────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ ● prd               protected │▏│ ‹ Overview · Config ›                                                                          │
 │ ● qat                 guarded │▏│                                                                                                │
 │ ● local                       │▏│ prd                                                                                            │
 │ ✗ scratch                     │▏│ protected — never a target                                                                     │
 ╰───────────────────────────────╯▏│                                                                                                │
-╭─ 2 Databases (3) ─────────────╮▏│ host       prd.example:5432                                                                    │
+╭─ [2] Databases (3) ───────────╮▏│ host       prd.example:5432                                                                    │
 │ product-development   11.0 GB │▏│ user       mbpiadmin                                                                           │
 │ claims   ╭────────────────────────────────────────────────────────────────────────────────────────────────────────────╮          │
 │ quote    │ Take a snapshot of prd                                                                                     │          │
 ╰──────────│                                                                                                            │          │
-╭─ 3 Snapsh│ Reads the chosen databases and writes a compressed copy. Nothing is written to prd. Choose where they go:  │          │
+╭─ [3] Snap│ Reads the chosen databases and writes a compressed copy. Nothing is written to prd. Choose where they go:  │          │
 │   08-27 2│ keeping them here, sending them away, or both.                                                             │          │
 ╰──────────│                                                                                                            │          │
-╭─ 4 Sets (│  choose at least one destination — space chooses, and more than one is fine                                │          │
+╭─ [4] Sets│  choose at least one destination — space chooses, and more than one is fine                                │          │
 │ claims   │                                                                                                            │          │
 ╰──────────│   Databases      1 of 3                                                                                    │          │
-╭─ 5 Runs ─│ ▸ ●   product-development                                                                                  │          │
+╭─ [5] Runs│ ▸ ●   product-development                                                                                  │          │
 │ nothing r│   ○   claims                                                                                               │          │
 ╰──────────│   ○   quote                                                                                                │          │
            │   Where it goes  nothing chosen yet                                                                        │          │

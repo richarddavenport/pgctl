@@ -1,20 +1,20 @@
 pgctl  pgctl.yaml
-╭─ 1 Connections (4) ───────────╮▏╭────────────────────────────────────────────────╭──────────────────────────────────────────────╮╮
+╭─ [1] Connections (4) ─────────╮▏╭────────────────────────────────────────────────╭──────────────────────────────────────────────╮╮
 │ ● prd               protected │▏│ ‹ Overview · Config ›                          │refused                                       ││
 │ ● qat                 guarded │▏│                                                │                                              ││
 │ ● local                       │▏│ scratch                                        │scratch is unreachable, so there is no        ││
 │ ✗ scratch                     │▏│                                                │database to act on: dial tcp 127.0.0.1:5432:  ││
 ╰───────────────────────────────╯▏│ CANNOT REACH SCRATCH                           │connect: connection refused                   ││
-╭─ 2 Databases ─────────────────╮▏│   dial tcp 127.0.0.1:5432: connect: connection │                                              ││
+╭─ [2] Databases ───────────────╮▏│   dial tcp 127.0.0.1:5432: connect: connection │                                              ││
 │ unreachable                   │▏│                                                │esc dismiss                                   ││
 ╰───────────────────────────────╯▏│ r retries. A secrets file that will not decrypt╰──────────────────────────────────────────────╯│
-╭─ 3 Snapshots ─────────────────╮▏│ address, and a stopped server all look the same from here.                                     │
+╭─ [3] Snapshots ───────────────╮▏│ address, and a stopped server all look the same from here.                                     │
 │ none on scratch — press n     │▏│                                                                                                │
 ╰───────────────────────────────╯▏│                                                                                                │
-╭─ 4 Sets (1) ──────────────────╮▏│                                                                                                │
+╭─ [4] Sets (1) ────────────────╮▏│                                                                                                │
 │ claims                      ? │▏│                                                                                                │
 ╰───────────────────────────────╯▏│                                                                                                │
-╭─ 5 Runs ──────────────────────╮▏│                                                                                                │
+╭─ [5] Runs ────────────────────╮▏│                                                                                                │
 │ nothing run yet               │▏│                                                                                                │
 ╰───────────────────────────────╯▏│                                                                                                │
                                  ▏│                                                                                                │

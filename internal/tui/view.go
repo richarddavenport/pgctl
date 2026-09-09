@@ -240,11 +240,12 @@ func (m *Model) panelBands(r comp.Rect) []comp.Rect {
 	return comp.Layout{Constraints: cs}.Rows(r)
 }
 
-// panelTitle is the panel's number, its name, its count and its filter.
+// panelTitle is the panel's key, its name, its count and its filter.
 //
-// The number is the key that jumps to it, which is the only reason it is on
-// screen: a panel labelled "1 Connections" tells you how to get there without
-// a legend.
+// The number is BRACKETED because it is a key rather than a quantity. Bare, it
+// sat beside a count in parentheses — "1 Connections (4)" — and read as two
+// numbers about the panel, one of which is not about the panel at all. `[1]`
+// says press this.
 //
 // The filter appears here as text and nowhere as a caret. Where the typing
 // lands is shown once, by the comp.Input in the footer — the version that drew
@@ -252,7 +253,7 @@ func (m *Model) panelBands(r comp.Rect) []comp.Rect {
 // append, because a caret you cannot move is a typo you correct by deleting
 // back to it.
 func (m *Model) panelTitle(panel int) string {
-	title := fmt.Sprintf("%d %s", panel+1, panelTitles[panel])
+	title := fmt.Sprintf("[%d] %s", panel+1, panelTitles[panel])
 	if n := m.panelItems(panel); n > 0 {
 		title += fmt.Sprintf(" (%d)", n)
 	}

@@ -1,22 +1,22 @@
 pgctl  pgctl.yaml
-╭─ 1 Connections (4) ───────────╮▏╭────────────────────────────────────────────────────────────────────────────────────────────────╮
+╭─ [1] Connections (4) ─────────╮▏╭────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ ● prd               protected │▏│ ‹ Overview · Config ›                                                                          │
 │ ● qat                 guarded │▏│                                                                                                │
 │ ● local                       │▏│ prd                                                                                            │
 │ ✗ scratch                     │▏│ protected — never a target                                                                     │
 ╰───────────────────────────────╯▏│                                                                                                │
-╭─ 2 Databases (3) ─────────────╮▏│ host       prd.example:5432                                                                    │
+╭─ [2] Databases (3) ───────────╮▏│ host       prd.example:5432                                                                    │
 │ product-development   11.0 GB │▏│ user       mbpiadmin                                                                           │
 │ claims                48.0 MB │▏│ server     PostgreSQL 17.4                                                                     │
 │ quote                 20.0 GB │▏│ databases  3                                                                                   │
 ╰───────────────────────────────╯▏│ total size 31.0 GB                                                                             │
-╭─ 3 Snapshots ─────────────────╮▏│ checked    just now                                                                            │
+╭─ [3] Snapshots ───────────────╮▏│ checked    just now                                                                            │
 │ none on prd — press n         │▏│                                                                                                │
 ╰───────────────────────────────╯▏│ SNAPSHOTS                                                                                      │
-╭─ 4 Sets (1) ──────────────────╮▏│   none — press n to take one                                                                   │
+╭─ [4] Sets (1) ────────────────╮▏│   none — press n to take one                                                                   │
 │ claims                    2+2 │▏│                                                                                                │
 ╰───────────────────────────────╯▏│                                                                                                │
-╭─ 5 Runs ──────────────────────╮▏│                                                                                                │
+╭─ [5] Runs ────────────────────╮▏│                                                                                                │
 │ nothing run yet               │▏│                                                                                                │
 ╰───────────────────────────────╯▏│                                                                                                │
                                  ▏│                                                                                                │

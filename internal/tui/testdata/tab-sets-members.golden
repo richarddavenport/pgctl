@@ -1,22 +1,22 @@
 pgctl  pgctl.yaml
-╭─ 1 Connections (4) ───────────╮▏╭────────────────────────────────────────────────────────────────────────────────────────────────╮
+╭─ [1] Connections (4) ─────────╮▏╭────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ ● prd               protected │▏│ ‹ Members · Closure · Load order ›                                                             │
 │ ● qat                 guarded │▏│                                                                                                │
 │ ● local                       │▏│   claims                                                                                       │
 │ ✗ scratch                     │▏│   claims and everything a claim points at                                                      │
 ╰───────────────────────────────╯▏│                                                                                                │
-╭─ 2 Databases (3) ─────────────╮▏│   patterns      claims.*                                                                       │
+╭─ [2] Databases (3) ───────────╮▏│   patterns      claims.*                                                                       │
 │ product-development   11.0 GB │▏│   matches       2 tables on prd                                                                │
 │ claims                48.0 MB │▏│   closure       +2 more — see Closure                                                          │
 │ quote                 20.0 GB │▏│                                                                                                │
 ╰───────────────────────────────╯▏│   MEMBERS                                                                                      │
-╭─ 3 Snapshots (1) ─────────────╮▏│   TABLE                                                                                   SIZE │
+╭─ [3] Snapshots (1) ───────────╮▏│   TABLE                                                                                   SIZE │
 │   08-27 22:00        1.9 GB l │▏│ › claims.policy_claim                                                                 180.0 MB │
 ╰───────────────────────────────╯▏│   claims.claim_detail                                                                        - │
-╭─ 4 Sets (1) ──────────────────╮▏│                                                                                                │
+╭─ [4] Sets (1) ────────────────╮▏│                                                                                                │
 │ claims                    2+2 │▏│                                                                                                │
 ╰───────────────────────────────╯▏│                                                                                                │
-╭─ 5 Runs ──────────────────────╮▏│                                                                                                │
+╭─ [5] Runs ────────────────────╮▏│                                                                                                │
 │ nothing run yet               │▏│                                                                                                │
 ╰───────────────────────────────╯▏│                                                                                                │
                                  ▏│                                                                                                │

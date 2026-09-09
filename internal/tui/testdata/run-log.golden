@@ -1,22 +1,22 @@
 pgctl  pgctl.yaml
-╭─ 1 Connections (4) ───────────╮▏╭────────────────────────────────────────────────────────────────────────────────────────────────╮
+╭─ [1] Connections (4) ─────────╮▏╭────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ ● prd               protected │▏│ ‹ Steps · Log ›                                                                                │
 │ ● qat                 guarded │▏│                                                                                                │
 │ ● local                       │▏│ apply → qat  Replacing 38 tables on qat with the contents of prd/product-development/20260828T │
 │ ✗ scratch                     │▏│ [────·········································································] 2 of 38 tables │
 ╰───────────────────────────────╯▏│   11:57:40 81 foreign keys, 31 indexes                                                         │
-╭─ 2 Databases (3) ─────────────╮▏│   11:57:50 111 user triggers on 33 tables                                                      │
+╭─ [2] Databases (3) ───────────╮▏│   11:57:50 111 user triggers on 33 tables                                                      │
 │ product-development   11.0 GB │▏│   11:58:00 children before parents                                                             │
 │ claims                48.0 MB │▏│   11:58:10 42 archive entries, 4 jobs                                                          │
 │ quote                 20.0 GB │▏│   11:58:20 claims.policy_claim  483,187 rows                                                   │
 ╰───────────────────────────────╯▏│   11:58:30 claims.claim_detail  1.2M rows                                                      │
-╭─ 3 Snapshots (1) ─────────────╮▏│   11:58:35 504 MB of 1.9 GB                                                                    │
+╭─ [3] Snapshots (1) ───────────╮▏│   11:58:35 504 MB of 1.9 GB                                                                    │
 │   08-27 22:00        1.9 GB l │▏│                                                                                                │
 ╰───────────────────────────────╯▏│                                                                                                │
-╭─ 4 Sets (1) ──────────────────╮▏│                                                                                                │
+╭─ [4] Sets (1) ────────────────╮▏│                                                                                                │
 │ claims                    2+2 │▏│                                                                                                │
 ╰───────────────────────────────╯▏│                                                                                                │
-╭─ 5 Runs (2) ──────────────────╮▏│                                                                                                │
+╭─ [5] Runs (2) ────────────────╮▏│                                                                                                │
 │ ⠋ apply → qat            1:41 │▏│                                                                                                │
 │ ✓ snapshot prd           3:22 │▏│                                                                                                │
 ╰───────────────────────────────╯▏│                                                                                                │

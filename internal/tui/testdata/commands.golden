@@ -1,22 +1,22 @@
 pgctl  pgctl.yaml
-╭─ 1 Connections (4) ───────────╮▏╭────────────────────────────────────────────────────────────────────────────────────────────────╮
+╭─ [1] Connections (4) ─────────╮▏╭────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ ● prd               protected │▏│ ‹ Overview · Config ›                                                                          │
 │ ● qat                 guarded │▏│                                                                                                │
 │ ● local                       │▏│ prd                                                                                            │
 │ ✗ scratch                     │▏│ protected — never a target                                                                     │
 ╰───────────────────────────────╯▏│                                                                                                │
-╭─ 2 Databases (3) ─────────────╮▏│ host       prd.example:5432                                                                    │
+╭─ [2] Databases (3) ───────────╮▏│ host       prd.example:5432                                                                    │
 │ product-developm╭─ run ────────────────────────────────────────────────────────────────────────────────────────╮                 │
 │ claims          │>   type to search 10 commands                                                                │                 │
 │ quote           │every key that acts right now; a greyed row says why it cannot                        10 of 10│                 │
 ╰─────────────────│──────────────────────────────────────────────────────────────────────────────────────────────│                 │
-╭─ 3 Snapshots (1)│ Operations                                                           act on what is selected │                 │
+╭─ [3] Snapshots (│ Operations                                                           act on what is selected │                 │
 │   08-27 22:00   │  snapshot                    n    read the chosen databases and write a compressed copy      │                 │
 ╰─────────────────│  apply                       a    replace data with prd/product-development/20260828T030000Z │                 │
-╭─ 4 Sets (1) ────│  move                        m    snapshot one connection into another and delete the copy   │                 │
+╭─ [4] Sets (1) ──│  move                        m    snapshot one connection into another and delete the copy   │                 │
 │ claims          │  prune                       p    report what the retention policy would remove              │                 │
 ╰─────────────────│  delete the snapshot         x    remove it from disk and from storage — this cannot be undon│                 │
-╭─ 5 Runs ────────│ Reading                                                                   nothing is written │                 │
+╭─ [5] Runs ──────│ Reading                                                                   nothing is written │                 │
 │ nothing run yet │  reload                      r    re-list snapshots and re-probe every connection pgctl has r│                 │
 ╰─────────────────│  filter                      /    narrow the focused panel                                   │                 │
                   │  next tab                    ]    what the detail pane is showing                            │                 │

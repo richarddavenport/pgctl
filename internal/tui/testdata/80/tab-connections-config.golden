@@ -1,22 +1,22 @@
 pgctl  pgctl.yaml
-╭─ 1 Connections (4) ──────────╮▏╭─────────────────────────────────────────────╮
+╭─ [1] Connections (4) ────────╮▏╭─────────────────────────────────────────────╮
 │ ● prd              protected │▏│ ‹ Overview · Config ›                       │
 │ ● qat                guarded │▏│                                             │
 │ ● local                      │▏│ name        prd                             │
 │ ✗ scratch                    │▏│ dsn         service=prd                     │
 ╰──────────────────────────────╯▏│ guarded     no                              │
-╭─ 2 Databases (3) ────────────╮▏│ protected   yes                             │
+╭─ [2] Databases (3) ──────────╮▏│ protected   yes                             │
 │ product-development  11.0 GB │▏│ maintenance postgres                        │
 │ claims               48.0 MB │▏│                                             │
 │ quote                20.0 GB │▏│ HOW THIS RESOLVES                           │
 ╰──────────────────────────────╯▏│   The DSN is handed to libpq unchanged, so  │
-╭─ 3 Snapshots (1) ────────────╮▏│   ~/.pg_service.conf, ~/.pgpass and the PG* │
+╭─ [3] Snapshots (1) ──────────╮▏│   ~/.pg_service.conf, ~/.pgpass and the PG* │
 │   08-27 22:00       1.9 GB l │▏│   variables apply exactly as they do to     │
 ╰──────────────────────────────╯▏│   psql. pgctl never stores a password.      │
-╭─ 4 Sets (1) ─────────────────╮▏│                                             │
+╭─ [4] Sets (1) ───────────────╮▏│                                             │
 │ claims                   2+2 │▏│ MEANING                                     │
 ╰──────────────────────────────╯▏│   This environment can never be an apply    │
-╭─ 5 Runs ─────────────────────╮▏│   target. There is no flag that changes     │
+╭─ [5] Runs ───────────────────╮▏│   target. There is no flag that changes     │
 │ nothing run yet              │▏│   that.                                     │
 ╰──────────────────────────────╯▏│                                             │
                                 ▏╰─────────────────────────────────────────────╯

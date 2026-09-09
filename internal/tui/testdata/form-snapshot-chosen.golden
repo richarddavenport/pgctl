@@ -1,22 +1,22 @@
 pgctl  pgctl.yaml
-╭─ 1 Connections (4) ───────────╮▏╭────────────────────────────────────────────────────────────────────────────────────────────────╮
+╭─ [1] Connections (4) ─────────╮▏╭────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ ● prd               protected │▏│ ‹ Overview · Config ›                                                                          │
 │ ● qat                 guarded │▏│                                                                                                │
 │ ● local                       │▏│ prd                                                                                            │
 │ ✗ scratch                     │▏│ protected — never a target                                                                     │
 ╰───────────────────────────────╯▏│                                                                                                │
-╭─ 2 Databases (3) ─────────────╮▏│ host       prd.example:5432                                                                    │
+╭─ [2] Databases (3) ───────────╮▏│ host       prd.example:5432                                                                    │
 │ product-development   11.0 GB │▏│ user       mbpiadmin                                                                           │
 │ claims                48.0 MB │▏│ server     PostgreSQL 17.4                                                                     │
 │ quote    ╭────────────────────────────────────────────────────────────────────────────────────────────────────────────╮          │
 ╰──────────│ Take a snapshot of prd                                                                                     │          │
-╭─ 3 Snapsh│                                                                                                            │          │
+╭─ [3] Snap│                                                                                                            │          │
 │   08-27 2│ Reads the chosen databases and writes a compressed copy. Nothing is written to prd. Choose where they go:  │          │
 ╰──────────│ keeping them here, sending them away, or both.                                                             │          │
-╭─ 4 Sets (│                                                                                                            │          │
+╭─ [4] Sets│                                                                                                            │          │
 │ claims   │   Databases      2 of 3                                                                                    │          │
 ╰──────────│   ●   product-development                                                                                  │          │
-╭─ 5 Runs ─│ ▸ ●   claims                                                                                               │          │
+╭─ [5] Runs│ ▸ ●   claims                                                                                               │          │
 │ nothing r│   ○   quote                                                                                                │          │
 ╰──────────│   Where it goes  nothing chosen yet                                                                        │          │
            │   ○   local           keep it on this machine, in .pgctl/snapshots                                         │          │

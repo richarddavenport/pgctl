@@ -1,20 +1,20 @@
 pgctl  pgctl.yaml
-╭─ 1 Connections (4) ──────────╮▏╭─────────────────────────────────────────────╮
+╭─ [1] Connections (4) ────────╮▏╭─────────────────────────────────────────────╮
 │ ● prd              protected │▏│ ‹ Overview · Config ›                       │
 │ ● qat                guarded │▏│                                             │
 │ ● local                      │▏│ local                                       │
 │ ✗ scratch                    │▏│                                             │
 ╰──────────────────────────────╯▏│ host       127.0.0.1:5432                   │
-╭─ 2 Databases (1) ────────────╮▏│ user       richardd                         │
+╭─ [2] Databases (1) ──────────╮▏│ user       richardd                         │
 │ postgres              8.0 MB │▏│ server     PostgreSQL 17.4                  │
 ╰──────────────────────────────╯▏│ databases  1                                │
-╭─ 3 Snapshots ────────────────╮▏│ total size 8.0 MB                           │
+╭─ [3] Snapshots ──────────────╮▏│ total size 8.0 MB                           │
 │ none on local — press n      │▏│ checked    2m ago                           │
 ╰──────────────────────────────╯▏│                                             │
-╭─ 4 Sets ─────────────────────╮▏│ SNAPSHOTS                                   │
+╭─ [4] Sets ───────────────────╮▏│ SNAPSHOTS                                   │
 │ none declared                │▏│   none — press n to take one                │
 ╰──────────────────────────────╯▏│                                             │
-╭─ 5 Runs ─────────────────────╮▏│                                             │
+╭─ [5] Runs ───────────────────╮▏│                                             │
 │ nothing run yet              │▏│                                             │
 ╰──────────────────────────────╯▏│                                             │
                                 ▏│                                             │

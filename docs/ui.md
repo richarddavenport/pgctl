@@ -14,12 +14,16 @@ give the same answer.
 Five panels down the left, and each one is **about the row selected above it**.
 
 ```
-1 Connections   the servers pgctl can reach
-2 Databases       …on the selected connection, discovered from the server
-3 Snapshots       …taken from the selected connection
-4 Sets            …declared for the selected database
-5 Runs          this session's operations
+[1] Connections   the servers pgctl can reach
+[2] Databases       …on the selected connection, discovered from the server
+[3] Snapshots       …taken from the selected connection
+[4] Sets            …declared for the selected database
+[5] Runs          this session's operations
 ```
+
+The number is bracketed because it is a **key**, not a quantity: bare, it sat
+beside a count in parentheses and read as two numbers about the panel, one of
+which is not about the panel at all.
 
 Moving the Connections cursor therefore changes what every panel below is
 showing. That is why the reachability marker comes first on a connection row:

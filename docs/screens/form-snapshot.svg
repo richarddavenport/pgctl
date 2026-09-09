@@ -4,8 +4,8 @@
 <text x="14" y="24.68" textLength="39" lengthAdjust="spacing" fill="#ff00ff" font-weight="600" xml:space="preserve">pgctl</text>
 <text x="53" y="24.68" textLength="93.6" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">  pgctl.yaml</text>
 <text x="14" y="40.92" textLength="15.6" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">╭─</text>
-<text x="29.6" y="40.92" textLength="140.4" lengthAdjust="spacing" fill="#7f7f7f" font-weight="600" xml:space="preserve"> 1 Connections (4)</text>
-<text x="177.8" y="40.92" textLength="93.6" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">───────────╮</text>
+<text x="29.6" y="40.92" textLength="156" lengthAdjust="spacing" fill="#7f7f7f" font-weight="600" xml:space="preserve"> [1] Connections (4)</text>
+<text x="193.4" y="40.92" textLength="78" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">─────────╮</text>
 <text x="271.4" y="40.92" textLength="7.8" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">▏</text>
 <text x="279.2" y="40.92" textLength="764.4" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">╭────────────────────────────────────────────────────────────────────────────────────────────────╮</text>
 <text x="14" y="57.17" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
@@ -56,8 +56,8 @@
 <text x="279.2" y="122.17" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="1035.8" y="122.17" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="14" y="138.43" textLength="15.6" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">╭─</text>
-<text x="29.6" y="138.43" textLength="124.8" lengthAdjust="spacing" fill="#7f7f7f" font-weight="600" xml:space="preserve"> 2 Databases (3)</text>
-<text x="162.2" y="138.43" textLength="109.2" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">─────────────╮</text>
+<text x="29.6" y="138.43" textLength="140.4" lengthAdjust="spacing" fill="#7f7f7f" font-weight="600" xml:space="preserve"> [2] Databases (3)</text>
+<text x="177.8" y="138.43" textLength="93.6" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">───────────╮</text>
 <text x="271.4" y="138.43" textLength="7.8" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">▏</text>
 <text x="279.2" y="138.43" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="294.8" y="138.43" textLength="210.6" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">host       prd.example:5432</text>
@@ -86,7 +86,7 @@
 <text x="950" y="203.43" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="1035.8" y="203.43" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="14" y="219.68" textLength="15.6" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">╭─</text>
-<text x="29.6" y="219.68" textLength="70.2" lengthAdjust="spacing" fill="#7f7f7f" font-weight="600" xml:space="preserve"> 3 Snapsh</text>
+<text x="29.6" y="219.68" textLength="70.2" lengthAdjust="spacing" fill="#7f7f7f" font-weight="600" xml:space="preserve"> [3] Snap</text>
 <text x="99.8" y="219.68" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="950" y="219.68" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="1035.8" y="219.68" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
@@ -102,7 +102,7 @@
 <text x="950" y="252.18" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="1035.8" y="252.18" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="14" y="268.43" textLength="15.6" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">╭─</text>
-<text x="29.6" y="268.43" textLength="70.2" lengthAdjust="spacing" fill="#7f7f7f" font-weight="600" xml:space="preserve"> 4 Sets (</text>
+<text x="29.6" y="268.43" textLength="70.2" lengthAdjust="spacing" fill="#7f7f7f" font-weight="600" xml:space="preserve"> [4] Sets</text>
 <text x="99.8" y="268.43" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="950" y="268.43" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="1035.8" y="268.43" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
@@ -121,8 +121,7 @@
 <text x="950" y="300.93" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="1035.8" y="300.93" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="14" y="317.18" textLength="15.6" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">╭─</text>
-<text x="29.6" y="317.18" textLength="54.6" lengthAdjust="spacing" fill="#7f7f7f" font-weight="600" xml:space="preserve"> 5 Runs</text>
-<text x="92" y="317.18" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">─</text>
+<text x="29.6" y="317.18" textLength="70.2" lengthAdjust="spacing" fill="#7f7f7f" font-weight="600" xml:space="preserve"> [5] Runs</text>
 <text x="99.8" y="317.18" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="131" y="317.18" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">○</text>
 <text x="146.6" y="317.18" textLength="62.4" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">  claims</text>

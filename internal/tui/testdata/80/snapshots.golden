@@ -1,22 +1,22 @@
 pgctl  pgctl.yaml
-╭─ 1 Connections (4) ──────────╮▏╭─────────────────────────────────────────────╮
+╭─ [1] Connections (4) ────────╮▏╭─────────────────────────────────────────────╮
 │ ● prd              protected │▏│ ‹ Manifest · Tables · Warnings · Drift ›    │
 │ ● qat                guarded │▏│                                             │
 │ ● local                      │▏│ prd/product-development/20260828T030000Z    │
 │ ✗ scratch                    │▏│                                             │
 ╰──────────────────────────────╯▏│ taken       2026-08-27 22:00  14h ago       │
-╭─ 2 Databases (3) ────────────╮▏│ took        3:22                            │
+╭─ [2] Databases (3) ──────────╮▏│ took        3:22                            │
 │ product-development  11.0 GB │▏│ size        1.9 GB                          │
 │ claims               48.0 MB │▏│ tables      3                               │
 │ quote                20.0 GB │▏│ where       local                           │
 ╰──────────────────────────────╯▏│ server      PostgreSQL    pg_dump           │
-╭─ 3 Snapshots (1) ────────────╮▏│ compression zstd:3   4 jobs                 │
+╭─ [3] Snapshots (1) ──────────╮▏│ compression zstd:3   4 jobs                 │
 │   08-27 22:00       1.9 GB l │▏│ source size 20.2 GB                         │
 ╰──────────────────────────────╯▏│                                             │
-╭─ 4 Sets (1) ─────────────────╮▏│ CONTENTS                                    │
+╭─ [4] Sets (1) ───────────────╮▏│ CONTENTS                                    │
 │ claims                   2+2 │▏│   whole        1                            │
 ╰──────────────────────────────╯▏│   filtered     1                            │
-╭─ 5 Runs ─────────────────────╮▏│   no data      1                            │
+╭─ [5] Runs ───────────────────╮▏│   no data      1                            │
 │ nothing run yet              │▏│   foreign keys 0                            │
 ╰──────────────────────────────╯▏│                                             │
                                 ▏╰─────────────────────────────────────────────╯

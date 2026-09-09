@@ -1,22 +1,22 @@
 pgctl  pgctl.yaml
-╭─ 1 Connections (4) ───────────╮▏╭────────────────────────────────────────────────────────────────────────────────────────────────╮
+╭─ [1] Connections (4) ─────────╮▏╭────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ ● prd               protected │▏│ ‹ Members · Closure · Load order ›                                                             │
 │ ● qat                 guarded │▏│                                                                                                │
 │ ● local                       │▏│ NOT CLOSED                                                                                     │
 │ ✗ scratch                     │▏│   2 tables reference 2 others. An apply is refused unless you widen it to include these.       │
 ╰───────────────────────────────╯▏│                                                                                                │
-╭─ 2 Databases (3) ─────────────╮▏│ WOULD BE ADDED BY --WIDEN                                                                      │
+╭─ [2] Databases (3) ───────────╮▏│ WOULD BE ADDED BY --WIDEN                                                                      │
 │ product-development   11.0 GB │▏│    operations.policy_contract                                                                  │
 │ claims                48.0 MB │▏│    public.address                                                                              │
 │ quote                 20.0 GB │▏│                                                                                                │
 ╰───────────────────────────────╯▏│                                                                                                │
-╭─ 3 Snapshots (1) ─────────────╮▏│                                                                                                │
+╭─ [3] Snapshots (1) ───────────╮▏│                                                                                                │
 │   08-27 22:00        1.9 GB l │▏│                                                                                                │
 ╰───────────────────────────────╯▏│                                                                                                │
-╭─ 4 Sets (1) ──────────────────╮▏│                                                                                                │
+╭─ [4] Sets (1) ────────────────╮▏│                                                                                                │
 │ claims                    2+2 │▏│                                                                                                │
 ╰───────────────────────────────╯▏│                                                                                                │
-╭─ 5 Runs ──────────────────────╮▏│                                                                                                │
+╭─ [5] Runs ────────────────────╮▏│                                                                                                │
 │ nothing run yet               │▏│                                                                                                │
 ╰───────────────────────────────╯▏│                                                                                                │
                                  ▏│                                                                                                │

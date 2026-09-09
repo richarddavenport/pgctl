@@ -1,17 +1,17 @@
 pgctl  pgctl.yaml
-╭─ 1 Connections (1) /q ───────╮▏╭─────────────────────────────────────────────╮
+╭─ [1] Connections (1) /q ─────╮▏╭─────────────────────────────────────────────╮
 │ ● qat                guarded │▏│ ‹ Overview · Config ›                       │
 ╰──────────────────────────────╯▏│                                             │
-╭─ 2 Databases (1) ────────────╮▏│ qat                                         │
+╭─ [2] Databases (1) ──────────╮▏│ qat                                         │
 │ product-development   9.0 GB │▏│ guarded                                     │
 ╰──────────────────────────────╯▏│                                             │
-╭─ 3 Snapshots ────────────────╮▏│ host       qat.example:5432                 │
+╭─ [3] Snapshots ──────────────╮▏│ host       qat.example:5432                 │
 │ none on qat — press n        │▏│ user       mbpiadmin                        │
 ╰──────────────────────────────╯▏│ server     PostgreSQL 17.4                  │
-╭─ 4 Sets (1) ─────────────────╮▏│ databases  1                                │
+╭─ [4] Sets (1) ───────────────╮▏│ databases  1                                │
 │ claims                     ? │▏│ total size 9.0 GB                           │
 ╰──────────────────────────────╯▏│ checked    1m ago                           │
-╭─ 5 Runs ─────────────────────╮▏│                                             │
+╭─ [5] Runs ───────────────────╮▏│                                             │
 │ nothing run yet              │▏│ SNAPSHOTS                                   │
 ╰──────────────────────────────╯▏│   none — press n to take one                │
                                 ▏│                                             │

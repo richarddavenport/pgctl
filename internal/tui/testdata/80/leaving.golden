@@ -1,22 +1,22 @@
 pgctl  pgctl.yaml
-╭─ 1 Connections (4) ──────────╮▏╭─────────────────────────────────────────────╮
+╭─ [1] Connections (4) ────────╮▏╭─────────────────────────────────────────────╮
 │ ● prd              protected │▏│ ‹ Overview · Config ›                       │
 │ ● qat                guarded │▏│                                             │
 │ ● local                      │▏│ prd                                         │
 │ ✗ scratch                    │▏│ protected — never a target                  │
 ╰───────╭──────────────────────────────────────────────────────────────╮       │
-╭─ 2 Dat│Leave while apply → qat is running?                           │       │
+╭─ [2] D│Leave while apply → qat is running?                           │       │
 │ produc│                                                              │       │
 │ claims│It is cancelled rather than abandoned, so the engine's        │       │
 │ quote │onFailure and postApply hooks still run — they are what       │       │
 ╰───────│bring an environment back up. Anything already written stays  │       │
-╭─ 3 Sna│written.                                                      │       │
+╭─ [3] S│written.                                                      │       │
 │   08-2│                                                              │       │
 ╰───────│y cancel it and leave · esc stay                              │       │
-╭─ 4 Set╰──────────────────────────────────────────────────────────────╯       │
+╭─ [4] S╰──────────────────────────────────────────────────────────────╯       │
 │ claims                   2+2 │▏│   newest 14h ago  prd/product-development/… │
 ╰──────────────────────────────╯▏│                                             │
-╭─ 5 Runs (2) ─────────────────╮▏│                                             │
+╭─ [5] Runs (2) ───────────────╮▏│                                             │
 │ ⠋ apply → qat           1:41 │▏│                                             │
 │ ✓ snapshot prd          3:22 │▏│                                             │
 ╰──────────────────────────────╯▏╰─────────────────────────────────────────────╯

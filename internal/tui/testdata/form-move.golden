@@ -1,22 +1,22 @@
 pgctl  pgctl.yaml
-╭─ 1 Connections (4) ───────────╮▏╭────────────────────────────────────────────────────────────────────────────────────────────────╮
+╭─ [1] Connections (4) ─────────╮▏╭────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ ● prd               protected │▏│ ‹ Overview · Config ›                                                                          │
 │ ● qat                 guarded │▏│                                                                                                │
 │ ● local                       │▏│ prd                                                                                            │
 │ ✗ scratch                     │▏│ protected — never a target                                                                     │
 ╰───────────────────────────────╯▏│                                                                                                │
-╭─ 2 Databases (3) ─────────────╮▏│ host       prd.example:5432                                                                    │
+╭─ [2] Databases (3) ───────────╮▏│ host       prd.example:5432                                                                    │
 │ product-development   11.0 GB │▏│ user       mbpiadmin                                                                           │
 │ claims                48.0 MB │▏│ server     PostgreSQL 17.4                                                                     │
 │ quote                 20.0 GB │▏│ databases  3                                                                                   │
 ╰───────────────────────────────╯▏│ total size 31.0 GB                                                                             │
-╭─ 3 Snapshots (1) ─────────────╮▏│ checked    just now                                                                            │
+╭─ [3] Snapshots (1) ───────────╮▏│ checked    just now                                                                            │
 │   08-27 2╭────────────────────────────────────────────────────────────────────────────────────────────────────────────╮          │
 ╰──────────│ Move prd/product-development into another connection                                                       │          │
-╭─ 4 Sets (│                                                                                                            │          │
+╭─ [4] Sets│                                                                                                            │          │
 │ claims   │ Takes a snapshot into a temporary directory, applies it, and deletes it. Nothing is catalogued or          │          │
 ╰──────────│ uploaded, and nothing is written to prd.                                                                   │          │
-╭─ 5 Runs ─│                                                                                                            │          │
+╭─ [5] Runs│                                                                                                            │          │
 │ nothing r│ ▸ To                        ‹ qat  (guarded — needs its name typed) ›  (1/3)                               │          │
 ╰──────────│   Keep the staged snapshot  no                                                                             │          │
            │ ← → to change                                                                                              │          │

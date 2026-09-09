@@ -1,22 +1,22 @@
 pgctl  pgctl.yaml
-╭─ 1 Connections (4) ───────────╮▏╭────────────────────────────────────────────────────────────────────────────────────────────────╮
+╭─ [1] Connections (4) ─────────╮▏╭────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ ● prd               protected │▏│ ‹ Overview · Config ›                                                                          │
 │ ● qat                 guarded │▏│                                                                                                │
 │ ● local                       │▏│ prd                                                                                            │
 │ ✗ scratch                     │▏│ protected — never a target                                                                     │
 ╰───────────────────────────────╯▏│                                                                                                │
-╭─ 2 Databases (3) ─────────────╮▏│ host       prd.example:5432                                                                    │
+╭─ [2] Databases (3) ───────────╮▏│ host       prd.example:5432                                                                    │
 │ product-development   11.0 GB │▏│ user       mbpiadmin                                                                           │
 │ claims                48.0 MB │▏│ server     PostgreSQL 17.4                                                                     │
 │ quote                 20.0 GB │▏│ databases  3                                                                                   │
 ╰─────────────────╭─ run ────────────────────────────────────────────────────────────────────────────────────────╮                 │
-╭─ 3 Snapshots (1)│> p                                                                                           │                 │
+╭─ [3] Snapshots (│> p                                                                                           │                 │
 │   08-27 22:00   │every key that acts right now; a greyed row says why it cannot                         5 of 10│                 │
 ╰─────────────────│──────────────────────────────────────────────────────────────────────────────────────────────│                 │
-╭─ 4 Sets (1) ────│  prune                             p    Operations          report what the retention policy │                 │
+╭─ [4] Sets (1) ──│  prune                             p    Operations          report what the retention policy │                 │
 │ claims          │  detail pane                       tab  Reading             focus it, and back               │                 │
 ╰─────────────────│  apply                             a    Operations          replace data with prd/product-dev│                 │
-╭─ 5 Runs ────────│  snapshot                          n    Operations          read the chosen databases and wri│                 │
+╭─ [5] Runs ──────│  snapshot                          n    Operations          read the chosen databases and wri│                 │
 │ nothing run yet │  delete the snapshot               x    Operations          remove it from disk and from stor│                 │
 ╰─────────────────│                                                                                              │                 │
                   │                                                                                          5/5 │                 │
