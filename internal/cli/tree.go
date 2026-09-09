@@ -46,7 +46,7 @@ func Commands() spec.Command {
 			},
 			{
 				Name:  "ls",
-				Short: "list snapshots, on disk and in storage",
+				Short: "list snapshot runs, on disk and in storage",
 				Flags: common(spec.Flag{Name: "from", Kind: spec.String, Complete: connections,
 					Help: "only this connection"}),
 				Run: do(runList),
@@ -135,6 +135,9 @@ func applyFlagSet() []spec.Flag {
 	return common(
 		spec.Flag{Name: "to", Kind: spec.String, Complete: connections,
 			Help: "connection to apply to"},
+		spec.Flag{Name: "db", Kind: spec.String,
+			Help: "restore only these databases of the run (comma separated; " +
+				"default: every one it covers)"},
 		spec.Flag{Name: "set", Kind: spec.String, Help: "restore only this table set"},
 		spec.Flag{Name: "tables", Kind: spec.String,
 			Help: "restore only these tables (comma separated, schema-qualified)"},

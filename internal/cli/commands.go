@@ -114,32 +114,37 @@ func runList(ctx context.Context, c spec.Call) error {
 	if err != nil {
 		return err
 	}
-	entries, err := e.Index(ctx, printer(false))
+	runs, err := e.Runs(ctx, printer(false))
 	if err != nil {
 		return err
 	}
 
+	// RUNS, not per-database snapshots. Six rows for one press of `n` is six
+	// answers to a question nobody asked — the thing taken, and the thing
+	// restored, is the run. `--db` and the run's own detail name its members.
 	w := tabwriter.NewWriter(c.Out, 0, 0, 2, ' ', 0)
-	fmt.Fprintln(w, "SNAPSHOT\tTAKEN\tTABLES\tSIZE\tWHERE\tSTATE") //nolint:errcheck // a tabwriter error surfaces on Flush
-	for i := len(entries) - 1; i >= 0; i-- {
-		entry := entries[i]
-		m := entry.Manifest
-		if from != "" && m.Connection != from {
+	fmt.Fprintln(w, "SNAPSHOT\tTAKEN\tDATABASES\tSIZE\tWHERE\tSTATE") //nolint:errcheck // a tabwriter error surfaces on Flush
+	for i := len(runs) - 1; i >= 0; i-- {
+		run := runs[i]
+		if from != "" && run.Connection != from {
 			continue
 		}
 		state := "complete"
-		if !m.Complete() {
+		if !run.Complete() {
 			state = "INCOMPLETE"
 		}
-		fmt.Fprintf(w, "%s\t%s\t%d\t%s\t%s\t%s\n", m.ID, //nolint:errcheck // as above
-			m.StartedAt.Local().Format("2006-01-02 15:04"), len(m.Tables),
-			engine.HumanBytes(m.Bytes), entry.Location(), state)
+		where := strings.Join(run.Locations(), "+")
+		if where == "" {
+			where = "nowhere whole"
+		}
+		fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\t%s\n", run.ID, //nolint:errcheck // as above
+			run.At.Local().Format("2006-01-02 15:04"),
+			strings.Join(run.Databases(), " "),
+			engine.HumanBytes(run.Bytes()), where, state)
 	}
 	return w.Flush()
 }
 
-// applyFlags is what plan and apply were given, read off the Call once so the
-// rest of each command reads a struct rather than a map.
 type applyFlags struct {
 	config   string
 	to       string
@@ -150,6 +155,7 @@ type applyFlags struct {
 	yes      bool
 	confirm  string
 	snapshot string
+	db       string
 }
 
 // applyFlagsOf reads plan's and apply's shared flags. Their declaration is in
@@ -166,16 +172,23 @@ func applyFlagsOf(c spec.Call) applyFlags {
 		yes:      c.Bool("yes"),
 		confirm:  c.Flag("confirm"),
 		snapshot: c.Arg("snapshot"),
+		db:       c.Flag("db"),
 	}
 }
 
-func (a *applyFlags) request() engine.ApplyRequest {
-	return engine.ApplyRequest{
-		Snapshot: a.snapshot,
-		Target:   a.to,
-		Set:      a.set,
-		Tables:   splitList(a.tables),
-		Widen:    a.widen,
+// request is one restore, of a whole RUN unless --db narrows it.
+//
+// A run is what `pgctl snapshot` produces — every database at one instant — so
+// it is what a restore takes. Naming a single-database id still restores that
+// database alone, because such an id resolves to a run of one member.
+func (a *applyFlags) request() engine.RunApplyRequest {
+	return engine.RunApplyRequest{
+		Run:       a.snapshot,
+		Target:    a.to,
+		Databases: splitList(a.db),
+		Set:       a.set,
+		Tables:    splitList(a.tables),
+		Widen:     a.widen,
 	}
 }
 
@@ -189,12 +202,48 @@ func runPlan(ctx context.Context, c spec.Call) error {
 		return err
 	}
 
-	plan, err := e.Plan(ctx, f.request(), printer(f.verbose))
+	plan, err := e.PlanRun(ctx, f.request(), printer(f.verbose))
 	if err != nil {
 		return err
 	}
-	fmt.Fprint(c.Out, plan.Describe()) //nolint:errcheck // a closed stdout is the caller's business
+	fmt.Fprint(c.Out, describeRun(plan)) //nolint:errcheck // a closed stdout is the caller's business
 	return nil
+}
+
+// describeRun is a run's plans, one after another, with the databases it
+// refuses named first.
+//
+// The refusals lead, because they are the part that changes what a reader is
+// about to confirm — five databases restoring and one refused is a decision,
+// and finding the refusal under two hundred lines of load order is not.
+func describeRun(plan *engine.RunPlan) string {
+	var b strings.Builder
+	if len(plan.Refusals) > 0 {
+		fmt.Fprintf(&b, "REFUSED, and skipped:\n")
+		for _, r := range plan.Refusals {
+			fmt.Fprintf(&b, "  %s: %s\n", r.Database, r.Reason)
+		}
+		b.WriteString("\n")
+	}
+	if len(plan.Plans) > 1 {
+		fmt.Fprintf(&b, "%s from %s to %s: %s, %s\n\n",
+			plural(len(plan.Plans), "database"), plan.Run.ID, plan.Target,
+			plural(plan.Tables(), "table"), engine.HumanBytes(plan.Bytes()))
+	}
+	for _, one := range plan.Plans {
+		b.WriteString(one.Describe())
+		b.WriteString("\n")
+	}
+	return b.String()
+}
+
+// plural is a count and its noun, agreeing. "1 databases" is the tell that a
+// number came from len() and nobody read the sentence.
+func plural(n int, noun string) string {
+	if n == 1 {
+		return fmt.Sprintf("%d %s", n, noun)
+	}
+	return fmt.Sprintf("%d %ss", n, noun)
 }
 
 func runApply(ctx context.Context, c spec.Call) error {
@@ -208,18 +257,18 @@ func runApply(ctx context.Context, c spec.Call) error {
 	}
 
 	report := printer(f.verbose)
-	plan, err := e.Plan(ctx, f.request(), report)
+	plan, err := e.PlanRun(ctx, f.request(), report)
 	if err != nil {
 		return err
 	}
-	fmt.Fprint(c.Out, plan.Describe()) //nolint:errcheck // as in runPlan
+	fmt.Fprint(c.Out, describeRun(plan)) //nolint:errcheck // as in runPlan
 
-	if err := confirm(plan, f); err != nil {
+	if err := confirm(plan.Plans[0], f); err != nil {
 		return err
 	}
-	// Executing the plan that was displayed, rather than planning again: a
+	// Executing the plans that were displayed, rather than planning again: a
 	// second plan could differ from the one that was confirmed.
-	return e.Execute(ctx, plan, report)
+	return e.ExecuteRun(ctx, plan, report)
 }
 
 func (a *applyFlags) validate() error {
