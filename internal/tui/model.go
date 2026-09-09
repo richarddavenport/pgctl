@@ -231,10 +231,22 @@ func New(e *engine.Engine) *Model {
 		StatusWidth: 2,
 		Marker:      "▸ ",
 		Blank:       "  ",
-		Selected:    &selectedStyle,
-		Unfocused:   &currentStyle,
-		Status:      &mutedStyle,
-		EmptyStyle:  &mutedStyle,
+		// The cursor is a MARKER and an accent, not a filled bar, and that is
+		// the one place in pgctl where those differ.
+		//
+		// Two reasons. A full-width reverse-video bar is heavy in a six-row box
+		// — the panels earn it because they are dense and twenty-eight columns
+		// wide, and a modal's list is neither. And it sidesteps tuikit issue
+		// 90: comp.List fills the row and then draws the status glyph with the
+		// glyph's OWN style, which carries a foreground and no background, so a
+		// filled row comes out with a two-column hole in it exactly where the
+		// ●/○ is. A reader asked whether that was intentional. It is not, it is
+		// not fixable from here — the same StatusStyle is used on every row and
+		// only one of them is filled — and a cursor that does not fill has
+		// nothing to leave a hole in.
+		Selected:   &currentStyle,
+		Status:     &mutedStyle,
+		EmptyStyle: &mutedStyle,
 		// The field's own row carries the count, so the list's status row would
 		// say it twice — in a modal, where the row is an option.
 		NoStatus: true,
