@@ -190,6 +190,11 @@ func states(t *testing.T) []state {
 		}},
 
 		{"filter", func(w, h int) *app.Runner { return keys(loaded(w, h), "/", "q") }},
+		// A filter still applying while the detail pane has focus, which is
+		// where it stopped saying so.
+		{"filter-kept", func(w, h int) *app.Runner {
+			return keys(loaded(w, h), "/", "q", "a", "t", "enter", "tab")
+		}},
 		{"filter-matches-nothing", func(w, h int) *app.Runner {
 			return keys(loaded(w, h), "/", "z", "z")
 		}},

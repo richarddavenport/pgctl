@@ -257,7 +257,14 @@ func (m *Model) panelTitle(panel int) string {
 	if n := m.panelItems(panel); n > 0 {
 		title += fmt.Sprintf(" (%d)", n)
 	}
-	if m.panelFocused(panel) && m.filter.Text != "" {
+	// m.focus, NOT panelFocused: a filter belongs to the panel it was typed
+	// into and keeps applying while you read the detail pane, which is the
+	// point of it — find the row, then look at it. panelFocused is false the
+	// moment `tab` crosses the divide, so the title stopped saying `/qat` while
+	// the panel was still showing one row of four. Rows missing with nothing on
+	// screen explaining why is exactly what "the filter got stuck" looks like,
+	// and under the new keymap `tab` is pressed constantly.
+	if m.focus == panel && m.filter.Text != "" {
 		title += " /" + m.filter.Text
 	}
 	return title
@@ -302,6 +309,14 @@ var filterHints = comp.Hints(
 )
 
 func (m *Model) emptyPanel(panel int) string {
+	// A filter that matched nothing says SO, before anything else. Otherwise
+	// the panel blames the data — "none", "unreachable", "none on prd — press
+	// n" — for a state the reader created two keystrokes ago, and the way out
+	// is not on screen.
+	if m.focus == panel && m.filter.Text != "" {
+		return "nothing matches /" + m.filter.Text
+	}
+
 	switch panel {
 	case panelConnections:
 		return "none declared"
@@ -344,12 +359,19 @@ func (m *Model) hints() []comp.Hint {
 			{Key: "?", Label: "keys"},
 		}
 	}
-	hints := []comp.Hint{
-		{Key: "n", Label: "snapshot"},
-		{Key: "a", Label: "apply"},
-		{Key: "m", Label: "move"},
-		{Key: "p", Label: "prune"},
+	hints := []comp.Hint{}
+	// First, so fitHints keeps it longest: it drops from the right. A filter is
+	// a state the reader is IN, and the key that ends it should not be the one
+	// that falls off a narrow terminal.
+	if m.filter.Text != "" {
+		hints = append(hints, comp.Hint{Key: "esc", Label: "clear /" + m.filter.Text})
 	}
+	hints = append(hints,
+		comp.Hint{Key: "n", Label: "snapshot"},
+		comp.Hint{Key: "a", Label: "apply"},
+		comp.Hint{Key: "m", Label: "move"},
+		comp.Hint{Key: "p", Label: "prune"},
+	)
 	if m.focus == panelSnapshots {
 		hints = append(hints, comp.Hint{Key: "x", Label: "delete"})
 	}

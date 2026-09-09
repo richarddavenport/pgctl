@@ -825,3 +825,59 @@ func TestTheKeymapMovesLikeItsFamily(t *testing.T) {
 		t.Errorf("l from inside the pane went to panel %d", m.focus)
 	}
 }
+
+// A filter that is applied SAYS SO, wherever focus has gone since.
+//
+// Reported as "the filter might have gotten stuck". It had not: the panel was
+// still filtered, correctly, and had stopped saying so — the title asked
+// panelFocused, which is false the moment `tab` crosses into the detail pane,
+// while the filtering itself keys off which panel is current. Rows missing with
+// nothing on screen explaining why is what stuck looks like, and under the
+// keymap `tab` is pressed constantly.
+func TestAnAppliedFilterKeepsSayingSo(t *testing.T) {
+	m := loadedModel(t)
+	press(t, m, "/", "q", "a", "t", "enter")
+	if got := len(m.connections()); got != 1 {
+		t.Fatalf("the filter matched %d connections", got)
+	}
+
+	// In the panel: the title carries it.
+	if title := m.panelTitle(panelConnections); !strings.Contains(title, "/qat") {
+		t.Errorf("title = %q, does not say a filter is on", title)
+	}
+
+	// And after crossing into the detail pane, where it still applies.
+	press(t, m, "tab")
+	if got := len(m.connections()); got != 1 {
+		t.Errorf("the filter stopped applying when focus moved: %d rows", got)
+	}
+	if title := m.panelTitle(panelConnections); !strings.Contains(title, "/qat") {
+		t.Errorf("title = %q while the pane has focus; the filter is still on", title)
+	}
+
+	// The footer offers the way out, and offers it first so a narrow terminal
+	// keeps it — fitHints drops from the right.
+	frame := harness.Strip(run(m, 80, 24).View())
+	if !strings.Contains(frame, "esc clear /qat") {
+		t.Errorf("the footer does not say how to clear the filter:\n%s", frame)
+	}
+}
+
+// A filter that matches nothing blames the filter, not the data.
+//
+// "none", "unreachable" and "none on prd — press n" are all answers about the
+// world, and the reader had created this state two keystrokes ago.
+func TestAFilterThatMatchesNothingSaysThat(t *testing.T) {
+	m := loadedModel(t)
+	press(t, m, "2", "/", "z", "z")
+
+	if got := m.emptyPanel(panelDatabases); !strings.Contains(got, "nothing matches") {
+		t.Errorf("the empty databases panel says %q", got)
+	}
+	// The panels that are NOT filtered keep their own empty states: the filter
+	// applies to one panel, and so does its explanation.
+	press(t, m, "esc", "4", "/", "z", "z")
+	if got := m.emptyPanel(panelDatabases); strings.Contains(got, "nothing matches") {
+		t.Errorf("an unfiltered panel blamed the filter: %q", got)
+	}
+}
