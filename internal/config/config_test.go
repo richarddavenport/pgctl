@@ -132,15 +132,47 @@ func TestDefaults(t *testing.T) {
 // A config half-migrated is worse than one that will not load: it would keep
 // pushing to the destination it always did while the interface offered a list
 // that did not include it.
+//
+// EVERY legacy key present is named, and the same ones every time. This was a
+// range over a map that returned at the first key it happened to find, so a
+// config with two of them was told about one at random: the operator fixed that
+// key, re-ran, and got a different complaint. The test passed four runs in five
+// and a CI runner collected the fifth.
 func TestTheOldStorageKeysAreRefusedWithTheNewShape(t *testing.T) {
-	_, err := Parse([]byte("storage:\n  kind: azureblob\n  container: pg-snapshots\n"), t.TempDir())
-	if err == nil {
-		t.Fatal("storage.kind loaded; it is no longer read")
-	}
-	for _, want := range []string{"storage.kind", "storage.remotes", "pg-snapshots"} {
-		if !strings.Contains(err.Error(), want) {
-			t.Errorf("the error does not mention %q:\n%s", want, err)
+	const legacy = "storage:\n  kind: azureblob\n  container: pg-snapshots\n" +
+		"  keyEnv: PGCTL_KEY\n"
+
+	first := ""
+	// Repeated, because one run of a map range proves nothing: the ordering
+	// this asserts is only observable across runs.
+	for i := 0; i < 50; i++ {
+		_, err := Parse([]byte(legacy), t.TempDir())
+		if err == nil {
+			t.Fatal("storage.kind loaded; it is no longer read")
 		}
+		for _, want := range []string{
+			// Every offending key, in the order they appear in the file.
+			"storage.kind, storage.container, storage.keyEnv",
+			// The shape to write instead, carrying the container it found.
+			"storage.remotes", "pg-snapshots",
+			// Plural, because three keys are not "is no longer read".
+			"are no longer read", "Move them",
+		} {
+			if !strings.Contains(err.Error(), want) {
+				t.Fatalf("the error does not mention %q:\n%s", want, err)
+			}
+		}
+		if first == "" {
+			first = err.Error()
+		} else if err.Error() != first {
+			t.Fatalf("the message changed between runs:\n%s\n---\n%s", first, err)
+		}
+	}
+
+	// One key alone reads as one key.
+	_, err := Parse([]byte("storage:\n  kind: azureblob\n"), t.TempDir())
+	if err == nil || !strings.Contains(err.Error(), "storage.kind is no longer read") {
+		t.Errorf("a single legacy key: %v", err)
 	}
 }
 

@@ -25,18 +25,37 @@ func (c *Config) Validate() error {
 	// A config half-migrated is worse than one that will not load: it would
 	// keep pushing to the destination it always did while the interface offered
 	// a list that did not include it.
-	for key, value := range map[string]string{
-		"kind":       c.Storage.LegacyKind,
-		"container":  c.Storage.LegacyContainer,
-		"endpoint":   c.Storage.LegacyEndpoint,
-		"accountEnv": c.Storage.LegacyAccountEnv,
-		"keyEnv":     c.Storage.LegacyKeyEnv,
-	} {
-		if value == "" {
-			continue
+	//
+	// EVERY legacy key present is named, in a fixed order. This was a range
+	// over a map returning at the first one it happened to find, which meant a
+	// config with `kind` and `container` was told about one of them at random —
+	// so the operator fixed that key, re-ran, and got a different complaint,
+	// and the test asserting the message named `storage.kind` passed on four
+	// runs out of five. Go randomises map iteration for exactly this reason and
+	// it took a CI runner to collect the fifth.
+	legacy := []struct {
+		key   string
+		value string
+	}{
+		{"kind", c.Storage.LegacyKind},
+		{"container", c.Storage.LegacyContainer},
+		{"endpoint", c.Storage.LegacyEndpoint},
+		{"accountEnv", c.Storage.LegacyAccountEnv},
+		{"keyEnv", c.Storage.LegacyKeyEnv},
+	}
+	var found []string
+	for _, l := range legacy {
+		if l.value != "" {
+			found = append(found, "storage."+l.key)
 		}
-		return fmt.Errorf("storage.%s is no longer read: storage now declares a "+
-			"list of destinations. Move it under storage.remotes:\n\n"+
+	}
+	if len(found) > 0 {
+		verb, them := "is", "it"
+		if len(found) > 1 {
+			verb, them = "are", "them"
+		}
+		return fmt.Errorf("%s %s no longer read: storage now declares a "+
+			"list of destinations. Move %s under storage.remotes:\n\n"+
 			"  storage:\n"+
 			"    dir: %s\n"+
 			"    remotes:\n"+
@@ -44,7 +63,8 @@ func (c *Config) Validate() error {
 			"        kind: %s\n"+
 			"        container: %s\n\n"+
 			"and see docs/config.md. A local-only config declares no remotes at all",
-			key, orDefault(c.Storage.Dir, ".pgctl/snapshots"),
+			strings.Join(found, ", "), verb, them,
+			orDefault(c.Storage.Dir, ".pgctl/snapshots"),
 			StorageAzureBlob, orDefault(c.Storage.LegacyContainer, "pg-snapshots"))
 	}
 
@@ -148,10 +168,15 @@ func validPattern(pat string) error {
 		return fmt.Errorf("table pattern %q has an empty half (want schema.table, "+
 			"or a bare table pattern for every schema)", pat)
 	}
-	for part, half := range map[string]string{"schema": schema, "table": table} {
-		if inner := strings.Trim(half, "*"); strings.Contains(inner, "*") {
+	// A slice, not a map: `a*b.c*d` is wrong in both halves and the message has
+	// to name the same one every time somebody re-runs it. Same bug as the
+	// legacy storage keys above, one function apart.
+	for _, half := range []struct{ part, value string }{
+		{"schema", schema}, {"table", table},
+	} {
+		if inner := strings.Trim(half.value, "*"); strings.Contains(inner, "*") {
 			return fmt.Errorf("table pattern %q: in the %s part, `*` is only allowed "+
-				"at the start or the end", pat, part)
+				"at the start or the end", pat, half.part)
 		}
 	}
 	return nil
