@@ -1,23 +1,23 @@
 pgctl  pgctl.yaml
-╭─ 1 Connections (3) ──────────╮▏╭─────────────────────────────────────────────╮
+╭─ 1 Connections (4) ──────────╮▏╭─────────────────────────────────────────────╮
 │ ● prd              protected │▏│ ‹ Steps · Log ›                             │
 │ ● qat                guarded │▏│                                             │
-│ ✗ scratch                    │▏│ apply → qat  Replacing 38 tables on qat wit │
-╰──────────────────────────────╯▏│ [─·························] 2 of 38 tables │
-╭─ 2 Databases (3) ────────────╮▏│   11:57:40 81 foreign keys, 31 indexes      │
-│ product-development  11.0 GB │▏│   11:57:50 111 user triggers on 33 tables   │
-│ claims               48.0 MB │▏│   11:58:00 children before parents          │
-│ quote                20.0 GB │▏│   11:58:10 42 archive entries, 4 jobs       │
-╰──────────────────────────────╯▏│   11:58:20 claims.policy_claim  483,187 ro… │
-╭─ 3 Snapshots (1) ────────────╮▏│   11:58:30 claims.claim_detail  1.2M rows   │
-│   08-27 22:00       1.9 GB l │▏│   11:58:35 504 MB of 1.9 GB                 │
+│ ● local                      │▏│ apply → qat  Replacing 38 tables on qat wit │
+│ ✗ scratch                    │▏│ [─·························] 2 of 38 tables │
+╰──────────────────────────────╯▏│   11:57:40 81 foreign keys, 31 indexes      │
+╭─ 2 Databases (3) ────────────╮▏│   11:57:50 111 user triggers on 33 tables   │
+│ product-development  11.0 GB │▏│   11:58:00 children before parents          │
+│ claims               48.0 MB │▏│   11:58:10 42 archive entries, 4 jobs       │
+│ quote                20.0 GB │▏│   11:58:20 claims.policy_claim  483,187 ro… │
+╰──────────────────────────────╯▏│   11:58:30 claims.claim_detail  1.2M rows   │
+╭─ 3 Snapshots (1) ────────────╮▏│   11:58:35 504 MB of 1.9 GB                 │
+│   08-27 22:00       1.9 GB l │▏│                                             │
 ╰──────────────────────────────╯▏│                                             │
 ╭─ 4 Sets (1) ─────────────────╮▏│                                             │
 │ claims                   2+2 │▏│                                             │
 ╰──────────────────────────────╯▏│                                             │
 ╭─ 5 Runs (2) ─────────────────╮▏│                                             │
 │ ⠋ apply → qat           1:41 │▏│                                             │
-│ ✓ snapshot prd          3:22 │▏│                                             │
-╰──────────────────────────────╯▏│                                  following  │
-                                ▏╰─────────────────────────────────────────────╯
+│ ✓ snapshot prd          3:22 │▏│                                  following  │
+╰──────────────────────────────╯▏╰─────────────────────────────────────────────╯
 q stop and leave · ] log · ? keys

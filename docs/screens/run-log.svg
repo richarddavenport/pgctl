@@ -1,11 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1057.6" height="625.25" viewBox="0 0 1057.6 625.25" font-family="ui-monospace, &#39;SF Mono&#39;, SFMono-Regular, Menlo, Consolas, &#39;DejaVu Sans Mono&#39;, monospace" font-size="13" role="img">
 <title>terminal frame, 132 columns by 37 rows</title>
 <rect width="1057.6" height="625.25" rx="7" fill="#0c0c0e"/>
-<rect x="45.2" y="304.5" width="210.6" height="16.25" fill="#e5e5e5"/>
+<rect x="45.2" y="320.75" width="210.6" height="16.25" fill="#e5e5e5"/>
 <text x="14" y="24.68" textLength="39" lengthAdjust="spacing" fill="#ff00ff" font-weight="600" xml:space="preserve">pgctl</text>
 <text x="53" y="24.68" textLength="93.6" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">  pgctl.yaml</text>
 <text x="14" y="40.92" textLength="15.6" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">╭─</text>
-<text x="29.6" y="40.92" textLength="140.4" lengthAdjust="spacing" fill="#7f7f7f" font-weight="600" xml:space="preserve"> 1 Connections (3)</text>
+<text x="29.6" y="40.92" textLength="140.4" lengthAdjust="spacing" fill="#7f7f7f" font-weight="600" xml:space="preserve"> 1 Connections (4)</text>
 <text x="177.8" y="40.92" textLength="93.6" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">───────────╮</text>
 <text x="271.4" y="40.92" textLength="7.8" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">▏</text>
 <text x="279.2" y="40.92" textLength="764.4" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">╭────────────────────────────────────────────────────────────────────────────────────────────────╮</text>
@@ -32,15 +32,18 @@
 <text x="279.2" y="73.42" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="1035.8" y="73.42" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="14" y="89.67" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
-<text x="29.6" y="89.67" textLength="7.8" lengthAdjust="spacing" fill="#cd0000" font-weight="600" xml:space="preserve">✗</text>
-<text x="45.2" y="89.67" textLength="54.6" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">scratch</text>
+<text x="29.6" y="89.67" textLength="7.8" lengthAdjust="spacing" fill="#00cd00" xml:space="preserve">●</text>
+<text x="45.2" y="89.67" textLength="39" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">local</text>
 <text x="263.6" y="89.67" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="271.4" y="89.67" textLength="7.8" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">▏</text>
 <text x="279.2" y="89.67" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="294.8" y="89.67" textLength="85.8" lengthAdjust="spacing" fill="#ff00ff" font-weight="600" xml:space="preserve">apply → qat</text>
 <text x="380.6" y="89.67" textLength="647.4" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">  Replacing 38 tables on qat with the contents of prd/product-development/20260828T</text>
 <text x="1035.8" y="89.67" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
-<text x="14" y="105.92" textLength="257.4" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">╰───────────────────────────────╯</text>
+<text x="14" y="105.92" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
+<text x="29.6" y="105.92" textLength="7.8" lengthAdjust="spacing" fill="#cd0000" font-weight="600" xml:space="preserve">✗</text>
+<text x="45.2" y="105.92" textLength="54.6" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">scratch</text>
+<text x="263.6" y="105.92" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="271.4" y="105.92" textLength="7.8" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">▏</text>
 <text x="279.2" y="105.92" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="294.8" y="105.92" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">[</text>
@@ -48,24 +51,22 @@
 <text x="333.8" y="105.92" textLength="577.2" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">·········································································]</text>
 <text x="918.8" y="105.92" textLength="109.2" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">2 of 38 tables</text>
 <text x="1035.8" y="105.92" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
-<text x="14" y="122.17" textLength="15.6" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">╭─</text>
-<text x="29.6" y="122.17" textLength="124.8" lengthAdjust="spacing" fill="#7f7f7f" font-weight="600" xml:space="preserve"> 2 Databases (3)</text>
-<text x="162.2" y="122.17" textLength="109.2" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">─────────────╮</text>
+<text x="14" y="122.17" textLength="257.4" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">╰───────────────────────────────╯</text>
 <text x="271.4" y="122.17" textLength="7.8" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">▏</text>
 <text x="279.2" y="122.17" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="294.8" y="122.17" textLength="78" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">  11:57:40</text>
 <text x="380.6" y="122.17" textLength="210.6" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">81 foreign keys, 31 indexes</text>
 <text x="1035.8" y="122.17" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
-<text x="14" y="138.43" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
-<text x="29.6" y="138.43" textLength="226.2" lengthAdjust="spacing" fill="#ff00ff" font-weight="600" xml:space="preserve">product-development   11.0 GB</text>
-<text x="263.6" y="138.43" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
+<text x="14" y="138.43" textLength="15.6" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">╭─</text>
+<text x="29.6" y="138.43" textLength="124.8" lengthAdjust="spacing" fill="#7f7f7f" font-weight="600" xml:space="preserve"> 2 Databases (3)</text>
+<text x="162.2" y="138.43" textLength="109.2" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">─────────────╮</text>
 <text x="271.4" y="138.43" textLength="7.8" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">▏</text>
 <text x="279.2" y="138.43" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="294.8" y="138.43" textLength="78" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">  11:57:50</text>
 <text x="380.6" y="138.43" textLength="234" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">111 user triggers on 33 tables</text>
 <text x="1035.8" y="138.43" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="14" y="154.68" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
-<text x="21.8" y="154.68" textLength="234" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve"> claims                48.0 MB</text>
+<text x="29.6" y="154.68" textLength="226.2" lengthAdjust="spacing" fill="#ff00ff" font-weight="600" xml:space="preserve">product-development   11.0 GB</text>
 <text x="263.6" y="154.68" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="271.4" y="154.68" textLength="7.8" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">▏</text>
 <text x="279.2" y="154.68" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
@@ -73,81 +74,84 @@
 <text x="380.6" y="154.68" textLength="179.4" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">children before parents</text>
 <text x="1035.8" y="154.68" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="14" y="170.93" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
-<text x="21.8" y="170.93" textLength="234" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve"> quote                 20.0 GB</text>
+<text x="21.8" y="170.93" textLength="234" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve"> claims                48.0 MB</text>
 <text x="263.6" y="170.93" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="271.4" y="170.93" textLength="7.8" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">▏</text>
 <text x="279.2" y="170.93" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="294.8" y="170.93" textLength="78" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">  11:58:10</text>
 <text x="380.6" y="170.93" textLength="202.8" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">42 archive entries, 4 jobs</text>
 <text x="1035.8" y="170.93" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
-<text x="14" y="187.18" textLength="257.4" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">╰───────────────────────────────╯</text>
+<text x="14" y="187.18" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
+<text x="21.8" y="187.18" textLength="234" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve"> quote                 20.0 GB</text>
+<text x="263.6" y="187.18" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="271.4" y="187.18" textLength="7.8" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">▏</text>
 <text x="279.2" y="187.18" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="294.8" y="187.18" textLength="78" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">  11:58:20</text>
 <text x="380.6" y="187.18" textLength="257.4" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">claims.policy_claim  483,187 rows</text>
 <text x="1035.8" y="187.18" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
-<text x="14" y="203.43" textLength="15.6" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">╭─</text>
-<text x="29.6" y="203.43" textLength="124.8" lengthAdjust="spacing" fill="#7f7f7f" font-weight="600" xml:space="preserve"> 3 Snapshots (1)</text>
-<text x="162.2" y="203.43" textLength="109.2" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">─────────────╮</text>
+<text x="14" y="203.43" textLength="257.4" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">╰───────────────────────────────╯</text>
 <text x="271.4" y="203.43" textLength="7.8" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">▏</text>
 <text x="279.2" y="203.43" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="294.8" y="203.43" textLength="78" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">  11:58:30</text>
 <text x="380.6" y="203.43" textLength="234" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">claims.claim_detail  1.2M rows</text>
 <text x="1035.8" y="203.43" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
-<text x="14" y="219.68" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
-<text x="45.2" y="219.68" textLength="210.6" lengthAdjust="spacing" fill="#ff00ff" font-weight="600" xml:space="preserve">08-27 22:00        1.9 GB l</text>
-<text x="263.6" y="219.68" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
+<text x="14" y="219.68" textLength="15.6" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">╭─</text>
+<text x="29.6" y="219.68" textLength="124.8" lengthAdjust="spacing" fill="#7f7f7f" font-weight="600" xml:space="preserve"> 3 Snapshots (1)</text>
+<text x="162.2" y="219.68" textLength="109.2" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">─────────────╮</text>
 <text x="271.4" y="219.68" textLength="7.8" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">▏</text>
 <text x="279.2" y="219.68" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="294.8" y="219.68" textLength="78" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">  11:58:35</text>
 <text x="380.6" y="219.68" textLength="124.8" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">504 MB of 1.9 GB</text>
 <text x="1035.8" y="219.68" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
-<text x="14" y="235.93" textLength="257.4" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">╰───────────────────────────────╯</text>
+<text x="14" y="235.93" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
+<text x="45.2" y="235.93" textLength="210.6" lengthAdjust="spacing" fill="#ff00ff" font-weight="600" xml:space="preserve">08-27 22:00        1.9 GB l</text>
+<text x="263.6" y="235.93" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="271.4" y="235.93" textLength="7.8" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">▏</text>
 <text x="279.2" y="235.93" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="1035.8" y="235.93" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
-<text x="14" y="252.18" textLength="15.6" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">╭─</text>
-<text x="29.6" y="252.18" textLength="85.8" lengthAdjust="spacing" fill="#7f7f7f" font-weight="600" xml:space="preserve"> 4 Sets (1)</text>
-<text x="123.2" y="252.18" textLength="148.2" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">──────────────────╮</text>
+<text x="14" y="252.18" textLength="257.4" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">╰───────────────────────────────╯</text>
 <text x="271.4" y="252.18" textLength="7.8" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">▏</text>
 <text x="279.2" y="252.18" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="1035.8" y="252.18" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
-<text x="14" y="268.43" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
-<text x="29.6" y="268.43" textLength="226.2" lengthAdjust="spacing" fill="#ff00ff" font-weight="600" xml:space="preserve">claims                    2+2</text>
-<text x="263.6" y="268.43" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
+<text x="14" y="268.43" textLength="15.6" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">╭─</text>
+<text x="29.6" y="268.43" textLength="85.8" lengthAdjust="spacing" fill="#7f7f7f" font-weight="600" xml:space="preserve"> 4 Sets (1)</text>
+<text x="123.2" y="268.43" textLength="148.2" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">──────────────────╮</text>
 <text x="271.4" y="268.43" textLength="7.8" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">▏</text>
 <text x="279.2" y="268.43" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="1035.8" y="268.43" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
-<text x="14" y="284.68" textLength="257.4" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">╰───────────────────────────────╯</text>
+<text x="14" y="284.68" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
+<text x="29.6" y="284.68" textLength="226.2" lengthAdjust="spacing" fill="#ff00ff" font-weight="600" xml:space="preserve">claims                    2+2</text>
+<text x="263.6" y="284.68" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="271.4" y="284.68" textLength="7.8" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">▏</text>
 <text x="279.2" y="284.68" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="1035.8" y="284.68" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
-<text x="14" y="300.93" textLength="15.6" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">╭─</text>
-<text x="29.6" y="300.93" textLength="85.8" lengthAdjust="spacing" fill="#ff00ff" font-weight="600" xml:space="preserve"> 5 Runs (2)</text>
-<text x="123.2" y="300.93" textLength="148.2" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">──────────────────╮</text>
+<text x="14" y="300.93" textLength="257.4" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">╰───────────────────────────────╯</text>
 <text x="271.4" y="300.93" textLength="7.8" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">▏</text>
 <text x="279.2" y="300.93" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="1035.8" y="300.93" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
-<text x="14" y="317.18" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
-<text x="29.6" y="317.18" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">⠋</text>
-<text x="45.2" y="317.18" textLength="210.6" lengthAdjust="spacing" fill="#000000" font-weight="600" xml:space="preserve">apply → qat            1:41</text>
-<text x="263.6" y="317.18" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
+<text x="14" y="317.18" textLength="15.6" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">╭─</text>
+<text x="29.6" y="317.18" textLength="85.8" lengthAdjust="spacing" fill="#ff00ff" font-weight="600" xml:space="preserve"> 5 Runs (2)</text>
+<text x="123.2" y="317.18" textLength="148.2" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">──────────────────╮</text>
 <text x="271.4" y="317.18" textLength="7.8" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">▏</text>
 <text x="279.2" y="317.18" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="1035.8" y="317.18" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="14" y="333.43" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
-<text x="29.6" y="333.43" textLength="7.8" lengthAdjust="spacing" fill="#00cd00" xml:space="preserve">✓</text>
-<text x="45.2" y="333.43" textLength="93.6" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">snapshot prd</text>
-<text x="224.6" y="333.43" textLength="31.2" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">3:22</text>
+<text x="29.6" y="333.43" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">⠋</text>
+<text x="45.2" y="333.43" textLength="210.6" lengthAdjust="spacing" fill="#000000" font-weight="600" xml:space="preserve">apply → qat            1:41</text>
 <text x="263.6" y="333.43" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="271.4" y="333.43" textLength="7.8" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">▏</text>
 <text x="279.2" y="333.43" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="1035.8" y="333.43" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
-<text x="14" y="349.68" textLength="257.4" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">╰───────────────────────────────╯</text>
+<text x="14" y="349.68" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
+<text x="29.6" y="349.68" textLength="7.8" lengthAdjust="spacing" fill="#00cd00" xml:space="preserve">✓</text>
+<text x="45.2" y="349.68" textLength="93.6" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">snapshot prd</text>
+<text x="224.6" y="349.68" textLength="31.2" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">3:22</text>
+<text x="263.6" y="349.68" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="271.4" y="349.68" textLength="7.8" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">▏</text>
 <text x="279.2" y="349.68" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="1035.8" y="349.68" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
-<text x="14" y="365.93" textLength="265.2" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">                                 ▏</text>
+<text x="14" y="365.93" textLength="257.4" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">╰───────────────────────────────╯</text>
+<text x="271.4" y="365.93" textLength="7.8" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">▏</text>
 <text x="279.2" y="365.93" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="1035.8" y="365.93" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="14" y="382.18" textLength="265.2" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">                                 ▏</text>

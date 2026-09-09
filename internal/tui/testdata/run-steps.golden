@@ -1,15 +1,16 @@
 pgctl  pgctl.yaml
-╭─ 1 Connections (3) ───────────╮▏╭────────────────────────────────────────────────────────────────────────────────────────────────╮
+╭─ 1 Connections (4) ───────────╮▏╭────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ ● prd               protected │▏│ ‹ Steps · Log ›                                                                                │
 │ ● qat                 guarded │▏│                                                                                                │
-│ ✗ scratch                     │▏│ apply → qat  Replacing 38 tables on qat with the contents of prd/product-development/20260828T │
-╰───────────────────────────────╯▏│ [────·········································································] 2 of 38 tables │
-╭─ 2 Databases (3) ─────────────╮▏│   ✓ drop constraints  81 foreign keys, 31 indexes                                        0:10  │
-│ product-development   11.0 GB │▏│   ✓ disable triggers  111 user triggers on 33 tables                                     0:10  │
-│ claims                48.0 MB │▏│   ✓ truncate  children before parents                                                    0:10  │
-│ quote                 20.0 GB │▏│   ⠋ load  504 MB of 1.9 GB                                                               1:50  │
-╰───────────────────────────────╯▏│                                                                                                │
-╭─ 3 Snapshots (1) ─────────────╮▏│   running…                                                                                     │
+│ ● local                       │▏│ apply → qat  Replacing 38 tables on qat with the contents of prd/product-development/20260828T │
+│ ✗ scratch                     │▏│ [────·········································································] 2 of 38 tables │
+╰───────────────────────────────╯▏│   ✓ drop constraints  81 foreign keys, 31 indexes                                        0:10  │
+╭─ 2 Databases (3) ─────────────╮▏│   ✓ disable triggers  111 user triggers on 33 tables                                     0:10  │
+│ product-development   11.0 GB │▏│   ✓ truncate  children before parents                                                    0:10  │
+│ claims                48.0 MB │▏│   ⠋ load  504 MB of 1.9 GB                                                               1:50  │
+│ quote                 20.0 GB │▏│                                                                                                │
+╰───────────────────────────────╯▏│   running…                                                                                     │
+╭─ 3 Snapshots (1) ─────────────╮▏│                                                                                                │
 │   08-27 22:00        1.9 GB l │▏│                                                                                                │
 ╰───────────────────────────────╯▏│                                                                                                │
 ╭─ 4 Sets (1) ──────────────────╮▏│                                                                                                │
@@ -19,7 +20,6 @@ pgctl  pgctl.yaml
 │ ⠋ apply → qat            1:41 │▏│                                                                                                │
 │ ✓ snapshot prd           3:22 │▏│                                                                                                │
 ╰───────────────────────────────╯▏│                                                                                                │
-                                 ▏│                                                                                                │
                                  ▏│                                                                                                │
                                  ▏│                                                                                                │
                                  ▏│                                                                                                │

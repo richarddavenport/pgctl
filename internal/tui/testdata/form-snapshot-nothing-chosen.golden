@@ -1,24 +1,24 @@
 pgctl  pgctl.yaml
-╭─ 1 Connections (3) ───────────╮▏╭────────────────────────────────────────────────────────────────────────────────────────────────╮
+╭─ 1 Connections (4) ───────────╮▏╭────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ ● prd               protected │▏│ ‹ Overview · Config ›                                                                          │
 │ ● qat                 guarded │▏│                                                                                                │
-│ ✗ scratch                     │▏│ prd                                                                                            │
-╰───────────────────────────────╯▏│ protected — never a target                                                                     │
-╭─ 2 Databases (3) ─────────────╮▏│                                                                                                │
-│ product-development   11.0 GB │▏│ host       prd.example:5432                                                                    │
-│ claims                48.0 MB │▏│ user       mbpiadmin                                                                           │
-│ quote    ╭────────────────────────────────────────────────────────────────────────────────────────────────────────────╮          │
-╰──────────│ Take a snapshot of prd                                                                                     │          │
-╭─ 3 Snapsh│                                                                                                            │          │
-│   08-27 2│ Reads the chosen databases and writes a compressed copy. Nothing is written to prd. Choose where they go:  │          │
-╰──────────│ keeping them here, sending them away, or both.                                                             │          │
-╭─ 4 Sets (│                                                                                                            │          │
-│ claims   │  choose at least one destination — space chooses, and more than one is fine                                │          │
+│ ● local                       │▏│ prd                                                                                            │
+│ ✗ scratch                     │▏│ protected — never a target                                                                     │
+╰───────────────────────────────╯▏│                                                                                                │
+╭─ 2 Databases (3) ─────────────╮▏│ host       prd.example:5432                                                                    │
+│ product-development   11.0 GB │▏│ user       mbpiadmin                                                                           │
+│ claims   ╭────────────────────────────────────────────────────────────────────────────────────────────────────────────╮          │
+│ quote    │ Take a snapshot of prd                                                                                     │          │
 ╰──────────│                                                                                                            │          │
-╭─ 5 Runs ─│   Databases      1 of 3                                                                                    │          │
-│ nothing r│ ▸ ●   product-development                                                                                  │          │
-╰──────────│   ○   claims                                                                                               │          │
-           │   ○   quote                                                                                                │          │
+╭─ 3 Snapsh│ Reads the chosen databases and writes a compressed copy. Nothing is written to prd. Choose where they go:  │          │
+│   08-27 2│ keeping them here, sending them away, or both.                                                             │          │
+╰──────────│                                                                                                            │          │
+╭─ 4 Sets (│  choose at least one destination — space chooses, and more than one is fine                                │          │
+│ claims   │                                                                                                            │          │
+╰──────────│   Databases      1 of 3                                                                                    │          │
+╭─ 5 Runs ─│ ▸ ●   product-development                                                                                  │          │
+│ nothing r│   ○   claims                                                                                               │          │
+╰──────────│   ○   quote                                                                                                │          │
            │   Where it goes  nothing chosen yet                                                                        │          │
            │   ○   local           keep it on this machine, in .pgctl/snapshots                                         │          │
            │   ○   snapshots       upload it to the pg-snapshots container                                              │          │

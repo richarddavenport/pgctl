@@ -131,8 +131,8 @@ func TestProtectedConnectionIsNeverAnApplyTarget(t *testing.T) {
 			t.Fatal("prd is offered as an apply target")
 		}
 	}
-	if len(targets) != 2 {
-		t.Errorf("targets = %v, want qat and scratch", targets)
+	if len(targets) != 3 {
+		t.Errorf("targets = %v, want every connection that is not protected", targets)
 	}
 }
 
@@ -438,7 +438,7 @@ func TestFilterNarrowsOnlyTheFocusedPanel(t *testing.T) {
 	}
 	// The connections panel is not focused, so it keeps everything: a filter
 	// that emptied every panel would read as data loss.
-	if got := len(m.connections()); got != 3 {
+	if got := len(m.connections()); got != len(m.cfg.All()) {
 		t.Errorf("the filter also narrowed the connections panel to %d", got)
 	}
 	press(t, m, "esc")

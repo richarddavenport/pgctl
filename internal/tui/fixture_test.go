@@ -35,6 +35,11 @@ connections:
   qat:
     dsn: "service=qat"
     guarded: true
+  # Reachable and unflagged, which the fixture did not have — so no frame ever
+  # rendered a connection row with nothing in its right-hand column, and the
+  # inconsistency a reader spotted (a version on one row, a flag on the next,
+  # nothing on a third) was invisible to all eighty goldens.
+  local: "service=local"
   scratch: "postgres://127.0.0.1/postgres"
 
 storage:
@@ -118,6 +123,12 @@ func fixtureModel(t *testing.T) *Model {
 		Host: "qat.example", Port: 5432, User: "mbpiadmin",
 		ProbedAt:  epoch.Add(-time.Minute),
 		Databases: []engine.DatabaseInfo{{Name: "product-development", Bytes: 9 << 30}},
+	}
+	m.probes["local"] = &engine.Probe{
+		Connection: "local", Reachable: true, ServerVersion: 170004,
+		Host: "127.0.0.1", Port: 5432, User: "richardd",
+		ProbedAt:  epoch.Add(-2 * time.Minute),
+		Databases: []engine.DatabaseInfo{{Name: "postgres", Bytes: 8 << 20}},
 	}
 	// One unreachable environment, because the marker in the Connections panel
 	// answers "can I reach it" before the name answers "which is it", and a

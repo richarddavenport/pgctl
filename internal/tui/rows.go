@@ -62,23 +62,33 @@ func (m *Model) connectionRows() []comp.Row {
 		// it", because an unreachable connection changes what every panel below
 		// is showing.
 		mark, markStyle := "○", &mutedStyle
-		right := []comp.Segment{}
 		switch {
 		case m.probing[conn.Name]:
 			mark = spinner(m.now)
 		case m.probes[conn.Name] == nil:
 		case m.probes[conn.Name].Reachable:
 			mark, markStyle = "●", &okStyle
-			right = []comp.Segment{
-				span(formatServerVersion(m.probes[conn.Name].ServerVersion), &mutedStyle),
-			}
 		default:
 			mark, markStyle = "✗", &dangerStyle
 		}
 
-		// A flag displaces the version, because which of the two a reader needs
-		// is not close: 17.4 is a fact about the server, and "protected" is the
-		// reason an apply to it will be refused.
+		// The right column is the SAFETY FLAG, and nothing else.
+		//
+		// It used to hold the server version too, with a flag displacing it —
+		// so a reader saw `17.10` on one row, `guarded` on the next and nothing
+		// on a third, which is one column doing three jobs and looks like
+		// missing data rather than a distinction. Somebody said so.
+		//
+		// The flag is what stays, because it is the only thing here that
+		// changes what pgctl will DO: protected is refused outright, guarded
+		// demands the name typed in full, and both are the engine's rather than
+		// this screen's. A version is a fact about the server and belongs where
+		// the other facts about it are — the Overview tab, one `[` away, which
+		// has said `server PostgreSQL 17.10` all along.
+		//
+		// A blank right column is therefore correct and not an omission: the
+		// rows with text on them are exactly the rows that will argue with you.
+		var right []comp.Segment
 		switch {
 		case conn.Protected:
 			right = []comp.Segment{span("protected", &dangerStyle)}

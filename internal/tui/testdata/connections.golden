@@ -1,24 +1,24 @@
 pgctl  pgctl.yaml
-╭─ 1 Connections (3) ───────────╮▏╭────────────────────────────────────────────────────────────────────────────────────────────────╮
+╭─ 1 Connections (4) ───────────╮▏╭────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ ● prd               protected │▏│ ‹ Overview · Config ›                                                                          │
 │ ● qat                 guarded │▏│                                                                                                │
-│ ✗ scratch                     │▏│ prd                                                                                            │
-╰───────────────────────────────╯▏│ protected — never a target                                                                     │
-╭─ 2 Databases (3) ─────────────╮▏│                                                                                                │
-│ product-development   11.0 GB │▏│ host       prd.example:5432                                                                    │
-│ claims                48.0 MB │▏│ user       mbpiadmin                                                                           │
-│ quote                 20.0 GB │▏│ server     PostgreSQL 17.4                                                                     │
-╰───────────────────────────────╯▏│ databases  3                                                                                   │
-╭─ 3 Snapshots (1) ─────────────╮▏│ total size 31.0 GB                                                                             │
-│   08-27 22:00        1.9 GB l │▏│ checked    just now                                                                            │
+│ ● local                       │▏│ prd                                                                                            │
+│ ✗ scratch                     │▏│ protected — never a target                                                                     │
 ╰───────────────────────────────╯▏│                                                                                                │
-╭─ 4 Sets (1) ──────────────────╮▏│ SNAPSHOTS                                                                                      │
-│ claims                    2+2 │▏│   count  1                                                                                     │
-╰───────────────────────────────╯▏│   newest 14h ago  prd/product-development/20260828T030000Z                                     │
+╭─ 2 Databases (3) ─────────────╮▏│ host       prd.example:5432                                                                    │
+│ product-development   11.0 GB │▏│ user       mbpiadmin                                                                           │
+│ claims                48.0 MB │▏│ server     PostgreSQL 17.4                                                                     │
+│ quote                 20.0 GB │▏│ databases  3                                                                                   │
+╰───────────────────────────────╯▏│ total size 31.0 GB                                                                             │
+╭─ 3 Snapshots (1) ─────────────╮▏│ checked    just now                                                                            │
+│   08-27 22:00        1.9 GB l │▏│                                                                                                │
+╰───────────────────────────────╯▏│ SNAPSHOTS                                                                                      │
+╭─ 4 Sets (1) ──────────────────╮▏│   count  1                                                                                     │
+│ claims                    2+2 │▏│   newest 14h ago  prd/product-development/20260828T030000Z                                     │
+╰───────────────────────────────╯▏│                                                                                                │
 ╭─ 5 Runs ──────────────────────╮▏│                                                                                                │
 │ nothing run yet               │▏│                                                                                                │
 ╰───────────────────────────────╯▏│                                                                                                │
-                                 ▏│                                                                                                │
                                  ▏│                                                                                                │
                                  ▏│                                                                                                │
                                  ▏│                                                                                                │

@@ -1,12 +1,13 @@
 pgctl  pgctl.yaml
-╭─ 1 Connections (3) ───────────╮▏╭────────────────────────────────────────────────────────────────────────────────────────────────╮
+╭─ 1 Connections (4) ───────────╮▏╭────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ ● prd               protected │▏│ ‹ Manifest · Tables · Warnings · Drift ›                                                       │
 │ ● qat                 guarded │▏│                                                                                                │
-│ ✗ scratch                     │▏│ snapshot    prd/product-development/20260828T030000Z                                           │
-╰───────────────────────────────╯▏│ compared to prd                                                                                │
-╭─ 2 Databases (3) ─────────────╮▏│                                                                                                │
-│ product-development   11.0 GB │▏│ NO DRIFT                                                                                       │
-│ claims                48.0 MB │▏│   The same tables exist on both sides.                                                         │
+│ ● local                       │▏│ snapshot    prd/product-development/20260828T030000Z                                           │
+│ ✗ scratch                     │▏│ compared to prd                                                                                │
+╰───────────────────────────────╯▏│                                                                                                │
+╭─ 2 Databases (3) ─────────────╮▏│ NO DRIFT                                                                                       │
+│ product-development   11.0 GB │▏│   The same tables exist on both sides.                                                         │
+│ claims                48.0 MB │▏│                                                                                                │
 │ quote                 20.0 GB │▏│                                                                                                │
 ╰───────────────────────────────╯▏│                                                                                                │
 ╭─ 3 Snapshots (1) ─────────────╮▏│                                                                                                │
@@ -18,7 +19,6 @@ pgctl  pgctl.yaml
 ╭─ 5 Runs ──────────────────────╮▏│                                                                                                │
 │ nothing run yet               │▏│                                                                                                │
 ╰───────────────────────────────╯▏│                                                                                                │
-                                 ▏│                                                                                                │
                                  ▏│                                                                                                │
                                  ▏│                                                                                                │
                                  ▏│                                                                                                │

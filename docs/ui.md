@@ -81,11 +81,17 @@ environment, and moving to one reaches it. Probing everything on startup meant
 opening the interface opened a session to production, which is not something a
 tool should do because you launched it. `r` asks for all of them.
 
-Beside the name, `protected` and `guarded` are the two safety flags:
+The right-hand column is the **safety flag**, and nothing else:
 
 - **`protected`** — never an apply target. There is no flag that changes it, and
   the refusal is the engine's, so the CLI refuses identically.
 - **`guarded`** — an apply needs the connection's name typed in full.
+
+A blank there is correct rather than missing data: the rows carrying text are
+exactly the rows that will argue with you. The column used to hold the server
+version as well, with a flag displacing it — one column doing three jobs, which
+read as a gap. The version is a fact about the server and lives with the other
+facts about it, on the **Overview** tab.
 
 ## Doing something
 

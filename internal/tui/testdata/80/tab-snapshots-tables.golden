@@ -1,11 +1,12 @@
 pgctl  pgctl.yaml
-╭─ 1 Connections (3) ──────────╮▏╭─────────────────────────────────────────────╮
+╭─ 1 Connections (4) ──────────╮▏╭─────────────────────────────────────────────╮
 │ ● prd              protected │▏│ ‹ Manifest · Tables · Warnings · Drift ›    │
 │ ● qat                guarded │▏│                                             │
-│ ✗ scratch                    │▏│   TABLE   SOURCE SIZE     ROWS CARRIED      │
-╰──────────────────────────────╯▏│ › audit…          0 B        - none         │
-╭─ 2 Databases (3) ────────────╮▏│   claim…     180.0 MB     483k all          │
-│ product-development  11.0 GB │▏│   quote…      20.0 GB     147k 4k rows      │
+│ ● local                      │▏│   TABLE   SOURCE SIZE     ROWS CARRIED      │
+│ ✗ scratch                    │▏│ › audit…          0 B        - none         │
+╰──────────────────────────────╯▏│   claim…     180.0 MB     483k all          │
+╭─ 2 Databases (3) ────────────╮▏│   quote…      20.0 GB     147k 4k rows      │
+│ product-development  11.0 GB │▏│                                             │
 │ claims               48.0 MB │▏│                                             │
 │ quote                20.0 GB │▏│                                             │
 ╰──────────────────────────────╯▏│                                             │
@@ -17,7 +18,6 @@ pgctl  pgctl.yaml
 ╰──────────────────────────────╯▏│                                             │
 ╭─ 5 Runs ─────────────────────╮▏│                                             │
 │ nothing run yet              │▏│                                             │
-╰──────────────────────────────╯▏│                                             │
-                                ▏│                                        4/4  │
+╰──────────────────────────────╯▏│                                        4/4  │
                                 ▏╰─────────────────────────────────────────────╯
 n snapshot · a apply · m move · p prune · x delete · / filter · ? keys

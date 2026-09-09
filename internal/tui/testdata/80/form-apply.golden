@@ -1,22 +1,22 @@
 pgctl  pgctl.yaml
-╭─ 1 Connections (3) ──────────╮▏╭─────────────────────────────────────────────╮
+╭─ 1 Connections (4) ──────────╮▏╭─────────────────────────────────────────────╮
 │ ● prd              protected │▏│ ‹ Manifest · Tables · Warnings · Drift ›    │
 │ ● qat                guarded │▏│                                             │
-│ ✗╭────────────────────────────────────────────────────────────────────────╮  │
-╰──│ Apply prd/product-development/20260828T030000Z                         │  │
-╭─ │                                                                        │  │
-│ p│ Replaces data on the target. The plan is shown before anything is      │  │
-│ c│ touched.                                                               │  │
-│ q│                                                                        │  │
-╰──│ ▸ Target                  ‹ qat  (guarded — needs its name typed) ›  ( │  │
-╭─ │   Scope                   ‹ whole database — drop and recreate it ›  ( │  │
-│  │   Tables                  nothing yet                                  │  │
-╰──│   Widen to closure        no                                           │  │
-╭─ │   Type the target's name  type it to confirm                           │  │
-│ c│ ← → to change                                                          │  │
-╰──│   ↑↓ field · ←→ change · enter plan it · esc cancel                    │  │
-╭─ ╰────────────────────────────────────────────────────────────────────────╯  │
-│ nothing run yet              │▏│   no data      1                            │
-╰──────────────────────────────╯▏│   foreign keys 0                            │
-                                ▏│                                             │
+│ ●╭────────────────────────────────────────────────────────────────────────╮  │
+│ ✗│ Apply prd/product-development/20260828T030000Z                         │  │
+╰──│                                                                        │  │
+╭─ │ Replaces data on the target. The plan is shown before anything is      │  │
+│ p│ touched.                                                               │  │
+│ c│                                                                        │  │
+│ q│ ▸ Target                  ‹ qat  (guarded — needs its name typed) ›  ( │  │
+╰──│   Scope                   ‹ whole database — drop and recreate it ›  ( │  │
+╭─ │   Tables                  nothing yet                                  │  │
+│  │   Widen to closure        no                                           │  │
+╰──│   Type the target's name  type it to confirm                           │  │
+╭─ │ ← → to change                                                          │  │
+│ c│   ↑↓ field · ←→ change · enter plan it · esc cancel                    │  │
+╰──╰────────────────────────────────────────────────────────────────────────╯  │
+╭─ 5 Runs ─────────────────────╮▏│   no data      1                            │
+│ nothing run yet              │▏│   foreign keys 0                            │
+╰──────────────────────────────╯▏│                                             │
                                 ▏╰─────────────────────────────────────────────╯

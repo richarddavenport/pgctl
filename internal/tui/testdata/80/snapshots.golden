@@ -1,23 +1,23 @@
 pgctl  pgctl.yaml
-╭─ 1 Connections (3) ──────────╮▏╭─────────────────────────────────────────────╮
+╭─ 1 Connections (4) ──────────╮▏╭─────────────────────────────────────────────╮
 │ ● prd              protected │▏│ ‹ Manifest · Tables · Warnings · Drift ›    │
 │ ● qat                guarded │▏│                                             │
-│ ✗ scratch                    │▏│ prd/product-development/20260828T030000Z    │
+│ ● local                      │▏│ prd/product-development/20260828T030000Z    │
+│ ✗ scratch                    │▏│                                             │
+╰──────────────────────────────╯▏│ taken       2026-08-27 22:00  14h ago       │
+╭─ 2 Databases (3) ────────────╮▏│ took        3:22                            │
+│ product-development  11.0 GB │▏│ size        1.9 GB                          │
+│ claims               48.0 MB │▏│ tables      3                               │
+│ quote                20.0 GB │▏│ where       local                           │
+╰──────────────────────────────╯▏│ server      PostgreSQL    pg_dump           │
+╭─ 3 Snapshots (1) ────────────╮▏│ compression zstd:3   4 jobs                 │
+│   08-27 22:00       1.9 GB l │▏│ source size 20.2 GB                         │
 ╰──────────────────────────────╯▏│                                             │
-╭─ 2 Databases (3) ────────────╮▏│ taken       2026-08-27 22:00  14h ago       │
-│ product-development  11.0 GB │▏│ took        3:22                            │
-│ claims               48.0 MB │▏│ size        1.9 GB                          │
-│ quote                20.0 GB │▏│ tables      3                               │
-╰──────────────────────────────╯▏│ where       local                           │
-╭─ 3 Snapshots (1) ────────────╮▏│ server      PostgreSQL    pg_dump           │
-│   08-27 22:00       1.9 GB l │▏│ compression zstd:3   4 jobs                 │
-╰──────────────────────────────╯▏│ source size 20.2 GB                         │
-╭─ 4 Sets (1) ─────────────────╮▏│                                             │
-│ claims                   2+2 │▏│ CONTENTS                                    │
-╰──────────────────────────────╯▏│   whole        1                            │
-╭─ 5 Runs ─────────────────────╮▏│   filtered     1                            │
-│ nothing run yet              │▏│   no data      1                            │
-╰──────────────────────────────╯▏│   foreign keys 0                            │
-                                ▏│                                             │
+╭─ 4 Sets (1) ─────────────────╮▏│ CONTENTS                                    │
+│ claims                   2+2 │▏│   whole        1                            │
+╰──────────────────────────────╯▏│   filtered     1                            │
+╭─ 5 Runs ─────────────────────╮▏│   no data      1                            │
+│ nothing run yet              │▏│   foreign keys 0                            │
+╰──────────────────────────────╯▏│                                             │
                                 ▏╰─────────────────────────────────────────────╯
 n snapshot · a apply · m move · p prune · x delete · / filter · ? keys

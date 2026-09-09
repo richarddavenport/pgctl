@@ -1,22 +1,22 @@
 pgctl  pgctl.yaml
-╭─ 1 Connections (3) ───────────╮▏╭────────────────────────────────────────────────────────────────────────────────────────────────╮
+╭─ 1 Connections (4) ───────────╮▏╭────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ ● prd               protected │▏│ ‹ Overview · Config ›                                                                          │
 │ ● qat                 guarded │▏│                                                                                                │
-│ ✗ scratch                     │▏│ scratch                                                                                        │
+│ ● local                       │▏│ local                                                                                          │
+│ ✗ scratch                     │▏│                                                                                                │
+╰───────────────────────────────╯▏│ host       127.0.0.1:5432                                                                      │
+╭─ 2 Databases (1) ─────────────╮▏│ user       richardd                                                                            │
+│ postgres               8.0 MB │▏│ server     PostgreSQL 17.4                                                                     │
+╰───────────────────────────────╯▏│ databases  1                                                                                   │
+╭─ 3 Snapshots ─────────────────╮▏│ total size 8.0 MB                                                                              │
+│ none on local — press n       │▏│ checked    2m ago                                                                              │
 ╰───────────────────────────────╯▏│                                                                                                │
-╭─ 2 Databases ─────────────────╮▏│ CANNOT REACH SCRATCH                                                                           │
-│ unreachable                   │▏│   dial tcp 127.0.0.1:5432: connect: connection refused                                         │
-╰───────────────────────────────╯▏│                                                                                                │
-╭─ 3 Snapshots ─────────────────╮▏│ r retries. A secrets file that will not decrypt, a firewall rule that does not list this       │
-│ none on scratch — press n     │▏│ address, and a stopped server all look the same from here.                                     │
-╰───────────────────────────────╯▏│                                                                                                │
-╭─ 4 Sets (1) ──────────────────╮▏│                                                                                                │
-│ claims                      ? │▏│                                                                                                │
+╭─ 4 Sets ──────────────────────╮▏│ SNAPSHOTS                                                                                      │
+│ none declared                 │▏│   none — press n to take one                                                                   │
 ╰───────────────────────────────╯▏│                                                                                                │
 ╭─ 5 Runs ──────────────────────╮▏│                                                                                                │
 │ nothing run yet               │▏│                                                                                                │
 ╰───────────────────────────────╯▏│                                                                                                │
-                                 ▏│                                                                                                │
                                  ▏│                                                                                                │
                                  ▏│                                                                                                │
                                  ▏│                                                                                                │

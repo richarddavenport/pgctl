@@ -1,15 +1,16 @@
 pgctl  pgctl.yaml
-╭─ 1 Connections (3) ──────────╮▏╭─────────────────────────────────────────────╮
+╭─ 1 Connections (4) ──────────╮▏╭─────────────────────────────────────────────╮
 │ ● prd              protected │▏│ ‹ Members · Closure · Load order ›          │
 │ ● qat                guarded │▏│                                             │
-│ ✗ scratch                    │▏│ NOT CLOSED                                  │
-╰──────────────────────────────╯▏│   2 tables reference 2 others. An apply is  │
-╭─ 2 Databases (3) ────────────╮▏│   refused unless you widen it to include    │
-│ product-development  11.0 GB │▏│   these.                                    │
-│ claims               48.0 MB │▏│                                             │
-│ quote                20.0 GB │▏│ WOULD BE ADDED BY --WIDEN                   │
-╰──────────────────────────────╯▏│    operations.policy_contract               │
-╭─ 3 Snapshots (1) ────────────╮▏│    public.address                           │
+│ ● local                      │▏│ NOT CLOSED                                  │
+│ ✗ scratch                    │▏│   2 tables reference 2 others. An apply is  │
+╰──────────────────────────────╯▏│   refused unless you widen it to include    │
+╭─ 2 Databases (3) ────────────╮▏│   these.                                    │
+│ product-development  11.0 GB │▏│                                             │
+│ claims               48.0 MB │▏│ WOULD BE ADDED BY --WIDEN                   │
+│ quote                20.0 GB │▏│    operations.policy_contract               │
+╰──────────────────────────────╯▏│    public.address                           │
+╭─ 3 Snapshots (1) ────────────╮▏│                                             │
 │   08-27 22:00       1.9 GB l │▏│                                             │
 ╰──────────────────────────────╯▏│                                             │
 ╭─ 4 Sets (1) ─────────────────╮▏│                                             │
@@ -18,6 +19,5 @@ pgctl  pgctl.yaml
 ╭─ 5 Runs ─────────────────────╮▏│                                             │
 │ nothing run yet              │▏│                                             │
 ╰──────────────────────────────╯▏│                                             │
-                                ▏│                                             │
                                 ▏╰─────────────────────────────────────────────╯
 n snapshot · a apply · m move · p prune · / filter · [ ] tabs · ? keys

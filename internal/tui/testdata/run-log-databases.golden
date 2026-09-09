@@ -1,17 +1,18 @@
 pgctl  pgctl.yaml
-╭─ 1 Connections (3) ───────────╮▏╭────────────────────────────────────────────────────────────────────────────────────────────────╮
+╭─ 1 Connections (4) ───────────╮▏╭────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ ● prd               protected │▏│ ‹ Steps · Log ›                                                                                │
 │ ● qat                 guarded │▏│                                                                                                │
-│ ✗ scratch                     │▏│ snapshot prd  Copying product-development from prd. Nothing is written to prd.        3:22  ok │
-╰───────────────────────────────╯▏│   11:56:00 product-development  pg_dump --format=directory --jobs=4                            │
-╭─ 2 Databases (3) ─────────────╮▏│   11:56:30 product-development  claims.policy_claim  180 MB                                    │
-│ product-development   11.0 GB │▏│   11:58:30 product-development  1 table has a row filter                                       │
-│ claims                48.0 MB │▏│   11:58:32 product-development  quotes.quote  4,200 rows                                       │
-│ quote                 20.0 GB │▏│   11:58:40 product-development  rule "operations.gone" matches no table in this database       │
-╰───────────────────────────────╯▏│   11:58:50 product-development  prd/product-development/… to azure blob                        │
-╭─ 3 Snapshots (1) ─────────────╮▏│   11:59:00 claims               pg_dump --format=directory --jobs=4                            │
-│   08-27 22:00        1.9 GB l │▏│   11:59:15 claims               prd/claims/… to azure blob                                     │
-╰───────────────────────────────╯▏│   11:59:22 claims               snapshot complete                                              │
+│ ● local                       │▏│ snapshot prd  Copying product-development from prd. Nothing is written to prd.        3:22  ok │
+│ ✗ scratch                     │▏│   11:56:00 product-development  pg_dump --format=directory --jobs=4                            │
+╰───────────────────────────────╯▏│   11:56:30 product-development  claims.policy_claim  180 MB                                    │
+╭─ 2 Databases (3) ─────────────╮▏│   11:58:30 product-development  1 table has a row filter                                       │
+│ product-development   11.0 GB │▏│   11:58:32 product-development  quotes.quote  4,200 rows                                       │
+│ claims                48.0 MB │▏│   11:58:40 product-development  rule "operations.gone" matches no table in this database       │
+│ quote                 20.0 GB │▏│   11:58:50 product-development  prd/product-development/… to azure blob                        │
+╰───────────────────────────────╯▏│   11:59:00 claims               pg_dump --format=directory --jobs=4                            │
+╭─ 3 Snapshots (1) ─────────────╮▏│   11:59:15 claims               prd/claims/… to azure blob                                     │
+│   08-27 22:00        1.9 GB l │▏│   11:59:22 claims               snapshot complete                                              │
+╰───────────────────────────────╯▏│                                                                                                │
 ╭─ 4 Sets (1) ──────────────────╮▏│                                                                                                │
 │ claims                    2+2 │▏│                                                                                                │
 ╰───────────────────────────────╯▏│                                                                                                │
@@ -19,7 +20,6 @@ pgctl  pgctl.yaml
 │ ⠋ apply → qat            1:41 │▏│                                                                                                │
 │ ✓ snapshot prd           3:22 │▏│                                                                                                │
 ╰───────────────────────────────╯▏│                                                                                                │
-                                 ▏│                                                                                                │
                                  ▏│                                                                                                │
                                  ▏│                                                                                                │
                                  ▏│                                                                                                │

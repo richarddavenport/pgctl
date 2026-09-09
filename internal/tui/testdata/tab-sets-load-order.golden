@@ -1,9 +1,10 @@
 pgctl  pgctl.yaml
-╭─ 1 Connections (3) ───────────╮▏╭────────────────────────────────────────────────────────────────────────────────────────────────╮
+╭─ 1 Connections (4) ───────────╮▏╭────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ ● prd               protected │▏│ ‹ Members · Closure · Load order ›                                                             │
 │ ● qat                 guarded │▏│                                                                                                │
-│ ✗ scratch                     │▏│ The load order is computed against the target when you plan an apply, because the target's     │
-╰───────────────────────────────╯▏│ foreign keys are the ones a load has to satisfy. Press a to plan one.                          │
+│ ● local                       │▏│ The load order is computed against the target when you plan an apply, because the target's     │
+│ ✗ scratch                     │▏│ foreign keys are the ones a load has to satisfy. Press a to plan one.                          │
+╰───────────────────────────────╯▏│                                                                                                │
 ╭─ 2 Databases (3) ─────────────╮▏│                                                                                                │
 │ product-development   11.0 GB │▏│                                                                                                │
 │ claims                48.0 MB │▏│                                                                                                │
@@ -18,7 +19,6 @@ pgctl  pgctl.yaml
 ╭─ 5 Runs ──────────────────────╮▏│                                                                                                │
 │ nothing run yet               │▏│                                                                                                │
 ╰───────────────────────────────╯▏│                                                                                                │
-                                 ▏│                                                                                                │
                                  ▏│                                                                                                │
                                  ▏│                                                                                                │
                                  ▏│                                                                                                │

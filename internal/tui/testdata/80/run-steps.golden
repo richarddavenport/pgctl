@@ -1,15 +1,16 @@
 pgctl  pgctl.yaml
-╭─ 1 Connections (3) ──────────╮▏╭─────────────────────────────────────────────╮
+╭─ 1 Connections (4) ──────────╮▏╭─────────────────────────────────────────────╮
 │ ● prd              protected │▏│ ‹ Steps · Log ›                             │
 │ ● qat                guarded │▏│                                             │
-│ ✗ scratch                    │▏│ apply → qat  Replacing 38 tables on qat wit │
-╰──────────────────────────────╯▏│ [─·························] 2 of 38 tables │
-╭─ 2 Databases (3) ────────────╮▏│   ✓ drop constraints  81 foreign keys, 31 i │
-│ product-development  11.0 GB │▏│   ✓ disable triggers  111 user triggers on  │
-│ claims               48.0 MB │▏│   ✓ truncate  children before parents 0:10  │
-│ quote                20.0 GB │▏│   ⠋ load  504 MB of 1.9 GB            1:50  │
-╰──────────────────────────────╯▏│                                             │
-╭─ 3 Snapshots (1) ────────────╮▏│   running…                                  │
+│ ● local                      │▏│ apply → qat  Replacing 38 tables on qat wit │
+│ ✗ scratch                    │▏│ [─·························] 2 of 38 tables │
+╰──────────────────────────────╯▏│   ✓ drop constraints  81 foreign keys, 31 i │
+╭─ 2 Databases (3) ────────────╮▏│   ✓ disable triggers  111 user triggers on  │
+│ product-development  11.0 GB │▏│   ✓ truncate  children before parents 0:10  │
+│ claims               48.0 MB │▏│   ⠋ load  504 MB of 1.9 GB            1:50  │
+│ quote                20.0 GB │▏│                                             │
+╰──────────────────────────────╯▏│   running…                                  │
+╭─ 3 Snapshots (1) ────────────╮▏│                                             │
 │   08-27 22:00       1.9 GB l │▏│                                             │
 ╰──────────────────────────────╯▏│                                             │
 ╭─ 4 Sets (1) ─────────────────╮▏│                                             │
@@ -18,6 +19,5 @@ pgctl  pgctl.yaml
 ╭─ 5 Runs (2) ─────────────────╮▏│                                             │
 │ ⠋ apply → qat           1:41 │▏│                                             │
 │ ✓ snapshot prd          3:22 │▏│                                             │
-╰──────────────────────────────╯▏│                                             │
-                                ▏╰─────────────────────────────────────────────╯
+╰──────────────────────────────╯▏╰─────────────────────────────────────────────╯
 q stop and leave · ] log · ? keys

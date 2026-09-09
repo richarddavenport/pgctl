@@ -1,8 +1,9 @@
 pgctl  pgctl.yaml
-╭─ 1 Connections (3) ───────────╮▏╭────────────────────────────────────────────────────────────────────────────────────────────────╮
+╭─ 1 Connections (4) ───────────╮▏╭────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ ● prd               protected │▏│ ‹ Manifest · Tables · Warnings · Drift ›                                                       │
 │ ● qat                 guarded │▏│                                                                                                │
-│ ✗ scratch                     │▏│ ! rule "operations.gone" matches no table in this database                                     │
+│ ● local                       │▏│ ! rule "operations.gone" matches no table in this database                                     │
+│ ✗ scratch                     │▏│                                                                                                │
 ╰───────────────────────────────╯▏│                                                                                                │
 ╭─ 2 Databases (3) ─────────────╮▏│                                                                                                │
 │ product-development   11.0 GB │▏│                                                                                                │
@@ -18,7 +19,6 @@ pgctl  pgctl.yaml
 ╭─ 5 Runs ──────────────────────╮▏│                                                                                                │
 │ nothing run yet               │▏│                                                                                                │
 ╰───────────────────────────────╯▏│                                                                                                │
-                                 ▏│                                                                                                │
                                  ▏│                                                                                                │
                                  ▏│                                                                                                │
                                  ▏│                                                                                                │

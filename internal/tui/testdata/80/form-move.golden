@@ -1,22 +1,22 @@
 pgctl  pgctl.yaml
-╭─ 1 Connections (3) ──────────╮▏╭─────────────────────────────────────────────╮
+╭─ 1 Connections (4) ──────────╮▏╭─────────────────────────────────────────────╮
 │ ● prd              protected │▏│ ‹ Overview · Config ›                       │
 │ ● qat                guarded │▏│                                             │
-│ ✗ scratch                    │▏│ prd                                         │
-╰──╭────────────────────────────────────────────────────────────────────────╮  │
-╭─ │ Move prd/product-development into another connection                   │  │
-│ p│                                                                        │  │
-│ c│ Takes a snapshot into a temporary directory, applies it, and deletes   │  │
-│ q│ it. Nothing is catalogued or uploaded, and nothing is written to prd.  │  │
-╰──│                                                                        │  │
+│ ● local                      │▏│ prd                                         │
+│ ✗╭────────────────────────────────────────────────────────────────────────╮  │
+╰──│ Move prd/product-development into another connection                   │  │
 ╭─ │                                                                        │  │
-│  │ ▸ To                        ‹ qat  (guarded — needs its name typed) ›  │  │
-╰──│   Keep the staged snapshot  no                                         │  │
-╭─ │ ← → to change                                                          │  │
-│ c│   ↑↓ field · ←→ change · enter move it · esc cancel                    │  │
-╰──╰────────────────────────────────────────────────────────────────────────╯… │
+│ p│ Takes a snapshot into a temporary directory, applies it, and deletes   │  │
+│ c│ it. Nothing is catalogued or uploaded, and nothing is written to prd.  │  │
+│ q│                                                                        │  │
+╰──│                                                                        │  │
+╭─ │ ▸ To                        ‹ qat  (guarded — needs its name typed) ›  │  │
+│  │   Keep the staged snapshot  no                                         │  │
+╰──│ ← → to change                                                          │  │
+╭─ │   ↑↓ field · ←→ change · enter move it · esc cancel                    │  │
+│ c╰────────────────────────────────────────────────────────────────────────╯… │
+╰──────────────────────────────╯▏│                                             │
 ╭─ 5 Runs ─────────────────────╮▏│                                             │
 │ nothing run yet              │▏│                                             │
 ╰──────────────────────────────╯▏│                                             │
-                                ▏│                                             │
                                 ▏╰─────────────────────────────────────────────╯

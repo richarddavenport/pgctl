@@ -1,25 +1,25 @@
 pgctl  pgctl.yaml
-╭─ 1 Connections (3) ───────────╮▏╭────────────────────────────────────────────────────────────────────────────────────────────────╮
+╭─ 1 Connections (4) ───────────╮▏╭────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ ● prd               protected │▏│ ‹ Steps · Log ›                                                                                │
 │ ● qat                 guarded │▏│                                                                                                │
-│ ✗ scratch                     │▏│ snapshot prd  Copying product-development from prd. Nothing is written to prd.        3:22  ok │
-╰───────────────────────────────╯▏│ product-development                                                                            │
-╭─ 2 Databases (3) ─────────────╮▏│     ✓ dump  claims.policy_claim                                                        2:30    │
-│ product-development   11.0 GB │▏│     ✓ filtered copy  quotes.quote                                                      0:20    │
-│ claims                48.0 MB │▏│         ! rule "operations.gone" matches no table in this database                             │
-│ quote                 20.0 GB │▏│     ✓ push  prd/product-development/… to azure blob                                    0:10    │
+│ ● local                       │▏│ snapshot prd  Copying product-development from prd. Nothing is written to prd.        3:22  ok │
+│ ✗ scratch                     │▏│ product-development                                                                            │
+╰───────────────────────────────╯▏│     ✓ dump  claims.policy_claim                                                        2:30    │
+╭─ 2 Databases (3) ─────────────╮▏│     ✓ filtered copy  quotes.quote                                                      0:20    │
+│ product-development   11.0 GB │▏│         ! rule "operations.gone" matches no table in this database                             │
+│ claims                48.0 MB │▏│     ✓ push  prd/product-development/… to azure blob                                    0:10    │
+│ quote                 20.0 GB │▏│                                                                                                │
+╰───────────────────────────────╯▏│ claims                                                                                         │
+╭─ 3 Snapshots (1) ─────────────╮▏│     ✓ dump  pg_dump --format=directory --jobs=4                                        0:15    │
+│   08-27 22:00        1.9 GB l │▏│     ✓ push  prd/claims/… to azure blob                                                 0:07    │
 ╰───────────────────────────────╯▏│                                                                                                │
-╭─ 3 Snapshots (1) ─────────────╮▏│ claims                                                                                         │
-│   08-27 22:00        1.9 GB l │▏│     ✓ dump  pg_dump --format=directory --jobs=4                                        0:15    │
-╰───────────────────────────────╯▏│     ✓ push  prd/claims/… to azure blob                                                 0:07    │
-╭─ 4 Sets (1) ──────────────────╮▏│                                                                                                │
-│ claims                    2+2 │▏│   snapshotted product-development from prd                                                     │
+╭─ 4 Sets (1) ──────────────────╮▏│   snapshotted product-development from prd                                                     │
+│ claims                    2+2 │▏│                                                                                                │
 ╰───────────────────────────────╯▏│                                                                                                │
 ╭─ 5 Runs (2) ──────────────────╮▏│                                                                                                │
 │ ⠋ apply → qat            1:41 │▏│                                                                                                │
 │ ✓ snapshot prd           3:22 │▏│                                                                                                │
 ╰───────────────────────────────╯▏│                                                                                                │
-                                 ▏│                                                                                                │
                                  ▏│                                                                                                │
                                  ▏│                                                                                                │
                                  ▏│                                                                                                │

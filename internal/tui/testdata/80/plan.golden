@@ -2,22 +2,22 @@ pgc╭────────────────────────�
 ╭─ │ Apply prd/product-development/20260828T030000Z                         │──╮
 │ ●│                                                                        │  │
 │ ●│ Replaces data on the target. The plan is shown before anything is      │  │
-│ ✗│ touched.                                                               │  │
+│ ●│ touched.                                                               │  │
+│ ✗│                                                                        │  │
+╰──│ REPLACE 6 tables in product-development on qat                         │  │
+╭─ │ from prd/product-development/20260828T030000Z taken 2026-08-27 22:00,  │  │
+│ p│ 2.3 GB of source data                                                  │  │
+│ c│                                                                        │  │
+│ q│ widened to include 2 more: operations.policy_contract, public.address  │  │
 ╰──│                                                                        │  │
-╭─ │ REPLACE 6 tables in product-development on qat                         │  │
-│ p│ from prd/product-development/20260828T030000Z taken 2026-08-27 22:00,  │  │
-│ c│ 2.3 GB of source data                                                  │  │
-│ q│                                                                        │  │
-╰──│ widened to include 2 more: operations.policy_contract, public.address  │  │
-╭─ │                                                                        │  │
-│  │ 81 foreign keys dropped and rebuilt, 31 indexes rebuilt                │  │
-╰──│ 12 user triggers disabled for the load on 1 table                      │  │
-╭─ │                                                                        │  │
-│ c│ LOAD ORDER                                                             │  │
-╰──│ 1. public.address                                                      │… │
-╭─ │ 2. operations.cancellation, operations.policy_contract,                │  │
-│ n│ operations.policy_contract_quote                                       │  │
-╰──│                                                                 13/20  │  │
-   │ read it, then confirm. Nothing has been touched yet.                   │  │
+╭─ │ 81 foreign keys dropped and rebuilt, 31 indexes rebuilt                │  │
+│  │ 12 user triggers disabled for the load on 1 table                      │  │
+╰──│                                                                        │  │
+╭─ │ LOAD ORDER                                                             │  │
+│ c│ 1. public.address                                                      │… │
+╰──│ 2. operations.cancellation, operations.policy_contract,                │  │
+╭─ │ operations.policy_contract_quote                                       │  │
+│ n│                                                                 13/20  │  │
+╰──│ read it, then confirm. Nothing has been touched yet.                   │  │
    │   enter apply it · ↑↓ read · esc back                                  │──╯
    ╰────────────────────────────────────────────────────────────────────────╯

@@ -1,11 +1,12 @@
 pgctl  pgctl.yaml
-╭─ 1 Connections (3) ───────────╮▏╭────────────────────────────────────────────────────────────────────────────────────────────────╮
+╭─ 1 Connections (4) ───────────╮▏╭────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ ● prd               protected │▏│ ‹ Manifest · Tables · Warnings · Drift ›                                                       │
 │ ● qat                 guarded │▏│                                                                                                │
-│ ✗ scratch                     │▏│   TABLE                                                      SOURCE SIZE     ROWS CARRIED      │
-╰───────────────────────────────╯▏│ › audit.logged_actions                                               0 B        - none         │
-╭─ 2 Databases (3) ─────────────╮▏│   claims.policy_claim                                           180.0 MB     483k all          │
-│ product-development   11.0 GB │▏│   quotes.quote                                                   20.0 GB     147k 4k rows      │
+│ ● local                       │▏│   TABLE                                                      SOURCE SIZE     ROWS CARRIED      │
+│ ✗ scratch                     │▏│ › audit.logged_actions                                               0 B        - none         │
+╰───────────────────────────────╯▏│   claims.policy_claim                                           180.0 MB     483k all          │
+╭─ 2 Databases (3) ─────────────╮▏│   quotes.quote                                                   20.0 GB     147k 4k rows      │
+│ product-development   11.0 GB │▏│                                                                                                │
 │ claims                48.0 MB │▏│                                                                                                │
 │ quote                 20.0 GB │▏│                                                                                                │
 ╰───────────────────────────────╯▏│                                                                                                │
@@ -18,7 +19,6 @@ pgctl  pgctl.yaml
 ╭─ 5 Runs ──────────────────────╮▏│                                                                                                │
 │ nothing run yet               │▏│                                                                                                │
 ╰───────────────────────────────╯▏│                                                                                                │
-                                 ▏│                                                                                                │
                                  ▏│                                                                                                │
                                  ▏│                                                                                                │
                                  ▏│                                                                                                │
