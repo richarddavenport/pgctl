@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/richarddavenport/pgctl/internal/config"
 	"github.com/richarddavenport/pgctl/internal/snapshot"
@@ -132,11 +133,33 @@ func (e *Engine) Push(ctx context.Context, id, destination string, report Report
 	}
 
 	report.step("push", fmt.Sprintf("%s to %s", id, remote.Store.Describe()))
+
+	// Reported as it goes, not only at the end. A 1.7 GB upload of two hundred
+	// files is minutes of a step whose only line was the one it started with —
+	// and a step whose line cannot change is a step a reader cannot distinguish
+	// from a hung one.
+	//
+	// No denominator: the store knows how many files a snapshot has and this
+	// does not, and a fraction invented here would be a bar that moves at a
+	// rate nothing measured. Bytes and a count are honest.
 	var files int
 	var bytes int64
+	lastAt := time.Now()
+	var lastBytes int64
 	err = remote.Store.Put(ctx, id, dir, func(_ string, n int64) {
 		files++
 		bytes += n
+		// Once a second at most: two hundred files in a burst would be two
+		// hundred events, and the reader can read one.
+		if now := time.Now(); now.Sub(lastAt) >= time.Second {
+			rate := ""
+			if seconds := now.Sub(lastAt).Seconds(); seconds > 0 && bytes > lastBytes {
+				rate = fmt.Sprintf(", %s/s", humanBytes(int64(float64(bytes-lastBytes)/seconds)))
+			}
+			report.send(Event{Kind: EventProgress, Step: "push", Bytes: bytes,
+				Message: fmt.Sprintf("%d files, %s uploaded%s", files, humanBytes(bytes), rate)})
+			lastAt, lastBytes = now, bytes
+		}
 	})
 	if err != nil {
 		return err

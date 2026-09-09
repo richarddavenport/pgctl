@@ -245,11 +245,13 @@ func (m *Model) drawLog(c *comp.Canvas, r comp.Rect, rec *runRecord) {
 	// this end of the seam is why: rebuilt every frame, the counter counts in
 	// place instead of writing a line per redraw and burying the log it is
 	// meant to annotate.
-	if p := rec.progressNow(); rec.running && p.Message != "" {
-		lines = append(lines, comp.LogLine{
-			At:   p.At.Local().Format("15:04:05"),
-			Text: p.Message,
-		})
+	if rec.running {
+		for _, p := range rec.progressAll() {
+			lines = append(lines, comp.LogLine{
+				At:   p.At.Local().Format("15:04:05"),
+				Text: logText(p, width),
+			})
+		}
 	}
 	m.logPane.Draw(c, r, lines, regLog)
 }
@@ -343,12 +345,21 @@ func (r *runRecord) stepsByDatabase(now time.Time) ([]comp.Step, []string) {
 		}
 	}
 
-	// The newest progress belongs to whatever phase is in flight, and it does
-	// not come through the event list: add() replaces it in place so a byte
-	// counter counts instead of scrolling.
-	if last := len(steps) - 1; last >= 0 && steps[last].State == comp.StepRunning {
-		if p := r.progressNow(); p.Message != "" {
-			steps[last].Detail = p.Message
+	// Each step's own progress, on that step.
+	//
+	// This used to put the newest progress event on whatever was RUNNING, and
+	// the result was the worst kind of wrong: the dump reports every second and
+	// the filtered copy reported nothing at all, so a thirty-five-minute
+	// filtered copy of a 20 GB jsonb table displayed the dump's final line —
+	// "2.6 GB written, 5.2 MB/s" — unchanged, for half an hour. A number that
+	// cannot move looks exactly like a program that has stopped, and somebody
+	// reasonably concluded it had.
+	//
+	// Applied to finished steps too, so a step keeps the number it ended on:
+	// what a dump wrote is worth reading after it has written it.
+	for i := range steps {
+		if p := r.progressFor(databases[i], steps[i].Label); p.Message != "" {
+			steps[i].Detail = p.Message
 		}
 	}
 

@@ -53,6 +53,59 @@ func TestTheStepsAreTheEnginesOwnPhases(t *testing.T) {
 	}
 }
 
+// Progress belongs to the step it came FROM, not to whatever is running.
+//
+// This is the bug that made a working run look hung: the dump reports progress
+// every second and the filtered copy reported none, so a thirty-five-minute
+// filtered copy displayed the dump's last line — "2.6 GB written, 5.2 MB/s" —
+// unchanged for half an hour. A number that cannot move is indistinguishable
+// from a program that has stopped.
+func TestProgressBelongsToItsOwnStep(t *testing.T) {
+	at := epoch
+	rec := &runRecord{
+		id:        "snapshot prd-0",
+		startedAt: at,
+		running:   true,
+		cancel:    func() {},
+	}
+	for _, e := range []engine.Event{
+		{Kind: engine.EventStep, Step: "dump", Database: "pd", Message: "writing to …", At: at},
+		{Kind: engine.EventProgress, Step: "dump", Database: "pd", Message: "2.6 GB written, 5.2 MB/s", At: at.Add(time.Second)},
+		{Kind: engine.EventStep, Step: "filtered copy", Database: "pd", Message: "1 table pg_dump cannot filter", At: at.Add(2 * time.Second)},
+	} {
+		rec.add(e)
+	}
+
+	steps, _ := rec.stepsByDatabase(at.Add(time.Minute))
+	last := steps[len(steps)-1]
+	if last.Label != "filtered copy" {
+		t.Fatalf("the running step is %q", last.Label)
+	}
+	if strings.Contains(last.Detail, "2.6 GB") {
+		t.Errorf("the filtered copy is showing the dump's progress: %q", last.Detail)
+	}
+	if last.Detail != "1 table pg_dump cannot filter" {
+		t.Errorf("detail = %q, want the step's own message", last.Detail)
+	}
+
+	// And its own progress does land on it.
+	rec.add(engine.Event{Kind: engine.EventProgress, Step: "filtered copy",
+		Database: "pd", Message: "1.7 GB written, 860 KB/s", At: at.Add(3 * time.Second)})
+	steps, _ = rec.stepsByDatabase(at.Add(time.Minute))
+	if got := steps[len(steps)-1].Detail; got != "1.7 GB written, 860 KB/s" {
+		t.Errorf("detail = %q, want its own progress", got)
+	}
+
+	// A progress event about ANOTHER database does not land either: six
+	// databases run one after another and the phases repeat.
+	rec.add(engine.Event{Kind: engine.EventProgress, Step: "filtered copy",
+		Database: "claims", Message: "12 KB written", At: at.Add(4 * time.Second)})
+	steps, _ = rec.stepsByDatabase(at.Add(time.Minute))
+	if got := steps[len(steps)-1].Detail; got != "1.7 GB written, 860 KB/s" {
+		t.Errorf("detail = %q; another database's progress landed on this step", got)
+	}
+}
+
 // A warning does not stop a step, and a failure does.
 func TestAWarningLeavesTheStepRunningAndAFailureDoesNot(t *testing.T) {
 	at := epoch

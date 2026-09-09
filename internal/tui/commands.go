@@ -3,6 +3,7 @@ package tui
 import (
 	"context"
 	"fmt"
+	"sort"
 	"sync"
 	"time"
 
@@ -191,9 +192,15 @@ type runRecord struct {
 	mu     sync.Mutex
 	events []engine.Event
 
-	// progress is the newest progress event, redrawn in place rather than
-	// appended, so a byte counter counts instead of scrolling.
-	progress engine.Event
+	// progress is the newest progress event PER STEP, redrawn in place rather
+	// than appended, so a byte counter counts instead of scrolling.
+	//
+	// Per step, not one slot, because an operation has several and they report
+	// at different rates: with one slot, a filtered copy's byte counter was
+	// erased by the next database's dump the moment it started, and a finished
+	// step lost the number it ended on. Keyed by database and step together,
+	// since the phases repeat per database.
+	progress map[string]engine.Event
 
 	running bool
 	err     error
@@ -218,22 +225,46 @@ func (r *runRecord) add(ev engine.Event) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	if ev.Kind == engine.EventProgress {
-		r.progress = ev
+		if r.progress == nil {
+			r.progress = map[string]engine.Event{}
+		}
+		r.progress[progressKey(ev.Database, ev.Step)] = ev
 		return
 	}
 	r.events = append(r.events, ev)
 }
 
-// progress is the newest progress event.
+// progressKey identifies the step a progress event is about. A NUL between the
+// halves, so a database called "dump" cannot collide with the dump step of a
+// database called "".
+func progressKey(database, step string) string { return database + "\x00" + step }
+
+// progressFor is the newest progress reported by one step of one database.
 //
 // Progress is redrawn in place rather than appended — see runRecord.progress —
 // so it is not in the event list and the steps have to ask for it separately.
 // That seam is where a fixture goes wrong: one that appends progress to events
 // renders a step list nothing can produce.
-func (r *runRecord) progressNow() engine.Event {
+func (r *runRecord) progressFor(database, step string) engine.Event {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	return r.progress
+	return r.progress[progressKey(database, step)]
+}
+
+// progressAll is every step's newest progress, oldest first.
+//
+// For the log, which shows what is happening now rather than what each step
+// says about itself: with several steps having reported, the newest of each is
+// the closest thing to a current picture.
+func (r *runRecord) progressAll() []engine.Event {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	out := make([]engine.Event, 0, len(r.progress))
+	for _, ev := range r.progress {
+		out = append(out, ev)
+	}
+	sort.Slice(out, func(i, j int) bool { return out[i].At.Before(out[j].At) })
+	return out
 }
 
 // tablesSeen is how many distinct tables the operation has reported, which is

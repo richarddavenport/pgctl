@@ -34,9 +34,18 @@ func (e *Engine) copyFiltered(ctx context.Context, target *Target, m *snapshot.M
 	}
 	defer conn.Close(ctx) //nolint:errcheck // nothing useful to do with a close failure
 
-	if err := os.MkdirAll(filepath.Join(dir, snapshot.FilteredDir), 0o700); err != nil {
+	filtered := filepath.Join(dir, snapshot.FilteredDir)
+	if err := os.MkdirAll(filtered, 0o700); err != nil {
 		return fmt.Errorf("create filtered directory: %w", err)
 	}
+
+	// Watched, like the dump is, and for a stronger reason: a filtered table is
+	// ONE query, so the per-table lines that bound the rest of this operation
+	// arrive at the end and say nothing in between. `quotes.quote` is 20 GB of
+	// jsonb, its filtered copy takes half an hour, and without this the step
+	// shows the message it started with for the whole of it.
+	stop := watchGrowth(ctx, filtered, "filtered copy", report)
+	defer stop()
 
 	for i, entry := range m.Tables {
 		if entry.File == "" {

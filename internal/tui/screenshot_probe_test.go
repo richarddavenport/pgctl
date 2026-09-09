@@ -312,7 +312,7 @@ func captureRun() *runRecord {
 	step("prepare", "truncating 38 tables")
 	step("load", "pg_restore 42 entries, 8 jobs")
 	step("rebuild", "recreating 31 indexes")
-	r.progress = engine.Event{Kind: engine.EventProgress, Step: "rebuild",
-		Message: "idx_contact_name_trgm on public.contact"}
+	r.add(engine.Event{Kind: engine.EventProgress, Step: "rebuild",
+		Message: "idx_contact_name_trgm on public.contact"})
 	return r
 }
