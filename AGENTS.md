@@ -1,7 +1,8 @@
 # AGENTS.md
 
-Canonical entry point for AI agents working on pgctl. Vendor adapters
-(`CLAUDE.md`) point back here; they are not the source of truth.
+Working context for pgctl: what to read before changing behaviour, what will
+fail your change, and the principles the code was written under. Start here, not
+in the source.
 
 pgctl moves PostgreSQL data between environments: nightly snapshots,
 whole-database refreshes, and migrations of individual tables or table sets that
@@ -76,6 +77,28 @@ To look at a screen rather than assert on it:
 PGCTL_FRAMES=/tmp/pgctl-frames go test ./internal/tui -run CaptureFrames
 tuikit frames /tmp/pgctl-frames -out /tmp/frames.html -title pgctl
 ```
+
+Four commands cover the rest of it:
+
+```sh
+make check       # tests, gofmt, go vet, golangci-lint — run this before pushing
+make install     # build the working tree over the pgctl on your PATH
+make lab-up      # a disposable PostgreSQL, for the tests that need a server
+make test-all    # the whole suite, including those
+```
+
+`make check` is what CI runs and the lint config is strict. Tests that need a
+database **skip** when they are not given one, so a green `make check` is not
+evidence that anything was exercised against a server — `make test-all` against
+the lab container is.
+
+`make install` is also the answer to "did my change take effect?" — the binary
+on your PATH is whatever was last built, and reasoning about it has cost this
+project two bug reports about screens that were already fixed.
+
+The `*_probe_test.go` files are not assertions but instruments: they render
+frames or print measurements for a person to look at. `render_probe_test.go` and
+`screenshot_probe_test.go` found three layout bugs that assertions had not.
 
 ## Keeping up with tuikit
 
