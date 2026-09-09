@@ -312,7 +312,7 @@ func captureRun() *runRecord {
 	step := func(s, msg string) {
 		r.events = append(r.events, engine.Event{Kind: engine.EventStep, Step: s, Message: msg})
 	}
-	step("fetch", "prd/product-development/20260831T030000Z from azure blob mbpsnapshots/pg-snapshots (40 files for 38 tables)")
+	step("fetch", "prd/product-development/20260831T030000Z from azure blob pgsnapshots/pg-snapshots (40 files for 38 tables)")
 	r.events = append(r.events, engine.Event{Kind: engine.EventWarning,
 		Message: "terminated 4 connection(s) to product-development"})
 	step("prepare", "dropping 81 foreign keys and 31 indexes")
