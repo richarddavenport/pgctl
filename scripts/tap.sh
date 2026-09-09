@@ -27,10 +27,43 @@ tap_repo=richarddavenport/homebrew-tap
 # a public repo and only the push fails, so reaching it proves nothing.
 tap_url=${PGCTL_TAP_URL:-git@github.com:$tap_repo}
 
-gh release view "$version" --repo "$repo" >/dev/null 2>&1 || {
-  echo "$version is not published in $repo — the formula would point at nothing" >&2
-  exit 1
+# The release has to exist, and "not yet" is a different answer from "no".
+#
+# Pushing a tag starts the Release workflow, which takes a minute or two — so
+# the obvious sequence, `git push origin v0.2.0 && make tap`, arrives here
+# before there is anything to point at. The first version of this said "is not
+# published", which reads as a failure when the truth is "wait". It waits now.
+wait_for_release() {
+  gh release view "$version" --repo "$repo" >/dev/null 2>&1 && return 0
+
+  run=$(gh run list --repo "$repo" --workflow Release --limit 10 \
+    --json databaseId,headBranch,status \
+    --jq "[.[] | select(.headBranch == \"$version\" and .status != \"completed\")][0].databaseId" 2>/dev/null || true)
+  if [ -z "$run" ] || [ "$run" = "null" ]; then
+    echo "$version is not published in $repo, and no Release workflow is building it." >&2
+    echo "  Push the tag to start one:  git push origin $version" >&2
+    echo "  Or publish from here:       make release VERSION=$version" >&2
+    return 1
+  fi
+
+  echo "waiting for the Release workflow to publish $version…"
+  echo "  https://github.com/$repo/actions/runs/$run"
+  # --exit-status makes a failed run a failed wait, which is the point: a
+  # formula written against a release that never appeared is worse than no
+  # formula.
+  gh run watch "$run" --repo "$repo" --exit-status >/dev/null || {
+    echo "the Release workflow for $version failed — nothing to point the tap at" >&2
+    return 1
+  }
+  # The release object can lag the workflow's last step by a moment.
+  for _ in 1 2 3 4 5 6; do
+    gh release view "$version" --repo "$repo" >/dev/null 2>&1 && return 0
+    sleep 5
+  done
+  echo "the workflow finished but $version still has no release" >&2
+  return 1
 }
+wait_for_release || exit 1
 
 work=$(mktemp -d)
 trap 'rm -rf "$work"' EXIT
