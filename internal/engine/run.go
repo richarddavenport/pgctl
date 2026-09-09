@@ -146,6 +146,13 @@ func (e *Engine) Runs(ctx context.Context, report Reporter) ([]*Run, error) {
 	return groupRuns(entries), nil
 }
 
+// GroupRuns groups an index into runs, oldest first.
+//
+// Exported and separated from the reading, so a front end that already holds an
+// index groups it without a second listing, and a test groups a fixture without
+// a store.
+func GroupRuns(entries []*Entry) []*Run { return groupRuns(entries) }
+
 // groupRuns is the grouping, separated from the reading so a test can group a
 // fixture without a store.
 func groupRuns(entries []*Entry) []*Run {

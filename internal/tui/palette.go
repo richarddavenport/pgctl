@@ -76,13 +76,14 @@ func (m *Model) operationItems() []comp.PaletteItem {
 
 	apply := comp.PaletteItem{Key: "a", Label: "apply", Warn: true,
 		Hint: "replace data on a target — the plan is shown first"}
-	switch entry, ok := m.selectedSnapshot(); {
+	switch run, ok := m.selectedSnapshot(); {
 	case !ok:
 		apply.Refused, apply.Hint = true, "no snapshot selected — take one with n"
-	case !entry.Manifest.Complete():
-		apply.Refused, apply.Hint = true, entry.Manifest.ID+" did not finish and cannot be applied"
+	case !run.Complete():
+		apply.Refused, apply.Hint = true, run.ID+" did not finish and cannot be applied"
 	default:
-		apply.Hint = fmt.Sprintf("replace data with %s — the plan is shown first", entry.Manifest.ID)
+		apply.Hint = fmt.Sprintf("restore %s of %s — the plan is shown first",
+			plural(len(run.Members), "database"), run.ID)
 	}
 
 	move := comp.PaletteItem{Key: "m", Label: "move", Warn: true,

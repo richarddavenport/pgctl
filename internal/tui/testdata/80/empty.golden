@@ -3,21 +3,21 @@ pgctl  pgctl.yaml
 │ ● prd              protected │▏│ ‹ Overview · Config ›                       │
 │ ● qat                guarded │▏│                                             │
 │ ● local                      │▏│ prd                                         │
-│ ✗ scratch                    │▏│ protected — never a target                  │
-╰──────────────────────────────╯▏│                                             │
-╭─ [2] Databases (3) ──────────╮▏│ host       prd.example:5432                 │
-│ product-development  11.0 GB │▏│ user       mbpiadmin                        │
-│ claims               48.0 MB │▏│ server     PostgreSQL 17.4                  │
-│ quote                20.0 GB │▏│ databases  3                                │
-╰──────────────────────────────╯▏│ total size 31.0 GB                          │
-╭─ [3] Snapshots ──────────────╮▏│ checked    just now                         │
-│ none on prd — press n        │▏│                                             │
-╰──────────────────────────────╯▏│ SNAPSHOTS                                   │
-╭─ [4] Sets (1) ───────────────╮▏│   none — press n to take one                │
+╰──────────────────────────────╯▏│ protected — never a target                  │
+╭─ [2] Databases (3) ──────────╮▏│                                             │
+│ product-development  11.0 GB │▏│ host       prd.example:5432                 │
+│ claims               48.0 MB │▏│ user       mbpiadmin                        │
+╰──────────────────────────────╯▏│ server     PostgreSQL 17.4                  │
+╭─ [3] Snapshots ──────────────╮▏│ databases  3                                │
+│ none on prd — press n        │▏│ total size 31.0 GB                          │
+╰──────────────────────────────╯▏│ checked    just now                         │
+╭─ [4] Restorable ─────────────╮▏│                                             │
+│                              │▏│ SNAPSHOTS                                   │
+╰──────────────────────────────╯▏│   none — press n to take one                │
+╭─ [5] Sets (1) ───────────────╮▏│                                             │
 │ claims                   2+2 │▏│                                             │
 ╰──────────────────────────────╯▏│                                             │
-╭─ [5] Runs ───────────────────╮▏│                                             │
+╭─ [6] Runs ───────────────────╮▏│                                             │
 │ nothing run yet              │▏│                                             │
-╰──────────────────────────────╯▏│                                             │
-                                ▏╰─────────────────────────────────────────────╯
+╰──────────────────────────────╯▏╰─────────────────────────────────────────────╯
 n snapshot · a apply · m move · p prune · / filter · [ ] tabs · ? keys

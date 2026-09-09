@@ -11,18 +11,18 @@ pgctl  pgctl.yaml
 │ quote                 20.0 GB │▏│ databases  3                                                                                   │
 ╰───────────────────────────────╯▏│ total size 31.0 GB                                                                             │
 ╭─ [3] Snapshots (1) ───────────╮▏│ checked    just now                                                                            │
-│   08-27 22:00         1.9 GB  │▏╭──────────────────────────────────────────────────────────────╮                                 │
+│   08-27 22:00      1db 1.9 GB │▏╭──────────────────────────────────────────────────────────────╮                                 │
 ╰───────────────────────────────╯▏│Leave while apply → qat is running?                           │                                 │
-╭─ [4] Sets (1) ────────────────╮▏│                                                              │                                 │
-│ claims                    2+2 │▏│It is cancelled rather than abandoned, so the engine's        │                                 │
+╭─ [4] Restorable ──────────────╮▏│                                                              │                                 │
+│                               │▏│It is cancelled rather than abandoned, so the engine's        │                                 │
 ╰───────────────────────────────╯▏│onFailure and postApply hooks still run — they are what       │                                 │
-╭─ [5] Runs (2) ────────────────╮▏│bring an environment back up. Anything already written stays  │                                 │
-│ ⠋ apply → qat            1:41 │▏│written.                                                      │                                 │
-│ ✓ snapshot prd           3:22 │▏│                                                              │                                 │
-╰───────────────────────────────╯▏│y cancel it and leave · esc stay                              │                                 │
-                                 ▏╰──────────────────────────────────────────────────────────────╯                                 │
-                                 ▏│                                                                                                │
-                                 ▏│                                                                                                │
+╭─ [5] Sets (1) ────────────────╮▏│bring an environment back up. Anything already written stays  │                                 │
+│ claims                    2+2 │▏│written.                                                      │                                 │
+╰───────────────────────────────╯▏│                                                              │                                 │
+╭─ [6] Runs (2) ────────────────╮▏│y cancel it and leave · esc stay                              │                                 │
+│ ⠋ apply → qat            1:41 │▏╰──────────────────────────────────────────────────────────────╯                                 │
+│ ✓ snapshot prd           3:22 │▏│                                                                                                │
+╰───────────────────────────────╯▏│                                                                                                │
                                  ▏│                                                                                                │
                                  ▏│                                                                                                │
                                  ▏│                                                                                                │

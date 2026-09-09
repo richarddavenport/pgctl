@@ -2,21 +2,21 @@ pgctl  pgctl.yaml
 ╭─ [1] Connections (4) ────────╮▏╭─────────────────────────────────────────────╮
 │ ● prd              protected │▏│ ‹ Manifest · Tables · Warnings · Drift ›    │
 │ ● qat                guarded │▏│                                             │
-│ ● local                      │▏│ prd/product-development/20260828T030000Z    │
-│ ✗ scratch                    │▏│                                             │
-╰──────────────────────────────╯▏│ taken       2026-08-27 22:00  14h ago       │
-╭─ ╭────────────────────────────────────────────────────────────────────────╮  │
-│ p│ Delete prd/product-development/20260828T030000Z                        │  │
-│ c│                                                                        │  │
-│ q│ Removes 1.9 GB from local. This cannot be undone.                      │  │
-╰──│                                                                        │  │
-╭─ │ ▸ Yes, delete it  no                                                   │  │
-│  │ space toggles                                                          │  │
-╰──│   space toggle · enter delete it · esc cancel                          │  │
-╭─ ╰────────────────────────────────────────────────────────────────────────╯  │
-│ claims                   2+2 │▏│   whole        1                            │
-╰──────────────────────────────╯▏│   filtered     1                            │
-╭─ [5] Runs ───────────────────╮▏│   no data      1                            │
-│ nothing run yet              │▏│   foreign keys 0                            │
+│ ● local                      │▏│ prd/20260828T030000Z                        │
 ╰──────────────────────────────╯▏│                                             │
-                                ▏╰─────────────────────────────────────────────╯
+╭─ [2] Databases (3) ──────────╮▏│ taken       2026-08-27 22:00  14h ago       │
+│ p╭────────────────────────────────────────────────────────────────────────╮  │
+│ c│ Delete prd/20260828T030000Z                                            │  │
+╰──│                                                                        │  │
+╭─ │ Removes 1.9 GB of 1 database from local. This cannot be undone.        │  │
+│  │                                                                        │  │
+╰──│ ▸ Yes, delete it  no                                                   │  │
+╭─ │ space toggles                                                          │  │
+│  │   space toggle · enter delete it · esc cancel                          │  │
+╰──╰────────────────────────────────────────────────────────────────────────╯  │
+╭─ [5] Sets (1) ───────────────╮▏│                                             │
+│ claims                   2+2 │▏│ CONTENTS                                    │
+╰──────────────────────────────╯▏│   whole    1                                │
+╭─ [6] Runs ───────────────────╮▏│   filtered 1                                │
+│ nothing run yet              │▏│   no data  1                                │
+╰──────────────────────────────╯▏╰─────────────────────────────────────────────╯

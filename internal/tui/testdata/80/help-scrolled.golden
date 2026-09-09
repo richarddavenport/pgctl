@@ -5,19 +5,19 @@
         │esc        back to the form                                   │
         │                                                              │
         │What a snapshot row means                                     │
+        │6db        the databases it covers — a snapshot is one run of…│
         │↓          not on this machine; applying downloads it first   │
-        │✗          it did not finish; it cannot be applied            │
+        │✗          a database of it did not finish; it cannot be appl…│
         │where      the Manifest tab names every place it is           │
+        │                                                              │
+        │The two snapshot panels                                       │
+        │[3]        Snapshots — what was taken FROM this connection    │
+        │[4]        Restorable — what can be put ON it, by source      │
+        │a          apply the selected one; the form names the target  │
         │                                                              │
         │What a connection row means                                   │
         │●          reachable                                          │
         │○          not reached yet — pgctl has not tried              │
         │⠋          being reached now                                  │
-        │✗          unreachable — Overview has the error               │
-        │protected  never an apply target, no override                 │
-        │guarded    an apply needs the name typed in full              │
-        │                                                              │
-        │What a set row means                                          │
-        │4 closed   closed: it can be applied on its own               │
-        │↓ 7 more                                                      │
+        │↓ 13 more                                                     │
         ╰──────────────────────────────────────────────────────────────╯

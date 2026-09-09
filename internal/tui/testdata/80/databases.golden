@@ -3,21 +3,21 @@ pgctl  pgctl.yaml
 │ ● prd              protected │▏│ ‹ Tables · Rules · Foreign keys ›           │
 │ ● qat                guarded │▏│                                             │
 │ ● local                      │▏│   tables        3   total   24.2 GB         │
-│ ✗ scratch                    │▏│                                             │
-╰──────────────────────────────╯▏│   TABLE             SIZE     ROWS SNAPSHOT  │
-╭─ [2] Databases (3) ──────────╮▏│ › claims.poli…  180.0 MB     483k all       │
-│ product-development  11.0 GB │▏│   quotes.quote   20.0 GB     147k filtered  │
-│ claims               48.0 MB │▏│   audit.logge…    4.0 GB     9.1M all       │
-│ quote                20.0 GB │▏│                                             │
 ╰──────────────────────────────╯▏│                                             │
+╭─ [2] Databases (3) ──────────╮▏│   TABLE             SIZE     ROWS SNAPSHOT  │
+│ product-development  11.0 GB │▏│ › claims.poli…  180.0 MB     483k all       │
+│ claims               48.0 MB │▏│   quotes.quote   20.0 GB     147k filtered  │
+╰──────────────────────────────╯▏│   audit.logge…    4.0 GB     9.1M all       │
 ╭─ [3] Snapshots (1) ──────────╮▏│                                             │
-│   08-27 22:00        1.9 GB  │▏│                                             │
+│   08-27 22:00     1db 1.9 GB │▏│                                             │
 ╰──────────────────────────────╯▏│                                             │
-╭─ [4] Sets (1) ───────────────╮▏│                                             │
+╭─ [4] Restorable ─────────────╮▏│                                             │
+│                              │▏│                                             │
+╰──────────────────────────────╯▏│                                             │
+╭─ [5] Sets (1) ───────────────╮▏│                                             │
 │ claims                   2+2 │▏│                                             │
 ╰──────────────────────────────╯▏│                                             │
-╭─ [5] Runs ───────────────────╮▏│                                             │
-│ nothing run yet              │▏│                                             │
-╰──────────────────────────────╯▏│                                        6/6  │
-                                ▏╰─────────────────────────────────────────────╯
+╭─ [6] Runs ───────────────────╮▏│                                             │
+│ nothing run yet              │▏│                                        6/6  │
+╰──────────────────────────────╯▏╰─────────────────────────────────────────────╯
 n snapshot · a apply · m move · p prune · / filter · [ ] tabs · ? keys

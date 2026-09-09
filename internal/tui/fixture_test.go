@@ -179,7 +179,7 @@ func fixtureSnapshot(t *testing.T, m *Model) *snapshot.Manifest {
 	if err := snapshot.Write(dir, man); err != nil {
 		t.Fatalf("write manifest: %v", err)
 	}
-	m.entries = []*engine.Entry{{Manifest: man, At: []string{config.LocalStorage}}}
+	m.setEntries([]*engine.Entry{{Manifest: man, At: []string{config.LocalStorage}}})
 	return man
 }
 
@@ -272,7 +272,7 @@ func fixturePlan(m *Model) {
 		return
 	}
 	m.action.stage = stagePlan
-	m.action.plan = &engine.Plan{
+	one := &engine.Plan{
 		Snapshot: m.entries[0].Manifest,
 		Target:   &engine.Target{Conn: config.Connection{Name: "qat", Guarded: true}},
 		Local:    true,
@@ -306,6 +306,19 @@ func fixturePlan(m *Model) {
 			"audit.logged_actions carries no data in this snapshot, " +
 				"so applying it empties the table",
 		},
+	}
+	// A run of two: one database that will restore and one the engine refuses,
+	// which is the arrangement the confirm screen exists for — five restoring
+	// and one refused is a decision, and a fixture of one plan never shows it.
+	m.action.plan = &engine.RunPlan{
+		Run:    m.snaps[len(m.snaps)-1],
+		Target: "qat",
+		Plans:  []*engine.Plan{one},
+		Refusals: []engine.Refusal{{
+			Database: "hasura",
+			Reason: "snapshot prd/hasura/20260828T030000Z does not contain " +
+				"hdb_catalog.hdb_version — it predates a migration that created it",
+		}},
 	}
 }
 
@@ -345,6 +358,8 @@ func fixtureTwoDatabases(m *Model) {
 		man.StartedAt = first.StartedAt.Add(-2 * time.Hour)
 		man.FinishedAt = man.StartedAt.Add(41 * time.Second)
 		man.Bytes = 467 << 20
-		m.entries = append(m.entries, &engine.Entry{Manifest: &man, At: []string{config.LocalStorage, "snapshots"}})
+		m.setEntries(append(m.entries, &engine.Entry{
+			Manifest: &man, At: []string{config.LocalStorage, "snapshots"},
+		}))
 	}
 }

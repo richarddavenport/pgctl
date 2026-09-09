@@ -3,21 +3,21 @@ pgctl  pgctl.yaml
 │ ● prd              protected │▏│ ‹ Members · Closure · Load order ›          │
 │ ● qat                guarded │▏│                                             │
 │ ● local                      │▏│ The load order is computed against the      │
-│ ✗ scratch                    │▏│ target when you plan an apply, because the  │
-╰──────────────────────────────╯▏│ target's foreign keys are the ones a load   │
-╭─ [2] Databases (3) ──────────╮▏│ has to satisfy. Press a to plan one.        │
-│ product-development  11.0 GB │▏│                                             │
+╰──────────────────────────────╯▏│ target when you plan an apply, because the  │
+╭─ [2] Databases (3) ──────────╮▏│ target's foreign keys are the ones a load   │
+│ product-development  11.0 GB │▏│ has to satisfy. Press a to plan one.        │
 │ claims               48.0 MB │▏│                                             │
-│ quote                20.0 GB │▏│                                             │
 ╰──────────────────────────────╯▏│                                             │
 ╭─ [3] Snapshots (1) ──────────╮▏│                                             │
-│   08-27 22:00        1.9 GB  │▏│                                             │
+│   08-27 22:00     1db 1.9 GB │▏│                                             │
 ╰──────────────────────────────╯▏│                                             │
-╭─ [4] Sets (1) ───────────────╮▏│                                             │
+╭─ [4] Restorable ─────────────╮▏│                                             │
+│                              │▏│                                             │
+╰──────────────────────────────╯▏│                                             │
+╭─ [5] Sets (1) ───────────────╮▏│                                             │
 │ claims                   2+2 │▏│                                             │
 ╰──────────────────────────────╯▏│                                             │
-╭─ [5] Runs ───────────────────╮▏│                                             │
+╭─ [6] Runs ───────────────────╮▏│                                             │
 │ nothing run yet              │▏│                                             │
-╰──────────────────────────────╯▏│                                             │
-                                ▏╰─────────────────────────────────────────────╯
+╰──────────────────────────────╯▏╰─────────────────────────────────────────────╯
 n snapshot · a apply · m move · p prune · / filter · [ ] tabs · ? keys

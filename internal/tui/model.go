@@ -29,12 +29,23 @@ const (
 	panelConnections = iota
 	panelDatabases
 	panelSnapshots
+	panelRestorable
 	panelSets
 	panelRuns
 	panelCount
 )
 
-var panelTitles = [panelCount]string{"Connections", "Databases", "Snapshots", "Sets", "Runs"}
+// Snapshots and Restorable are two panels because they answer two questions,
+// and one list cannot.
+//
+// Snapshots is what was taken FROM the selected connection. Restorable is what
+// can be put ON it — every other connection's snapshots. Standing on qat, the
+// first is empty and correct (nothing is ever taken from qat) and the second is
+// how you refresh it, which is the whole reason anybody opens this tool. One
+// panel showing both would be a list whose rows mean opposite things.
+var panelTitles = [panelCount]string{
+	"Connections", "Databases", "Snapshots", "Restorable", "Sets", "Runs",
+}
 
 // panelStatusWidth is the columns a panel reserves for comp.Row.Status: the
 // reachability dot, the mark on a snapshot that never finished, whether a run
@@ -43,6 +54,7 @@ var panelTitles = [panelCount]string{"Connections", "Databases", "Snapshots", "S
 var panelStatusWidth = [panelCount]int{
 	panelConnections: 2,
 	panelSnapshots:   2,
+	panelRestorable:  2,
 	panelRuns:        2,
 }
 
@@ -100,6 +112,11 @@ type Model struct {
 	liveErr   map[string]error
 	loading   map[string]bool
 	setInfo   map[string]*setSummary
+
+	// snaps is the index grouped into snapshots — engine.Run, one per press of
+	// `n`. Grouped where the entries arrive rather than per frame, and named
+	// nothing like `runs` below, which is this session's OPERATIONS.
+	snaps []*engine.Run
 
 	// runs is this session's operation history, newest last.
 	runs   []*runRecord
@@ -290,6 +307,17 @@ func New(e *engine.Engine) *Model {
 	return m
 }
 
+// setEntries records the index and the snapshots it groups into.
+//
+// One call rather than two assignments, because they are one fact: a fixture
+// that set entries and forgot snaps rendered a Snapshots panel that said
+// "none on prd" over an index with prd's snapshot in it, which is the
+// contradiction the panel was fixed for this morning arriving by another route.
+func (m *Model) setEntries(entries []*engine.Entry) {
+	m.entries = entries
+	m.snaps = engine.GroupRuns(entries)
+}
+
 // Canvas is the last frame, so a mouse event or a capture script can address a
 // region by name.
 func (m *Model) Canvas() *comp.Canvas { return m.canvas }
@@ -353,7 +381,7 @@ func (m *Model) Update(msg tea.Msg) (app.Model, tea.Cmd) {
 			m.err = msg.err
 			return m, nil
 		}
-		m.entries = msg.entries
+		m.setEntries(msg.entries)
 		return m, nil
 
 	case liveTablesMsg:
@@ -436,7 +464,7 @@ func (m *Model) capture() app.Handled {
 // screenKey is the keys that act on what is focused right now.
 func (m *Model) screenKey(msg tea.KeyMsg) (tea.Cmd, bool) {
 	switch key := msg.String(); key {
-	case "1", "2", "3", "4", "5":
+	case "1", "2", "3", "4", "5", "6":
 		m.focus = int(key[0] - '1')
 		m.paneFocus = false
 		m.clearFilter()

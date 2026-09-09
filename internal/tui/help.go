@@ -55,9 +55,15 @@ func KeySections() []comp.KeySection {
 		// and comp.Hint is a key and a label, which is exactly the shape a
 		// legend is.
 		{Name: "What a snapshot row means", Keys: []comp.Hint{
+			{Key: "6db", Label: "the databases it covers — a snapshot is one run of n"},
 			{Key: "↓", Label: "not on this machine; applying downloads it first"},
-			{Key: "✗", Label: "it did not finish; it cannot be applied"},
+			{Key: "✗", Label: "a database of it did not finish; it cannot be applied"},
 			{Key: "where", Label: "the Manifest tab names every place it is"},
+		}},
+		{Name: "The two snapshot panels", Keys: []comp.Hint{
+			{Key: "[3]", Label: "Snapshots — what was taken FROM this connection"},
+			{Key: "[4]", Label: "Restorable — what can be put ON it, by source"},
+			{Key: "a", Label: "apply the selected one; the form names the target"},
 		}},
 		{Name: "What a connection row means", Keys: []comp.Hint{
 			{Key: "●", Label: "reachable"},

@@ -39,8 +39,8 @@ func (m *Model) panelRows(panel int) []comp.Row {
 		return m.connectionRows()
 	case panelDatabases:
 		return m.databaseRows()
-	case panelSnapshots:
-		return m.snapshotRows()
+	case panelSnapshots, panelRestorable:
+		return m.snapshotRows(panel)
 	case panelSets:
 		return m.setRows()
 	case panelRuns:
@@ -127,15 +127,22 @@ func (m *Model) databaseRows() []comp.Row {
 	return out
 }
 
-func (m *Model) snapshotRows() []comp.Row {
-	list := m.snapshots()
+// snapshotRows renders either snapshot panel: what was taken from here, or what
+// can be restored here.
+//
+// One row per SNAPSHOT, where a snapshot is every database taken at one
+// instant. It was one row per database until somebody counted them: six rows
+// for one press of `n`, and a restore that made you choose databases a second
+// time.
+func (m *Model) snapshotRows(panel int) []comp.Row {
+	list := m.panelSnapshotRows(panel)
 	out := make([]comp.Row, 0, len(list))
 	for _, row := range list {
-		// A database heading: a label, not a thing. Skip keeps the cursor off
-		// it, so ↑↓ moves between snapshots and the detail pane always has one.
-		if row.entry == nil {
+		// A source connection heading, in the Restorable panel: a label, not a
+		// thing. Skip keeps the cursor off it.
+		if row.run == nil {
 			out = append(out, comp.Row{
-				Key:   "db/" + row.heading,
+				Key:   "from/" + row.heading,
 				Text:  row.heading,
 				Style: &headerStyle,
 				Skip:  true,
@@ -143,63 +150,44 @@ func (m *Model) snapshotRows() []comp.Row {
 			continue
 		}
 
-		man := row.entry.Manifest
-		stamp := man.StartedAt.Local().Format("01-02 15:04")
-
-		// What applying it will COST, rather than where it is: `↓` means the
-		// files are not on this machine and an apply downloads them first.
+		run := row.run
+		// One status column, three states, in the order they matter: ✗ cannot
+		// be applied at all, ↓ can but downloads first, blank is here and
+		// ready. Both are the same question — what will using this cost me —
+		// and putting them in one column leaves the right-hand side for the
+		// two facts that are not state.
 		//
-		// The panel used to say `l`, `r` or `l+r` — location, in the two
-		// columns a panel this narrow has — and the first reader to meet it
-		// asked what `r` meant. Location is three states to learn; the cost is
-		// one, it is the thing being decided when picking a snapshot to apply,
-		// and it needs no legend once seen.
-		//
-		// What that gives up, deliberately: a local-only snapshot and one that
-		// is also uploaded now look the same here. "Is it backed up" is a
-		// different question from "what will this cost me", it is answered by
-		// the Manifest tab's `where` — which NAMES the destinations, where a
-		// letter could not — and by the run that just uploaded it.
-		var where comp.Segment
-		if !row.entry.Local() {
-			where = span("↓", &accentStyle)
-		}
-
-		// An unfinished snapshot cannot be applied — the engine refuses it —
-		// so it is marked in the status column, where the answer to "is this
-		// one usable" is on every other row too.
+		// The right side is why: at twenty-eight columns a timestamp, a
+		// database count, a size AND a marker do not fit, and they collided —
+		// `09-09 10:121 db 47.6 KB ↓`.
 		status, statusStyle := "", &mutedStyle
-		if !man.Complete() {
+		switch {
+		case !run.Complete():
 			status, statusStyle = "✗", &dangerStyle
+		case !run.Local():
+			status, statusStyle = "↓", &accentStyle
 		}
 
 		out = append(out, comp.Row{
-			Key:         man.ID,
+			Key:         run.ID,
 			Status:      status,
 			StatusStyle: statusStyle,
-			Text:        stamp,
-			// Indented under its heading, when there is one. A group of one
-			// database has no heading and no indent to sit under.
-			Depth: m.snapshotDepth(),
+			Text:        run.At.Local().Format("01-02 15:04"),
+			Depth:       m.snapshotDepth(panel),
 			Right: []comp.Segment{
-				span(engine.HumanBytes(man.Bytes)+" ", nil),
-				where,
+				span(fmt.Sprintf("%ddb ", len(run.Members)), &mutedStyle),
+				span(engine.HumanBytes(run.Bytes()), nil),
 			},
 		})
 	}
 	return out
 }
 
-// snapshotDepth indents a snapshot under its database heading, and does not
-// when there is no heading to indent under.
-//
-// Asked of the rows rather than remembered, because whether the panel is
-// grouped is a property of what the connection holds: one database's worth of
-// snapshots is a flat list, and the second database is what turns it into
-// groups.
-func (m *Model) snapshotDepth() int {
-	for _, r := range m.snapshots() {
-		if r.entry == nil {
+// snapshotDepth indents a snapshot under its source heading, and does not when
+// there is no heading to indent under.
+func (m *Model) snapshotDepth(panel int) int {
+	for _, r := range m.panelSnapshotRows(panel) {
+		if r.run == nil {
 			return 1
 		}
 	}

@@ -719,3 +719,71 @@ do, because a reader who has not learned the letters should not be stuck.
 **What would have to change to reverse this.** The family changing, which is not
 something this repo gets a vote on. If lazygit rebinds `[`/`]`, the argument
 that produced this decision is the argument for following it.
+
+## 26. The snapshot is the run, and two panels list it
+
+Decision 1 made a snapshot a first-class thing. It made the wrong thing
+first-class: a snapshot id was `connection/database/timestamp`, so one press of
+`n` over six databases produced six snapshots that merely shared a timestamp,
+and the comment in `dump.go` claiming they were "one snapshot set rather than
+six unrelated ones" described an intention nothing in the model enforced.
+
+Reported, in these words: *"something that seems entirely wrong is that each
+database is a snapshot. The reality of what I'm trying to do is snapshot →
+restore. And making it appear as if I have to select multiple databases for the
+snapshot AND the restore creates a lot of friction."* Three symptoms, and the
+third is the one that mattered: **`pgctl apply prd/latest --to qat` restored one
+database** — whichever sorted last — because `latest` meant the newest
+single-database snapshot of the connection. That is the command a nightly
+restore would use.
+
+**A run — `prd/20260909T153059Z` — is the addressable snapshot, and its
+databases are members of it.** It is *derived*, not stored: the members already
+share the instant `pgctl snapshot` stamps across them, so `engine.Run` groups
+what is on disk and the ids, the manifests and the storage layout are untouched.
+A member's own id still resolves, as a run of one, which keeps every script that
+names a full id working — and the caller does not branch, because an apply of
+one database and an apply of six differ in how many plans they produce, not in
+kind. You choose databases when you take a snapshot and not again when you put
+it back.
+
+**Complete and "where it is" are properties of the whole run.** One unfinished
+member makes the run incomplete, because a run is what gets restored: five good
+databases and one truncated dump is not a state of the estate anybody wants, and
+the alternative — call it complete and refuse that member at apply time — is a
+refusal an hour into the work. `Locations` is the intersection of the members and
+not the union, for the same reason: `local+snapshots` for a run whose
+product-development member never uploaded names the one member you would need.
+
+**Two panels, because one list cannot answer both questions.** Panel 3 is what
+was taken **from** the selected connection; panel 4 is what can be put **on**
+it — every other connection's runs, under a heading naming where each came from.
+Asked for after the one-panel version was tried: *"we should have 2 panels, not
+just 1. We need one for snapshots and another one for 'restorable snapshots'."*
+The single panel had produced the report that started this: standing on qat and
+finding nothing, which was *correct* — nothing is taken from qat — and useless,
+because refreshing qat is what most people open this tool to do. Now the restore
+path is stand on the target, `[4]`, `a`, with the target and every database
+already chosen.
+
+**One plan per database, and a refusal for one database does not refuse the
+others.** Databases are independent — no foreign key crosses them — so a table
+missing from one database's snapshot says nothing about the other five, and
+refusing all six would let one stale member block a refresh of the estate. The
+refusals are therefore returned as values rather than raised, and the
+confirmation screen lists them above the plans. What still refuses everything is
+a request that cannot mean anything: a protected target, or a set or table
+selection named for a run of more than one database — `config.Set` carries a
+database and a table pattern resolves against one catalog, so applying it to
+whichever member happened to match is how a "claims set" apply could have
+silently restored the whole of five other databases.
+
+**`ExecuteRun` stops at the first failure and names what finished.** A refusal
+was dealt with at plan time, so a failure here is the environment misbehaving —
+a dropped connection, a full disk, a lock that never came — and the next
+database would meet the same thing.
+
+**What would have to change to reverse this.** A database becoming the thing
+people restore one of, rather than the thing a refresh happens to contain. If
+that happens the run does not go away — it is what the storage already holds —
+it just stops being the default selection.

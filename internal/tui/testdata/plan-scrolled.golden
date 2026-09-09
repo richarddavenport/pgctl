@@ -3,33 +3,33 @@ pgctl  pgctl.yaml
 │ ● prd               protected │▏│ ‹ Overview · Config ›                                                                          │
 │ ● qat                 guarded │▏│                                                                                                │
 │ ● local                       │▏│ prd                                                                                            │
-│ ✗ scratch                     │▏│ protected — never a target                                                                     │
-╰──────────╭────────────────────────────────────────────────────────────────────────────────────────────────────────────╮          │
-╭─ [2] Data│ Apply prd/product-development/20260828T030000Z                                                             │          │
-│ product-d│                                                                                                            │          │
-│ claims   │ Replaces data on the target. The plan is shown before anything is touched.                                 │          │
+│ ✗ scratch╭────────────────────────────────────────────────────────────────────────────────────────────────────────────╮          │
+╰──────────│ Apply prd/20260828T030000Z                                                                                 │          │
+╭─ [2] Data│                                                                                                            │          │
+│ product-d│ Replaces data on the target, one database at a time. 1 database taken 14h ago. The plan is shown before    │          │
+│ claims   │ anything is touched.                                                                                       │          │
 │ quote    │                                                                                                            │          │
-╰──────────│ REPLACE 6 tables in product-development on qat                                                             │          │
-╭─ [3] Snap│ from prd/product-development/20260828T030000Z taken 2026-08-27 22:00, 2.3 GB of source data                │          │
-│   08-27 2│                                                                                                            │          │
-╰──────────│ widened to include 2 more: operations.policy_contract, public.address                                      │          │
-╭─ [4] Sets│                                                                                                            │          │
-│ claims   │ 81 foreign keys dropped and rebuilt, 31 indexes rebuilt                                                    │          │
-╰──────────│ 12 user triggers disabled for the load on 1 table                                                          │          │
-╭─ [5] Runs│                                                                                                            │          │
-│ nothing r│ LOAD ORDER                                                                                                 │          │
-╰──────────│ 1. public.address                                                                                          │          │
-           │ 2. operations.cancellation, operations.policy_contract, operations.policy_contract_quote                   │          │
+╰──────────│ REFUSED, and skipped: 1 database                                                                           │          │
+╭─ [3] Snap│ hasura — snapshot prd/hasura/20260828T030000Z does not contain hdb_catalog.hdb_version — it predates a     │          │
+│   08-27 2│ migration that created it                                                                                  │          │
+╰──────────│                                                                                                            │          │
+╭─ [4] Rest│ REPLACE 6 tables in 1 database on qat                                                                      │          │
+│          │ from prd/20260828T030000Z taken 2026-08-27 22:00, 2.3 GB of source data                                    │          │
+╰──────────│                                                                                                            │          │
+╭─ [5] Sets│ product-development — 6 tables, 2.3 GB                                                                     │          │
+│ claims   │ widened to include 2 more: operations.policy_contract, public.address                                      │          │
+╰──────────│ 81 foreign keys dropped and rebuilt, 31 indexes rebuilt                                                    │          │
+╭─ [6] Runs│ 12 user triggers disabled for the load on 1 table                                                          │          │
+│ nothing r│ 1. public.address                                                                                          │          │
+╰──────────│ 2. operations.cancellation, operations.policy_contract, operations.policy_contract_quote                   │          │
            │ 3. claims.policy_claim                                                                                     │          │
            │ 4. claims.claim_detail                                                                                     │          │
            │ ring: operations.cancellation, operations.policy_contract, operations.policy_contract_quote                │          │
-           │                                                                                                            │          │
            │ ! audit.logged_actions carries no data in this snapshot, so applying it empties the table                  │          │
-           │                                                                                                     16/16  │          │
+           │                                                                                                     17/17  │          │
            │ read it, then confirm. Nothing has been touched yet.                                                       │          │
            │   enter apply it · ↑↓ read · esc back                                                                      │          │
            ╰────────────────────────────────────────────────────────────────────────────────────────────────────────────╯          │
-                                 ▏│                                                                                                │
                                  ▏│                                                                                                │
                                  ▏│                                                                                                │
                                  ▏│                                                                                                │

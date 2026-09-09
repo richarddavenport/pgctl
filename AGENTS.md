@@ -11,7 +11,7 @@ respect the foreign keys between them.
 
 - [`README.md`](./README.md) — what the tool does and how it is configured.
 - [`design/decisions.md`](./design/decisions.md) — **read before changing how
-  anything behaves.** Twenty-five numbered decisions, each with the reasoning that
+  anything behaves.** Twenty-six numbered decisions, each with the reasoning that
   produced it. A change that contradicts one is not forbidden, but it has to say
   so rather than quietly reverse it — decision 19 supersedes 18 and says which
   part.
@@ -59,7 +59,7 @@ Three things will fail your change:
 - `guard.Tokens`, `guard.Glyphs` and `guard.Chrome` in `internal/tui` — a colour
   that is not a role in `theme.go`, or a non-ASCII character not in its glyph
   set, is a test failure.
-- the goldens in `internal/tui/testdata` — 40 states at two terminal sizes, 80
+- the goldens in `internal/tui/testdata` — 52 states at two terminal sizes, 104
   frames. A layout change is an ordinary test failure; run
   `go test ./internal/tui -update-goldens` when it is intended, and **read the
   diff**. `TestEveryFrameFitsItsTerminal` is the one that stops a frame drawing

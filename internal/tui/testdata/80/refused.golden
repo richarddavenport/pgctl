@@ -3,21 +3,21 @@ pgctl  pgctl.yaml
 │ ● prd              protected │refused                                       ││
 │ ● qat                guarded │                                              ││
 │ ● local                      │no snapshot selected — press n to take one,   ││
-│ ✗ scratch                    │or move to the Snapshots panel                ││
-╰──────────────────────────────│                                              ││
-╭─ [2] Databases (3) ──────────│esc dismiss                                   ││
-│ product-development  11.0 GB ╰──────────────────────────────────────────────╯│
-│ claims               48.0 MB │▏│                                             │
-│ quote                20.0 GB │▏│                                             │
-╰──────────────────────────────╯▏│                                             │
+╰──────────────────────────────│or move to panel 4, which lists what other    ││
+╭─ [2] Databases (3) ──────────│connections have that can be restored here    ││
+│ product-development  11.0 GB │                                              ││
+│ claims               48.0 MB │esc dismiss                                   ││
+╰──────────────────────────────╰──────────────────────────────────────────────╯│
 ╭─ [3] Snapshots ──────────────╮▏│                                             │
 │ none on prd — press n        │▏│                                             │
 ╰──────────────────────────────╯▏│                                             │
-╭─ [4] Sets (1) ───────────────╮▏│                                             │
+╭─ [4] Restorable ─────────────╮▏│                                             │
+│                              │▏│                                             │
+╰──────────────────────────────╯▏│                                             │
+╭─ [5] Sets (1) ───────────────╮▏│                                             │
 │ claims                   2+2 │▏│                                             │
 ╰──────────────────────────────╯▏│                                             │
-╭─ [5] Runs ───────────────────╮▏│                                             │
+╭─ [6] Runs ───────────────────╮▏│                                             │
 │ nothing run yet              │▏│                                             │
-╰──────────────────────────────╯▏│                                             │
-                                ▏╰─────────────────────────────────────────────╯
+╰──────────────────────────────╯▏╰─────────────────────────────────────────────╯
 n snapshot · a apply · m move · p prune · x delete · / filter · ? keys

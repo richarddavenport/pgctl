@@ -13,15 +13,15 @@ pgctl  pgctl.yaml
 ╭─ [3] Snap│ Reads the chosen databases and writes a compressed copy. Nothing is written to prd. Choose where they go:  │          │
 │   08-27 2│ keeping them here, sending them away, or both.                                                             │          │
 ╰──────────│                                                                                                            │          │
-╭─ [4] Sets│  choose at least one destination — space chooses, and more than one is fine                                │          │
-│ claims   │                                                                                                            │          │
+╭─ [4] Rest│  choose at least one destination — space chooses, and more than one is fine                                │          │
+│          │                                                                                                            │          │
 ╰──────────│   Databases      1 of 3                                                                                    │          │
-╭─ [5] Runs│ ▸ ●   product-development                                                                                  │          │
-│ nothing r│   ○   claims                                                                                               │          │
+╭─ [5] Sets│ ▸ ●   product-development                                                                                  │          │
+│ claims   │   ○   claims                                                                                               │          │
 ╰──────────│   ○   quote                                                                                                │          │
-           │   Where it goes  nothing chosen yet                                                                        │          │
-           │   ○   local           keep it on this machine, in .pgctl/snapshots                                         │          │
-           │   ○   snapshots       upload it to the pg-snapshots container                                              │          │
+╭─ [6] Runs│   Where it goes  nothing chosen yet                                                                        │          │
+│ nothing r│   ○   local           keep it on this machine, in .pgctl/snapshots                                         │          │
+╰──────────│   ○   snapshots       upload it to the pg-snapshots container                                              │          │
            │ product-development alone                                                                                  │          │
            │   ↑↓ move · space choose · a all · tab field · enter take it · esc cancel                                  │          │
            ╰────────────────────────────────────────────────────────────────────────────────────────────────────────────╯          │

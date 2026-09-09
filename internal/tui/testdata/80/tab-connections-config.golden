@@ -3,21 +3,21 @@ pgctl  pgctl.yaml
 │ ● prd              protected │▏│ ‹ Overview · Config ›                       │
 │ ● qat                guarded │▏│                                             │
 │ ● local                      │▏│ name        prd                             │
-│ ✗ scratch                    │▏│ dsn         service=prd                     │
-╰──────────────────────────────╯▏│ guarded     no                              │
-╭─ [2] Databases (3) ──────────╮▏│ protected   yes                             │
-│ product-development  11.0 GB │▏│ maintenance postgres                        │
-│ claims               48.0 MB │▏│                                             │
-│ quote                20.0 GB │▏│ HOW THIS RESOLVES                           │
-╰──────────────────────────────╯▏│   The DSN is handed to libpq unchanged, so  │
-╭─ [3] Snapshots (1) ──────────╮▏│   ~/.pg_service.conf, ~/.pgpass and the PG* │
-│   08-27 22:00        1.9 GB  │▏│   variables apply exactly as they do to     │
-╰──────────────────────────────╯▏│   psql. pgctl never stores a password.      │
-╭─ [4] Sets (1) ───────────────╮▏│                                             │
-│ claims                   2+2 │▏│ MEANING                                     │
-╰──────────────────────────────╯▏│   This environment can never be an apply    │
-╭─ [5] Runs ───────────────────╮▏│   target. There is no flag that changes     │
-│ nothing run yet              │▏│   that.                                     │
+╰──────────────────────────────╯▏│ dsn         service=prd                     │
+╭─ [2] Databases (3) ──────────╮▏│ guarded     no                              │
+│ product-development  11.0 GB │▏│ protected   yes                             │
+│ claims               48.0 MB │▏│ maintenance postgres                        │
 ╰──────────────────────────────╯▏│                                             │
-                                ▏╰─────────────────────────────────────────────╯
+╭─ [3] Snapshots (1) ──────────╮▏│ HOW THIS RESOLVES                           │
+│   08-27 22:00     1db 1.9 GB │▏│   The DSN is handed to libpq unchanged, so  │
+╰──────────────────────────────╯▏│   ~/.pg_service.conf, ~/.pgpass and the PG* │
+╭─ [4] Restorable ─────────────╮▏│   variables apply exactly as they do to     │
+│                              │▏│   psql. pgctl never stores a password.      │
+╰──────────────────────────────╯▏│                                             │
+╭─ [5] Sets (1) ───────────────╮▏│ MEANING                                     │
+│ claims                   2+2 │▏│   This environment can never be an apply    │
+╰──────────────────────────────╯▏│   target. There is no flag that changes     │
+╭─ [6] Runs ───────────────────╮▏│   that.                                     │
+│ nothing run yet              │▏│                                             │
+╰──────────────────────────────╯▏╰─────────────────────────────────────────────╯
 n snapshot · a apply · m move · p prune · / filter · [ ] tabs · ? keys

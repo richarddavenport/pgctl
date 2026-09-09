@@ -11,18 +11,18 @@ pgctl  pgctl.yaml
 │ quote                 20.0 GB │▏│   11:58:50 product-development  prd/product-development/… to azure blob                        │
 ╰───────────────────────────────╯▏│   11:59:00 claims               pg_dump --format=directory --jobs=4                            │
 ╭─ [3] Snapshots (1) ───────────╮▏│   11:59:15 claims               prd/claims/… to azure blob                                     │
-│   08-27 22:00         1.9 GB  │▏│   11:59:22 claims               snapshot complete                                              │
+│   08-27 22:00      1db 1.9 GB │▏│   11:59:22 claims               snapshot complete                                              │
 ╰───────────────────────────────╯▏│                                                                                                │
-╭─ [4] Sets (1) ────────────────╮▏│                                                                                                │
+╭─ [4] Restorable ──────────────╮▏│                                                                                                │
+│                               │▏│                                                                                                │
+╰───────────────────────────────╯▏│                                                                                                │
+╭─ [5] Sets (1) ────────────────╮▏│                                                                                                │
 │ claims                    2+2 │▏│                                                                                                │
 ╰───────────────────────────────╯▏│                                                                                                │
-╭─ [5] Runs (2) ────────────────╮▏│                                                                                                │
+╭─ [6] Runs (2) ────────────────╮▏│                                                                                                │
 │ ⠋ apply → qat            1:41 │▏│                                                                                                │
 │ ✓ snapshot prd           3:22 │▏│                                                                                                │
 ╰───────────────────────────────╯▏│                                                                                                │
-                                 ▏│                                                                                                │
-                                 ▏│                                                                                                │
-                                 ▏│                                                                                                │
                                  ▏│                                                                                                │
                                  ▏│                                                                                                │
                                  ▏│                                                                                                │

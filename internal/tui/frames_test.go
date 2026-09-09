@@ -51,7 +51,8 @@ func states(t *testing.T) []state {
 		{"connections", loaded},
 		{"databases", func(w, h int) *app.Runner { return keys(loaded(w, h), "2") }},
 		{"snapshots", func(w, h int) *app.Runner { return keys(loaded(w, h), "3") }},
-		{"sets", func(w, h int) *app.Runner { return keys(loaded(w, h), "4") }},
+		{"restorable", func(w, h int) *app.Runner { return keys(loaded(w, h), "4") }},
+		{"sets", func(w, h int) *app.Runner { return keys(loaded(w, h), "5") }},
 
 		// The Snapshots panel grouped by database, which is what it looks like
 		// on any connection anybody has taken more than one kind of snapshot
@@ -70,6 +71,15 @@ func states(t *testing.T) []state {
 		// The modal forms, which are where an operator does damage.
 		{"form-snapshot", func(w, h int) *app.Runner { return keys(loaded(w, h), "n") }},
 		{"form-apply", func(w, h int) *app.Runner { return keys(loaded(w, h), "3", "a") }},
+		// The apply reached from the Restorable panel, which is the path a
+		// restore actually takes: stand on the target, look at what other
+		// connections have, apply it here.
+		{"form-apply-restorable", func(w, h int) *app.Runner {
+			m := fixtureModel(t)
+			fixtureSnapshot(t, m)
+			r := run(m, w, h)
+			return keys(r, "j", "4", "a")
+		}},
 		{"form-move", func(w, h int) *app.Runner { return keys(loaded(w, h), "m") }},
 		{"form-prune", func(w, h int) *app.Runner { return keys(loaded(w, h), "p") }},
 		{"form-delete", func(w, h int) *app.Runner { return keys(loaded(w, h), "3", "x") }},
@@ -93,7 +103,8 @@ func states(t *testing.T) []state {
 		// The apply form with a scope chosen and the guarded target's phrase
 		// half typed: the two fields that gate everything.
 		{"form-apply-guarded", func(w, h int) *app.Runner {
-			return keys(loaded(w, h), "3", "a", "down", "right", "down", "down", "q", "a")
+			return keys(loaded(w, h), "3", "a", "tab", "tab", "right",
+				"tab", "tab", "q", "a")
 		}},
 
 		// The plan, which is the last screen between an operator and a
@@ -119,14 +130,14 @@ func states(t *testing.T) []state {
 			fixtureSnapshot(t, m)
 			fixtureRun(m)
 			r := run(m, w, h)
-			return keys(r, "5")
+			return keys(r, "6")
 		}},
 		{"run-log", func(w, h int) *app.Runner {
 			m := fixtureModel(t)
 			fixtureSnapshot(t, m)
 			fixtureRun(m)
 			r := run(m, w, h)
-			return keys(r, "5", "]")
+			return keys(r, "6", "]")
 		}},
 		// The log of a run that covered two databases: every line names which,
 		// because the phases repeat and a path inside a message is not an
@@ -136,14 +147,14 @@ func states(t *testing.T) []state {
 			fixtureSnapshot(t, m)
 			fixtureRun(m)
 			r := run(m, w, h)
-			return keys(r, "5", "j", "]")
+			return keys(r, "6", "j", "]")
 		}},
 		{"run-finished", func(w, h int) *app.Runner {
 			m := fixtureModel(t)
 			fixtureSnapshot(t, m)
 			fixtureRun(m)
 			r := run(m, w, h)
-			return keys(r, "5", "j")
+			return keys(r, "6", "j")
 		}},
 		{"leaving", func(w, h int) *app.Runner {
 			m := fixtureModel(t)

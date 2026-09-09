@@ -13,15 +13,15 @@ pgctl  pgctl.yaml
 ╭─ [3] Snapshots (1) ───────────╮▏│ checked    just now                                                                            │
 │   08-27 2╭────────────────────────────────────────────────────────────────────────────────────────────────────────────╮          │
 ╰──────────│ Prune snapshots                                                                                            │          │
-╭─ [4] Sets│                                                                                                            │          │
-│ claims   │ Retention: 2 daily, 0 weekly, 0 monthly. An incomplete snapshot is never kept, and the newest always is.   │          │
+╭─ [4] Rest│                                                                                                            │          │
+│          │ Retention: 2 daily, 0 weekly, 0 monthly. An incomplete snapshot is never kept, and the newest always is.   │          │
 ╰──────────│                                                                                                            │          │
-╭─ [5] Runs│ ▸ Connection   ‹ all ›  (1/5)                                                                              │          │
-│ nothing r│   Delete them  no                                                                                          │          │
+╭─ [5] Sets│ ▸ Connection   ‹ all ›  (1/5)                                                                              │          │
+│ claims   │   Delete them  no                                                                                          │          │
 ╰──────────│ ← → to change                                                                                              │          │
-           │   ↑↓ field · ←→ change · enter prune · esc cancel                                                          │          │
-           ╰────────────────────────────────────────────────────────────────────────────────────────────────────────────╯          │
-                                 ▏│                                                                                                │
+╭─ [6] Runs│   ↑↓ field · ←→ change · enter prune · esc cancel                                                          │          │
+│ nothing r╰────────────────────────────────────────────────────────────────────────────────────────────────────────────╯          │
+╰───────────────────────────────╯▏│                                                                                                │
                                  ▏│                                                                                                │
                                  ▏│                                                                                                │
                                  ▏│                                                                                                │

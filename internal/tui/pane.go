@@ -23,7 +23,11 @@ func (m *Model) paneTabs() []string {
 		return []string{"Overview", "Config"}
 	case panelDatabases:
 		return []string{"Tables", "Rules", "Foreign keys"}
-	case panelSnapshots:
+	case panelSnapshots, panelRestorable:
+		// The same tabs for both, because they hold the same kind of thing and
+		// differ only in where it came from. A Restorable snapshot's Drift tab
+		// is the more useful of the two: it compares what you are about to
+		// restore against the connection you are standing on.
 		return []string{"Manifest", "Tables", "Warnings", "Drift"}
 	case panelSets:
 		return []string{"Members", "Closure", "Load order"}
@@ -224,7 +228,7 @@ func (m *Model) paneBody(tab, width int) paneContent {
 		return m.viewConnectionTab(tab)
 	case panelDatabases:
 		return m.viewDatabaseTab(tab, width)
-	case panelSnapshots:
+	case panelSnapshots, panelRestorable:
 		return m.viewSnapshotTab(tab, width)
 	case panelSets:
 		return m.viewSetTab(tab, width)

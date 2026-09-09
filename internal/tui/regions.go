@@ -21,6 +21,7 @@ const (
 	regConnections comp.Name = "connections"
 	regDatabases   comp.Name = "databases"
 	regSnapshots   comp.Name = "snapshots"
+	regRestorable  comp.Name = "restorable"
 	regSets        comp.Name = "sets"
 	regRuns        comp.Name = "runs"
 
@@ -31,6 +32,7 @@ const (
 	regConnectionsRow comp.Name = "connections.row"
 	regDatabasesRow   comp.Name = "databases.row"
 	regSnapshotsRow   comp.Name = "snapshots.row"
+	regRestorableRow  comp.Name = "restorable.row"
 	regSetsRow        comp.Name = "sets.row"
 	regRunsRow        comp.Name = "runs.row"
 
@@ -70,6 +72,7 @@ var panelRegions = [panelCount]comp.Name{
 	panelConnections: regConnections,
 	panelDatabases:   regDatabases,
 	panelSnapshots:   regSnapshots,
+	panelRestorable:  regRestorable,
 	panelSets:        regSets,
 	panelRuns:        regRuns,
 }
@@ -79,6 +82,7 @@ var panelRowRegions = [panelCount]comp.Name{
 	panelConnections: regConnectionsRow,
 	panelDatabases:   regDatabasesRow,
 	panelSnapshots:   regSnapshotsRow,
+	panelRestorable:  regRestorableRow,
 	panelSets:        regSetsRow,
 	panelRuns:        regRunsRow,
 }

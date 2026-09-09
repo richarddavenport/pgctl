@@ -28,6 +28,22 @@ func press(t *testing.T, m *Model, keys ...string) {
 
 // loaded is the fixture world with a snapshot in it, which is the state the
 // interface is in for all but the first second of a session.
+// focusField puts the form's cursor on a field by key.
+//
+// By key, never by index: a form gains and loses fields — the apply form grew a
+// databases multi-select between target and scope — and a test that counted
+// would then be testing a different field while still passing.
+func focusField(t *testing.T, m *Model, key string) {
+	t.Helper()
+	for i, f := range m.action.fields {
+		if f.key == key {
+			m.action.cursor = i
+			return
+		}
+	}
+	t.Fatalf("the form has no %q field", key)
+}
+
 func loadedModel(t *testing.T) *Model {
 	t.Helper()
 	m := fixtureModel(t)
@@ -52,17 +68,15 @@ func TestPanelsAreAHierarchy(t *testing.T) {
 		t.Errorf("qat shows %d snapshots, want none — they belong to prd", got)
 	}
 
-	// The database selection reorders the Snapshots panel and does NOT empty
-	// it. Emptying it is what this test used to assert, and it was the bug: on
-	// a server with ten databases the cursor lands on the first alphabetically
-	// and every snapshot anyone takes is of another one, so the panel read
-	// "none" beside a detail pane reading "1 snapshot, newest just now".
+	// The database selection does not touch the Snapshots panel at all now: a
+	// snapshot is a RUN, covering every database taken at one instant, so
+	// panel 3 is about the connection and nothing below it.
 	press(t, m, "up", "2", "down")
 	if db, _ := m.selectedDatabase(); db.Name != "claims" {
 		t.Fatalf("database cursor is on %q, want claims", db.Name)
 	}
-	if got := m.snapshotCount(); got != 1 {
-		t.Errorf("the claims database hides %d of prd's snapshots", 1-got)
+	if got := m.snapshotCount(panelSnapshots); got != 1 {
+		t.Errorf("panel 3 shows %d snapshots of prd, want its one run", got)
 	}
 
 	// Sets ARE per database, and stay that way: a set names tables in one
@@ -72,53 +86,61 @@ func TestPanelsAreAHierarchy(t *testing.T) {
 	}
 }
 
-// The selected database is FIRST in the Snapshots panel, which is what is left
-// of the hierarchy once the panel stopped filtering.
-func TestTheSelectedDatabasesSnapshotsComeFirst(t *testing.T) {
+// Two panels, two questions: what was taken FROM here, and what can be put ON
+// here.
+//
+// One list cannot answer both, which is what made the apply path hard to find:
+// standing on qat, the Snapshots panel is empty and correct — nothing is ever
+// taken from qat — and a reader looking for something to restore there found
+// nothing at all.
+func TestSnapshotsAreWhatWasTakenAndRestorableIsWhatCanBePut(t *testing.T) {
 	m := loadedModel(t)
-	// A second database with a newer snapshot, so "first" cannot be an accident
-	// of the order they were listed in.
-	newer := *m.entries[0].Manifest
-	newer.ID = "prd/hasura/20260828T090000Z"
-	newer.Database = "hasura"
-	newer.StartedAt = m.entries[0].Manifest.StartedAt.Add(time.Hour)
-	m.entries = append(m.entries, &engine.Entry{Manifest: &newer, At: []string{config.LocalStorage}})
+	// A second connection's snapshot, so "somebody else's" has a member.
+	qatRun := *m.entries[0].Manifest
+	qatRun.ID = "qat/product-development/20260828T060000Z"
+	qatRun.Connection = "qat"
+	qatRun.StartedAt = m.entries[0].Manifest.StartedAt.Add(-time.Hour)
+	m.setEntries(append(m.entries, &engine.Entry{
+		Manifest: &qatRun, At: []string{config.LocalStorage},
+	}))
 
-	// With hasura selected it leads, and it would anyway — it is the newer.
-	press(t, m, "2", "down", "down")
-	if db, _ := m.selectedDatabase(); db.Name != "quote" {
-		t.Fatalf("database cursor is on %q, want quote", db.Name)
+	// On prd: its own run in Snapshots, qat's in Restorable.
+	if got := m.snapshotCount(panelSnapshots); got != 1 {
+		t.Errorf("prd's Snapshots panel shows %d, want its own run", got)
 	}
-	// quote has no snapshots at all, so neither group is the selected one and
-	// the newest leads.
-	rows := m.snapshots()
-	if rows[0].heading != "hasura" {
-		t.Errorf("groups lead with %q, want the newest (hasura)", rows[0].heading)
+	if got := m.snapshotCount(panelRestorable); got != 1 {
+		t.Errorf("prd's Restorable panel shows %d, want qat's run", got)
 	}
-
-	// Selecting product-development, whose snapshot is OLDER, puts it first.
-	// The fixture lists databases as the server reports them, so g is
-	// product-development rather than the alphabetical first.
-	press(t, m, "g")
-	if db, _ := m.selectedDatabase(); db.Name != "product-development" {
-		t.Fatalf("database cursor is on %q after g, want product-development", db.Name)
-	}
-	rows = m.snapshots()
-	if rows[0].heading != "product-development" {
-		t.Errorf("groups lead with %q, want the selected product-development",
-			rows[0].heading)
+	// Grouped by where they came from, since that is the fact that distinguishes
+	// them and the row cannot hold a connection name as well as a date.
+	rows := m.restorable()
+	if len(rows) == 0 || rows[0].heading != "qat" {
+		t.Fatalf("the Restorable panel does not lead with a source heading: %+v", rows)
 	}
 
-	// And the headings are not selectable, so the cursor and the detail pane
-	// cannot disagree about which snapshot is in front of you.
-	press(t, m, "3")
-	entry, ok := m.selectedSnapshot()
+	// On qat: nothing was taken from it, and prd's run is what can go on it.
+	press(t, m, "j")
+	if conn, _ := m.selectedConn(); conn.Name != "qat" {
+		t.Fatalf("cursor is on %q, want qat", conn.Name)
+	}
+	if got := m.snapshotCount(panelSnapshots); got != 1 {
+		t.Errorf("qat's Snapshots panel shows %d, want the one taken from qat", got)
+	}
+	if got := m.snapshotCount(panelRestorable); got != 1 {
+		t.Errorf("qat's Restorable panel shows %d, want prd's run", got)
+	}
+
+	// A snapshot is the RUN, so selecting one selects every database of it.
+	press(t, m, "4")
+	run, ok := m.selectedSnapshot()
 	if !ok {
-		t.Fatal("nothing is selected in a panel with two snapshots in it")
+		t.Fatal("nothing selected in a Restorable panel with a row in it")
 	}
-	if entry.Manifest.Database != "product-development" {
-		t.Errorf("selected %q, want the first snapshot under the leading heading",
-			entry.Manifest.ID)
+	if run.Connection != "prd" {
+		t.Errorf("selected a run from %q, want prd's", run.Connection)
+	}
+	if len(run.Databases()) != 1 {
+		t.Errorf("the run covers %v; the fixture takes one database", run.Databases())
 	}
 }
 
@@ -174,7 +196,9 @@ func TestFieldsThatCannotApplyAreDisabledNotHidden(t *testing.T) {
 	}
 
 	// Choosing the set enables widening, because now it decides something.
-	m.action.cursor = 1
+	// The cursor is put on the field BY KEY: the apply form gained a databases
+	// field between target and scope, and an index would have moved with it.
+	focusField(t, m, "scope")
 	press(t, m, "right")
 	if m.action.value("scope") != "set:claims" {
 		t.Fatalf("scope = %q after one step", m.action.value("scope"))

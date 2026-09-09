@@ -2,26 +2,26 @@ pgctl  pgctl.yaml
 ╭─ [1] Connections (4) ─────────╮▏╭────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ ● prd               protected │▏│ ‹ Manifest · Tables · Warnings · Drift ›                                                       │
 │ ● qat                 guarded │▏│                                                                                                │
-│ ● local                       │▏│ snapshot    prd/product-development/20260828T030000Z                                           │
+│ ● local                       │▏│ snapshot    prd/20260828T030000Z                                                               │
 │ ✗ scratch                     │▏│ compared to prd                                                                                │
 ╰───────────────────────────────╯▏│                                                                                                │
-╭─ [2] Databases (3) ───────────╮▏│ NO DRIFT                                                                                       │
-│ product-development   11.0 GB │▏│   The same tables exist on both sides.                                                         │
+╭─ [2] Databases (3) ───────────╮▏│ PRODUCT-DEVELOPMENT                                                                            │
+│ product-development   11.0 GB │▏│    the same tables on both sides                                                               │
 │ claims                48.0 MB │▏│                                                                                                │
 │ quote                 20.0 GB │▏│                                                                                                │
 ╰───────────────────────────────╯▏│                                                                                                │
 ╭─ [3] Snapshots (1) ───────────╮▏│                                                                                                │
-│   08-27 22:00         1.9 GB  │▏│                                                                                                │
+│   08-27 22:00      1db 1.9 GB │▏│                                                                                                │
 ╰───────────────────────────────╯▏│                                                                                                │
-╭─ [4] Sets (1) ────────────────╮▏│                                                                                                │
+╭─ [4] Restorable ──────────────╮▏│                                                                                                │
+│                               │▏│                                                                                                │
+╰───────────────────────────────╯▏│                                                                                                │
+╭─ [5] Sets (1) ────────────────╮▏│                                                                                                │
 │ claims                    2+2 │▏│                                                                                                │
 ╰───────────────────────────────╯▏│                                                                                                │
-╭─ [5] Runs ────────────────────╮▏│                                                                                                │
+╭─ [6] Runs ────────────────────╮▏│                                                                                                │
 │ nothing run yet               │▏│                                                                                                │
 ╰───────────────────────────────╯▏│                                                                                                │
-                                 ▏│                                                                                                │
-                                 ▏│                                                                                                │
-                                 ▏│                                                                                                │
                                  ▏│                                                                                                │
                                  ▏│                                                                                                │
                                  ▏│                                                                                                │

@@ -102,12 +102,11 @@
 <text x="950" y="252.18" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="1035.8" y="252.18" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="14" y="268.43" textLength="15.6" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">╭─</text>
-<text x="29.6" y="268.43" textLength="70.2" lengthAdjust="spacing" fill="#7f7f7f" font-weight="600" xml:space="preserve"> [4] Sets</text>
+<text x="29.6" y="268.43" textLength="70.2" lengthAdjust="spacing" fill="#7f7f7f" font-weight="600" xml:space="preserve"> [4] Rest</text>
 <text x="99.8" y="268.43" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="950" y="268.43" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="1035.8" y="268.43" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="14" y="284.68" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
-<text x="29.6" y="284.68" textLength="46.8" lengthAdjust="spacing" fill="#ff00ff" font-weight="600" xml:space="preserve">claims</text>
 <text x="99.8" y="284.68" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="131" y="284.68" textLength="70.2" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">Databases</text>
 <text x="248" y="284.68" textLength="46.8" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">2 of 3</text>
@@ -120,7 +119,7 @@
 <text x="950" y="300.93" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="1035.8" y="300.93" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="14" y="317.18" textLength="15.6" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">╭─</text>
-<text x="29.6" y="317.18" textLength="70.2" lengthAdjust="spacing" fill="#7f7f7f" font-weight="600" xml:space="preserve"> [5] Runs</text>
+<text x="29.6" y="317.18" textLength="70.2" lengthAdjust="spacing" fill="#7f7f7f" font-weight="600" xml:space="preserve"> [5] Sets</text>
 <text x="99.8" y="317.18" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="115.4" y="317.18" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" font-weight="600" xml:space="preserve">▸</text>
 <text x="131" y="317.18" textLength="7.8" lengthAdjust="spacing" fill="#00cd00" xml:space="preserve">●</text>
@@ -128,7 +127,7 @@
 <text x="950" y="317.18" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="1035.8" y="317.18" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="14" y="333.43" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
-<text x="29.6" y="333.43" textLength="70.2" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">nothing r</text>
+<text x="29.6" y="333.43" textLength="46.8" lengthAdjust="spacing" fill="#ff00ff" font-weight="600" xml:space="preserve">claims</text>
 <text x="99.8" y="333.43" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="131" y="333.43" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">○</text>
 <text x="146.6" y="333.43" textLength="54.6" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">  quote</text>
@@ -140,18 +139,23 @@
 <text x="248" y="349.68" textLength="140.4" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">nothing chosen yet</text>
 <text x="950" y="349.68" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="1035.8" y="349.68" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
+<text x="14" y="365.93" textLength="15.6" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">╭─</text>
+<text x="29.6" y="365.93" textLength="70.2" lengthAdjust="spacing" fill="#7f7f7f" font-weight="600" xml:space="preserve"> [6] Runs</text>
 <text x="99.8" y="365.93" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="131" y="365.93" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">○</text>
 <text x="146.6" y="365.93" textLength="54.6" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">  local</text>
 <text x="287" y="365.93" textLength="343.2" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">keep it on this machine, in .pgctl/snapshots</text>
 <text x="950" y="365.93" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="1035.8" y="365.93" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
+<text x="14" y="382.18" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
+<text x="29.6" y="382.18" textLength="70.2" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">nothing r</text>
 <text x="99.8" y="382.18" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="131" y="382.18" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">○</text>
 <text x="146.6" y="382.18" textLength="85.8" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">  snapshots</text>
 <text x="287" y="382.18" textLength="304.2" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">upload it to the pg-snapshots container</text>
 <text x="950" y="382.18" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="1035.8" y="382.18" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
+<text x="14" y="398.43" textLength="85.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">╰──────────</text>
 <text x="99.8" y="398.43" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="115.4" y="398.43" textLength="475.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">product-development, claims — one snapshot set, one timestamp</text>
 <text x="950" y="398.43" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>

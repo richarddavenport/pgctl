@@ -3,21 +3,21 @@ pgctl  pgctl.yaml
 │ ● prd              protected │▏│ ‹ Members · Closure · Load order ›          │
 │ ● qat                guarded │▏│                                             │
 │ ● local                      │▏│   claims                                    │
-│ ✗ scratch                    │▏│   claims and everything a claim points at   │
+╰──────────────────────────────╯▏│   claims and everything a claim points at   │
+╭─ [2] Databases (3) ──────────╮▏│                                             │
+│ product-development  11.0 GB │▏│   patterns      claims.*                    │
+│ claims               48.0 MB │▏│   matches       2 tables on prd             │
+╰──────────────────────────────╯▏│   closure       +2 more — see Closure       │
+╭─ [3] Snapshots (1) ──────────╮▏│                                             │
+│   08-27 22:00     1db 1.9 GB │▏│   MEMBERS                                   │
+╰──────────────────────────────╯▏│   TABLE                                SIZE │
+╭─ [4] Restorable ─────────────╮▏│ › claims.policy_claim              180.0 MB │
+│                              │▏│   claims.claim_detail                     - │
 ╰──────────────────────────────╯▏│                                             │
-╭─ [2] Databases (3) ──────────╮▏│   patterns      claims.*                    │
-│ product-development  11.0 GB │▏│   matches       2 tables on prd             │
-│ claims               48.0 MB │▏│   closure       +2 more — see Closure       │
-│ quote                20.0 GB │▏│                                             │
-╰──────────────────────────────╯▏│   MEMBERS                                   │
-╭─ [3] Snapshots (1) ──────────╮▏│   TABLE                                SIZE │
-│   08-27 22:00        1.9 GB  │▏│ › claims.policy_claim              180.0 MB │
-╰──────────────────────────────╯▏│   claims.claim_detail                     - │
-╭─ [4] Sets (1) ───────────────╮▏│                                             │
+╭─ [5] Sets (1) ───────────────╮▏│                                             │
 │ claims                   2+2 │▏│                                             │
 ╰──────────────────────────────╯▏│                                             │
-╭─ [5] Runs ───────────────────╮▏│                                             │
-│ nothing run yet              │▏│                                             │
-╰──────────────────────────────╯▏│                                      11/11  │
-                                ▏╰─────────────────────────────────────────────╯
+╭─ [6] Runs ───────────────────╮▏│                                             │
+│ nothing run yet              │▏│                                      11/11  │
+╰──────────────────────────────╯▏╰─────────────────────────────────────────────╯
 n snapshot · a apply · m move · p prune · / filter · [ ] tabs · ? keys

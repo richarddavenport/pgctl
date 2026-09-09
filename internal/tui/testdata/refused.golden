@@ -2,26 +2,26 @@ pgctl  pgctl.yaml
 ╭─ [1] Connections (4) ─────────╮▏╭────────────────────────────────────────────────╭──────────────────────────────────────────────╮╮
 │ ● prd               protected │▏│ ‹ Manifest · Tables · Warnings · Drift ›       │refused                                       ││
 │ ● qat                 guarded │▏│                                                │                                              ││
-│ ● local                       │▏│ no snapshot selected. Press n to take one.     │no snapshot selected — press n to take one,   ││
-│ ✗ scratch                     │▏│                                                │or move to the Snapshots panel                ││
-╰───────────────────────────────╯▏│                                                │                                              ││
-╭─ [2] Databases (3) ───────────╮▏│                                                │esc dismiss                                   ││
-│ product-development   11.0 GB │▏│                                                ╰──────────────────────────────────────────────╯│
-│ claims                48.0 MB │▏│                                                                                                │
+│ ● local                       │▏│ no snapshot selected. Press n to take one; pane│no snapshot selected — press n to take one,   ││
+│ ✗ scratch                     │▏│ be restored here.                              │or move to panel 4, which lists what other    ││
+╰───────────────────────────────╯▏│                                                │connections have that can be restored here    ││
+╭─ [2] Databases (3) ───────────╮▏│                                                │                                              ││
+│ product-development   11.0 GB │▏│                                                │esc dismiss                                   ││
+│ claims                48.0 MB │▏│                                                ╰──────────────────────────────────────────────╯│
 │ quote                 20.0 GB │▏│                                                                                                │
 ╰───────────────────────────────╯▏│                                                                                                │
 ╭─ [3] Snapshots ───────────────╮▏│                                                                                                │
 │ none on prd — press n         │▏│                                                                                                │
 ╰───────────────────────────────╯▏│                                                                                                │
-╭─ [4] Sets (1) ────────────────╮▏│                                                                                                │
+╭─ [4] Restorable ──────────────╮▏│                                                                                                │
+│                               │▏│                                                                                                │
+╰───────────────────────────────╯▏│                                                                                                │
+╭─ [5] Sets (1) ────────────────╮▏│                                                                                                │
 │ claims                    2+2 │▏│                                                                                                │
 ╰───────────────────────────────╯▏│                                                                                                │
-╭─ [5] Runs ────────────────────╮▏│                                                                                                │
+╭─ [6] Runs ────────────────────╮▏│                                                                                                │
 │ nothing run yet               │▏│                                                                                                │
 ╰───────────────────────────────╯▏│                                                                                                │
-                                 ▏│                                                                                                │
-                                 ▏│                                                                                                │
-                                 ▏│                                                                                                │
                                  ▏│                                                                                                │
                                  ▏│                                                                                                │
                                  ▏│                                                                                                │

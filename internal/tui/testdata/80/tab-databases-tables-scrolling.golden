@@ -3,21 +3,21 @@ pgctl  pgctl.yaml
 │ ● prd              protected │▏│ ‹ Tables · Rules · Foreign keys ›           │
 │ ● qat                guarded │▏│                                             │
 │ ● local                      │▏│   tables        224   total   24.6 GB     │ │
-│ ✗ scratch                    │▏│                                           · │
-╰──────────────────────────────╯▏│   TABLE            SIZE     ROWS SNAPSHOT · │
-╭─ [2] Databases (3) ──────────╮▏│ › operations…  224.0 MB     1.3M all      · │
-│ product-development  11.0 GB │▏│   operations…  223.0 MB     1.3M all      · │
-│ claims               48.0 MB │▏│   operations…  222.0 MB     1.3M all      · │
-│ quote                20.0 GB │▏│   operations…  221.0 MB     1.3M all      · │
-╰──────────────────────────────╯▏│   operations…  220.0 MB     1.3M all      · │
-╭─ [3] Snapshots (1) ──────────╮▏│   operations…  219.0 MB     1.3M all      · │
-│   08-27 22:00        1.9 GB  │▏│   operations…  218.0 MB     1.3M all      · │
-╰──────────────────────────────╯▏│   operations…  217.0 MB     1.3M all      · │
-╭─ [4] Sets (1) ───────────────╮▏│   operations…  216.0 MB     1.3M all      · │
-│ claims                   2+2 │▏│   operations…  215.0 MB     1.3M all      · │
-╰──────────────────────────────╯▏│   operations…  214.0 MB     1.3M all      · │
-╭─ [5] Runs ───────────────────╮▏│   operations…  213.0 MB     1.3M all      · │
-│ nothing run yet              │▏│   operations…  212.0 MB     1.3M all      · │
-╰──────────────────────────────╯▏│                                    16/227 · │
-                                ▏╰─────────────────────────────────────────────╯
+╰──────────────────────────────╯▏│                                           · │
+╭─ [2] Databases (3) ──────────╮▏│   TABLE            SIZE     ROWS SNAPSHOT · │
+│ product-development  11.0 GB │▏│ › operations…  224.0 MB     1.3M all      · │
+│ claims               48.0 MB │▏│   operations…  223.0 MB     1.3M all      · │
+╰──────────────────────────────╯▏│   operations…  222.0 MB     1.3M all      · │
+╭─ [3] Snapshots (1) ──────────╮▏│   operations…  221.0 MB     1.3M all      · │
+│   08-27 22:00     1db 1.9 GB │▏│   operations…  220.0 MB     1.3M all      · │
+╰──────────────────────────────╯▏│   operations…  219.0 MB     1.3M all      · │
+╭─ [4] Restorable ─────────────╮▏│   operations…  218.0 MB     1.3M all      · │
+│                              │▏│   operations…  217.0 MB     1.3M all      · │
+╰──────────────────────────────╯▏│   operations…  216.0 MB     1.3M all      · │
+╭─ [5] Sets (1) ───────────────╮▏│   operations…  215.0 MB     1.3M all      · │
+│ claims                   2+2 │▏│   operations…  214.0 MB     1.3M all      · │
+╰──────────────────────────────╯▏│   operations…  213.0 MB     1.3M all      · │
+╭─ [6] Runs ───────────────────╮▏│   operations…  212.0 MB     1.3M all      · │
+│ nothing run yet              │▏│                                    16/227 · │
+╰──────────────────────────────╯▏╰─────────────────────────────────────────────╯
 n snapshot · a apply · m move · p prune · / filter · [ ] tabs · ? keys

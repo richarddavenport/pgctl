@@ -2,8 +2,13 @@ package tui
 
 import (
 	"testing"
+	"time"
 
 	"github.com/richarddavenport/tuikit/comp"
+
+	"github.com/richarddavenport/pgctl/internal/config"
+	"github.com/richarddavenport/pgctl/internal/engine"
+	"github.com/richarddavenport/pgctl/internal/snapshot"
 )
 
 // panelBands is a constraint solve, and these are the three rules it has to
@@ -54,10 +59,22 @@ func TestPanelBandsKeepsItsThreeRules(t *testing.T) {
 func TestASqueezedColumnSharesInProportion(t *testing.T) {
 	m := fixtureModel(t)
 	// Snapshots asks for far more than the others: 40 rows against 3 and 1.
-	fixtureSnapshot(t, m)
-	for len(m.entries) < 40 {
-		m.entries = append(m.entries, m.entries[0])
+	//
+	// Forty distinct RUNS, each at its own instant. Forty copies of one entry
+	// is what this used to build, and since a snapshot became a run they all
+	// grouped into one row — the panel asked for 1 and the test still claimed
+	// it asked for 40.
+	man := fixtureSnapshot(t, m)
+	entries := m.entries
+	for i := 1; i < 40; i++ {
+		another := *man
+		another.StartedAt = man.StartedAt.Add(-time.Duration(i) * time.Hour)
+		another.ID = snapshot.NewID(man.Connection, man.Database, another.StartedAt)
+		entries = append(entries, &engine.Entry{
+			Manifest: &another, At: []string{config.LocalStorage},
+		})
 	}
+	m.setEntries(entries)
 
 	got := m.panelBands(comp.Rect{W: 1, H: 30})
 	if got[panelSnapshots].H <= got[panelSets].H {

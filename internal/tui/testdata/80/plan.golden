@@ -1,23 +1,23 @@
 pgc╭────────────────────────────────────────────────────────────────────────╮
-╭─ │ Apply prd/product-development/20260828T030000Z                         │──╮
+╭─ │ Apply prd/20260828T030000Z                                             │──╮
 │ ●│                                                                        │  │
-│ ●│ Replaces data on the target. The plan is shown before anything is      │  │
-│ ●│ touched.                                                               │  │
-│ ✗│                                                                        │  │
-╰──│ REPLACE 6 tables in product-development on qat                         │  │
-╭─ │ from prd/product-development/20260828T030000Z taken 2026-08-27 22:00,  │  │
-│ p│ 2.3 GB of source data                                                  │  │
-│ c│                                                                        │  │
-│ q│ widened to include 2 more: operations.policy_contract, public.address  │  │
+│ ●│ Replaces data on the target, one database at a time. 1 database taken  │  │
+│ ●│ 14h ago. The plan is shown before anything is touched.                 │  │
 ╰──│                                                                        │  │
-╭─ │ 81 foreign keys dropped and rebuilt, 31 indexes rebuilt                │  │
-│  │ 12 user triggers disabled for the load on 1 table                      │  │
+╭─ │ REFUSED, and skipped: 1 database                                       │  │
+│ p│ hasura — snapshot prd/hasura/20260828T030000Z does not contain         │  │
+│ c│ hdb_catalog.hdb_version — it predates a migration that created it      │  │
 ╰──│                                                                        │  │
-╭─ │ LOAD ORDER                                                             │  │
-│ c│ 1. public.address                                                      │… │
-╰──│ 2. operations.cancellation, operations.policy_contract,                │  │
-╭─ │ operations.policy_contract_quote                                       │  │
-│ n│                                                                 13/20  │  │
-╰──│ read it, then confirm. Nothing has been touched yet.                   │  │
-   │   enter apply it · ↑↓ read · esc back                                  │──╯
+╭─ │ REPLACE 6 tables in 1 database on qat                                  │  │
+│  │ from prd/20260828T030000Z taken 2026-08-27 22:00, 2.3 GB of source     │  │
+╰──│ data                                                                   │  │
+╭─ │                                                                        │  │
+│  │ product-development — 6 tables, 2.3 GB                                 │  │
+╰──│ widened to include 2 more: operations.policy_contract, public.address  │  │
+╭─ │ 81 foreign keys dropped and rebuilt, 31 indexes rebuilt                │… │
+│ c│ 12 user triggers disabled for the load on 1 table                      │  │
+╰──│ 1. public.address                                                      │  │
+╭─ │                                                                 13/21  │  │
+│ n│ read it, then confirm. Nothing has been touched yet.                   │  │
+╰──│   enter apply it · ↑↓ read · esc back                                  │──╯
    ╰────────────────────────────────────────────────────────────────────────╯

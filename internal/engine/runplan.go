@@ -83,6 +83,18 @@ func (p *RunPlan) Warnings() []string {
 	return out
 }
 
+// CanWiden reports a plan some database of which could be widened: a
+// whole-database apply has nothing to widen, and a selection already closed has
+// nothing left to add.
+func (p *RunPlan) CanWiden() bool {
+	for _, one := range p.Plans {
+		if !one.WholeDatabase && len(one.Added) == 0 {
+			return true
+		}
+	}
+	return false
+}
+
 // PlanRun computes a plan per database of a run.
 //
 // A refusal for one database does not refuse the others, which is the decision

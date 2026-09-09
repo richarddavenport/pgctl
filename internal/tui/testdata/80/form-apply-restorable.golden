@@ -1,0 +1,22 @@
+pgctl  pgctl.yaml
+╭─ [1] Connections (4) ────────╮▏╭─────────────────────────────────────────────╮
+│ ● prd              protected │▏│ ‹ Manifest · Tables · Warnings · Drift ›    │
+│ ●╭────────────────────────────────────────────────────────────────────────╮  │
+│ ●│ Apply prd/20260828T030000Z                                             │  │
+│ ✗│                                                                        │  │
+╰──│ Replaces data on the target, one database at a time. 1 database taken  │  │
+╭─ │ 14h ago. The plan is shown before anything is touched.                 │  │
+│ p│                                                                        │  │
+╰──│ ▸ Target                  ‹ qat  (guarded — needs its name typed) ›  ( │  │
+╭─ │   Databases               all 1                                        │  │
+│ n│   ●   product-development                                              │  │
+╰──│   Scope                   ‹ whole database — drop and recreate it ›  ( │  │
+╭─ │   Tables                  nothing yet                                  │  │
+│  │   Widen to closure        no                                           │  │
+╰──│   Type the target's name  type it to confirm                           │  │
+╭─ │ ← → to change                                                          │  │
+│ c│   ↑↓ field · ←→ change · enter plan it · esc cancel                    │  │
+╰──╰────────────────────────────────────────────────────────────────────────╯  │
+╭─ [6] Runs ───────────────────╮▏│   filtered 1                                │
+│ nothing run yet              │▏│   no data  1                                │
+╰──────────────────────────────╯▏╰─────────────────────────────────────────────╯

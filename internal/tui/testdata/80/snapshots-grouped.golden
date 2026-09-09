@@ -2,22 +2,22 @@ pgctl  pgctl.yaml
 ╭─ [1] Connections (4) ────────╮▏╭─────────────────────────────────────────────╮
 │ ● prd              protected │▏│ ‹ Manifest · Tables · Warnings · Drift ›    │
 │ ● qat                guarded │▏│                                             │
-╰──────────────────────────────╯▏│ prd/product-development/20260828T030000Z    │
-╭─ [2] Databases (3) ──────────╮▏│                                             │
-│ product-development  11.0 GB │▏│ taken       2026-08-27 22:00  14h ago       │
-╰──────────────────────────────╯▏│ took        3:22                            │
-╭─ [3] Snapshots (3) ──────────╮▏│ size        1.9 GB                          │
-│   product-development        │▏│ tables      3                               │
-│     08-27 22:00      1.9 GB  │▏│ where       local                           │
-│   hasura                     │▏│ server      PostgreSQL    pg_dump           │
-│     08-27 20:00    467.0 MB  │▏│ compression zstd:3   4 jobs                 │
-│   ory                        │▏│ source size 20.2 GB                         │
-│     08-27 20:00    467.0 MB  │▏│                                             │
-╰──────────────────────────────╯▏│ CONTENTS                                    │
-╭─ [4] Sets (1) ───────────────╮▏│   whole        1                            │
-│ claims                   2+2 │▏│   filtered     1                            │
-╰──────────────────────────────╯▏│   no data      1                            │
-╭─ [5] Runs ───────────────────╮▏│   foreign keys 0                            │
-│ nothing run yet              │▏│                                             │
+│ ● local                      │▏│ prd/20260828T030000Z                        │
+╰──────────────────────────────╯▏│                                             │
+╭─ [2] Databases (3) ──────────╮▏│ taken       2026-08-27 22:00  14h ago       │
+│ product-development  11.0 GB │▏│ from        prd                             │
+│ claims               48.0 MB │▏│ state       complete                        │
+╰──────────────────────────────╯▏│ databases   1                               │
+╭─ [3] Snapshots (2) ──────────╮▏│ size        1.9 GB                          │
+│   08-27 22:00     1db 1.9 GB │▏│ tables      3                               │
+╰──────────────────────────────╯▏│ where       local                           │
+╭─ [4] Restorable ─────────────╮▏│ server      PostgreSQL    pg_dump           │
+│                              │▏│ compression zstd:3   4 jobs                 │
+╰──────────────────────────────╯▏│ source size 20.2 GB                         │
+╭─ [5] Sets (1) ───────────────╮▏│                                             │
+│ claims                   2+2 │▏│ CONTENTS                                    │
+╰──────────────────────────────╯▏│   whole    1                                │
+╭─ [6] Runs ───────────────────╮▏│   filtered 1                                │
+│ nothing run yet              │▏│   no data  1                                │
 ╰──────────────────────────────╯▏╰─────────────────────────────────────────────╯
 n snapshot · a apply · m move · p prune · x delete · / filter · ? keys

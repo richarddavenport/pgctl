@@ -3,21 +3,21 @@ pgctl  pgctl.yaml
 │ ● prd              protected │▏│ ‹ Steps · Log ›                             │
 │ ● qat                guarded │▏│                                             │
 │ ● local                      │▏│ snapshot prd  Copying product-development f │
-│ ✗ scratch                    │▏│ product-development                         │
-╰──────────────────────────────╯▏│     ✓ dump  claims.policy_claim     2:30    │
-╭─ [2] Databases (3) ──────────╮▏│     ✓ filtered copy  quotes.quote   0:20    │
-│ product-development  11.0 GB │▏│         ! rule "operations.gone" matches no │
-│ claims               48.0 MB │▏│     ✓ push  prd/product-development/… to az │
-│ quote                20.0 GB │▏│                                             │
-╰──────────────────────────────╯▏│ claims                                      │
-╭─ [3] Snapshots (1) ──────────╮▏│     ✓ dump  pg_dump --format=directory --jo │
-│   08-27 22:00        1.9 GB  │▏│     ✓ push  prd/claims/… to azure blob0:07  │
-╰──────────────────────────────╯▏│                                             │
-╭─ [4] Sets (1) ───────────────╮▏│   snapshotted product-development from prd  │
+╰──────────────────────────────╯▏│ product-development                         │
+╭─ [2] Databases (3) ──────────╮▏│     ✓ dump  claims.policy_claim     2:30    │
+│ product-development  11.0 GB │▏│     ✓ filtered copy  quotes.quote   0:20    │
+│ claims               48.0 MB │▏│         ! rule "operations.gone" matches no │
+╰──────────────────────────────╯▏│     ✓ push  prd/product-development/… to az │
+╭─ [3] Snapshots (1) ──────────╮▏│                                             │
+│   08-27 22:00     1db 1.9 GB │▏│ claims                                      │
+╰──────────────────────────────╯▏│     ✓ dump  pg_dump --format=directory --jo │
+╭─ [4] Restorable ─────────────╮▏│     ✓ push  prd/claims/… to azure blob0:07  │
+│                              │▏│                                             │
+╰──────────────────────────────╯▏│   snapshotted product-development from prd  │
+╭─ [5] Sets (1) ───────────────╮▏│                                             │
 │ claims                   2+2 │▏│                                             │
 ╰──────────────────────────────╯▏│                                             │
-╭─ [5] Runs (2) ───────────────╮▏│                                             │
-│ ⠋ apply → qat           1:41 │▏│                                             │
+╭─ [6] Runs (2) ───────────────╮▏│                                             │
 │ ✓ snapshot prd          3:22 │▏│                                      11/11  │
 ╰──────────────────────────────╯▏╰─────────────────────────────────────────────╯
 q stop and leave · ] log · ? keys

@@ -11,17 +11,17 @@ pgctl  pgctl.yaml
 │ quote                 20.0 GB │▏│   operations.policy_contract_detail_003                           221.0 MB     1.3M all      · │
 ╰───────────────────────────────╯▏│   operations.policy_contract_detail_004                           220.0 MB     1.3M all      · │
 ╭─ [3] Snapshots (1) ───────────╮▏│   operations.policy_contract_detail_005                           219.0 MB     1.3M all      · │
-│   08-27 22:00         1.9 GB  │▏│   operations.policy_contract_detail_006                           218.0 MB     1.3M all      · │
+│   08-27 22:00      1db 1.9 GB │▏│   operations.policy_contract_detail_006                           218.0 MB     1.3M all      · │
 ╰───────────────────────────────╯▏│   operations.policy_contract_detail_007                           217.0 MB     1.3M all      · │
-╭─ [4] Sets (1) ────────────────╮▏│   operations.policy_contract_detail_008                           216.0 MB     1.3M all      · │
-│ claims                    2+2 │▏│   operations.policy_contract_detail_009                           215.0 MB     1.3M all      · │
+╭─ [4] Restorable ──────────────╮▏│   operations.policy_contract_detail_008                           216.0 MB     1.3M all      · │
+│                               │▏│   operations.policy_contract_detail_009                           215.0 MB     1.3M all      · │
 ╰───────────────────────────────╯▏│   operations.policy_contract_detail_010                           214.0 MB     1.3M all      · │
-╭─ [5] Runs ────────────────────╮▏│   operations.policy_contract_detail_011                           213.0 MB     1.3M all      · │
-│ nothing run yet               │▏│   operations.policy_contract_detail_012                           212.0 MB     1.3M all      · │
+╭─ [5] Sets (1) ────────────────╮▏│   operations.policy_contract_detail_011                           213.0 MB     1.3M all      · │
+│ claims                    2+2 │▏│   operations.policy_contract_detail_012                           212.0 MB     1.3M all      · │
 ╰───────────────────────────────╯▏│   operations.policy_contract_detail_013                           211.0 MB     1.3M all      · │
-                                 ▏│   operations.policy_contract_detail_014                           210.0 MB     1.3M all      · │
-                                 ▏│   operations.policy_contract_detail_015                           209.0 MB     1.3M all      · │
-                                 ▏│   operations.policy_contract_detail_016                           208.0 MB     1.2M all      · │
+╭─ [6] Runs ────────────────────╮▏│   operations.policy_contract_detail_014                           210.0 MB     1.3M all      · │
+│ nothing run yet               │▏│   operations.policy_contract_detail_015                           209.0 MB     1.3M all      · │
+╰───────────────────────────────╯▏│   operations.policy_contract_detail_016                           208.0 MB     1.2M all      · │
                                  ▏│   operations.policy_contract_detail_017                           207.0 MB     1.2M all      · │
                                  ▏│   operations.policy_contract_detail_018                           206.0 MB     1.2M all      · │
                                  ▏│   operations.policy_contract_detail_019                           205.0 MB     1.2M all      · │

@@ -3,20 +3,20 @@ pgctl  pgctl.yaml
 │ ● prd              protected │▏│ ‹ Overview · Config ›                       │
 │ ● qat                guarded │▏│                                             │
 │ ╭─ run ────────────────────────────────────────────────────────────────────╮ │
-│ │> p                                                                       │ │
-╰─│every key that acts right now; a greyed row says why it cannot     5 of 10│ │
-╭─│──────────────────────────────────────────────────────────────────────────│ │
+╰─│> p                                                                       │ │
+╭─│every key that acts right now; a greyed row says why it cannot     5 of 10│ │
+│ │──────────────────────────────────────────────────────────────────────────│ │
 │ │  prune                             p    Operations          report what t│ │
-│ │  detail pane                       tab  Reading             focus it, and│ │
-│ │  apply                             a    Operations          replace data │ │
-╰─│  snapshot                          n    Operations          read the chos│ │
-╭─│  delete the snapshot               x    Operations          remove it fro│ │
-│ │                                                                          │ │
-╰─│                                                                      5/5 │ │
-╭─│──────────────────────────────────────────────────────────────────────────│ │
-│ │  enter run · ↑↓ move · esc close                                         │ │
-╰─╰──────────────────────────────────────────────────────────────────────────╯ │
-╭─ [5] Runs ───────────────────╮▏│                                             │
-│ nothing run yet              │▏│                                             │
+╰─│  detail pane                       tab  Reading             focus it, and│ │
+╭─│  apply                             a    Operations          restore 1 dat│ │
+│ │  snapshot                          n    Operations          read the chos│ │
+╰─│  delete the snapshot               x    Operations          remove it fro│ │
+╭─│                                                                          │ │
+│ │                                                                      5/5 │ │
+╰─│──────────────────────────────────────────────────────────────────────────│ │
+╭─│  enter run · ↑↓ move · esc close                                         │ │
+│ ╰──────────────────────────────────────────────────────────────────────────╯ │
 ╰──────────────────────────────╯▏│                                             │
-                                ▏╰─────────────────────────────────────────────╯
+╭─ [6] Runs ───────────────────╮▏│                                             │
+│ nothing run yet              │▏│                                             │
+╰──────────────────────────────╯▏╰─────────────────────────────────────────────╯

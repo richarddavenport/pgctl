@@ -11,16 +11,16 @@ pgctl  pgctl.yaml
 ╭─ [3] Snapshots ───────────────╮▏│ total size 8.0 MB                                                                              │
 │ none on local — press n       │▏│ checked    2m ago                                                                              │
 ╰───────────────────────────────╯▏│                                                                                                │
-╭─ [4] Sets ────────────────────╮▏│ SNAPSHOTS                                                                                      │
-│ none declared                 │▏│   none — press n to take one                                                                   │
+╭─ [4] Restorable (1) ──────────╮▏│ SNAPSHOTS                                                                                      │
+│   prd                         │▏│   none — press n to take one                                                                   │
+│     08-27 22:00    1db 1.9 GB │▏│                                                                                                │
 ╰───────────────────────────────╯▏│                                                                                                │
-╭─ [5] Runs ────────────────────╮▏│                                                                                                │
+╭─ [5] Sets ────────────────────╮▏│                                                                                                │
+│ none declared                 │▏│                                                                                                │
+╰───────────────────────────────╯▏│                                                                                                │
+╭─ [6] Runs ────────────────────╮▏│                                                                                                │
 │ nothing run yet               │▏│                                                                                                │
 ╰───────────────────────────────╯▏│                                                                                                │
-                                 ▏│                                                                                                │
-                                 ▏│                                                                                                │
-                                 ▏│                                                                                                │
-                                 ▏│                                                                                                │
                                  ▏│                                                                                                │
                                  ▏│                                                                                                │
                                  ▏│                                                                                                │

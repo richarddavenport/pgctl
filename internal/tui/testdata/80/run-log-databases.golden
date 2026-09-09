@@ -3,21 +3,21 @@ pgctl  pgctl.yaml
 │ ● prd              protected │▏│ ‹ Steps · Log ›                             │
 │ ● qat                guarded │▏│                                             │
 │ ● local                      │▏│ snapshot prd  Copying product-development f │
-│ ✗ scratch                    │▏│   11:56:00 product-development  pg_dump --… │
-╰──────────────────────────────╯▏│   11:56:30 product-development  claims.pol… │
-╭─ [2] Databases (3) ──────────╮▏│   11:58:30 product-development  1 table ha… │
-│ product-development  11.0 GB │▏│   11:58:32 product-development  quotes.quo… │
-│ claims               48.0 MB │▏│   11:58:40 product-development  rule "oper… │
-│ quote                20.0 GB │▏│   11:58:50 product-development  prd/produc… │
-╰──────────────────────────────╯▏│   11:59:00 claims               pg_dump --… │
-╭─ [3] Snapshots (1) ──────────╮▏│   11:59:15 claims               prd/claims… │
-│   08-27 22:00        1.9 GB  │▏│   11:59:22 claims               snapshot c… │
+╰──────────────────────────────╯▏│   11:56:00 product-development  pg_dump --… │
+╭─ [2] Databases (3) ──────────╮▏│   11:56:30 product-development  claims.pol… │
+│ product-development  11.0 GB │▏│   11:58:30 product-development  1 table ha… │
+│ claims               48.0 MB │▏│   11:58:32 product-development  quotes.quo… │
+╰──────────────────────────────╯▏│   11:58:40 product-development  rule "oper… │
+╭─ [3] Snapshots (1) ──────────╮▏│   11:58:50 product-development  prd/produc… │
+│   08-27 22:00     1db 1.9 GB │▏│   11:59:00 claims               pg_dump --… │
+╰──────────────────────────────╯▏│   11:59:15 claims               prd/claims… │
+╭─ [4] Restorable ─────────────╮▏│   11:59:22 claims               snapshot c… │
+│                              │▏│                                             │
 ╰──────────────────────────────╯▏│                                             │
-╭─ [4] Sets (1) ───────────────╮▏│                                             │
+╭─ [5] Sets (1) ───────────────╮▏│                                             │
 │ claims                   2+2 │▏│                                             │
 ╰──────────────────────────────╯▏│                                             │
-╭─ [5] Runs (2) ───────────────╮▏│                                             │
-│ ⠋ apply → qat           1:41 │▏│                                             │
+╭─ [6] Runs (2) ───────────────╮▏│                                             │
 │ ✓ snapshot prd          3:22 │▏│                                  following  │
 ╰──────────────────────────────╯▏╰─────────────────────────────────────────────╯
 q stop and leave · ] log · ? keys

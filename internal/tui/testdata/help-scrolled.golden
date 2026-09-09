@@ -1,22 +1,22 @@
                                   ╭──────────────────────────────────────────────────────────────╮
                                   │pgctl keys                                                    │
                                   │                                                              │
-                                  │↑ 21 above                                                    │
-                                  │← →        change a choice                                    │
-                                  │space      toggle                                             │
-                                  │enter      run it, or plan it                                 │
-                                  │esc        cancel                                             │
-                                  │                                                              │
-                                  │Reading a plan                                                │
+                                  │↑ 27 above                                                    │
                                   │↑ ↓        scroll it — nothing has been touched yet           │
                                   │w          widen to the referential closure and re-plan       │
                                   │enter      apply it                                           │
                                   │esc        back to the form                                   │
                                   │                                                              │
                                   │What a snapshot row means                                     │
+                                  │6db        the databases it covers — a snapshot is one run of…│
                                   │↓          not on this machine; applying downloads it first   │
-                                  │✗          it did not finish; it cannot be applied            │
+                                  │✗          a database of it did not finish; it cannot be appl…│
                                   │where      the Manifest tab names every place it is           │
+                                  │                                                              │
+                                  │The two snapshot panels                                       │
+                                  │[3]        Snapshots — what was taken FROM this connection    │
+                                  │[4]        Restorable — what can be put ON it, by source      │
+                                  │a          apply the selected one; the form names the target  │
                                   │                                                              │
                                   │What a connection row means                                   │
                                   │●          reachable                                          │

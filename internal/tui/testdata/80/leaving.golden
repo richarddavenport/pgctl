@@ -3,21 +3,21 @@ pgctl  pgctl.yaml
 │ ● prd              protected │▏│ ‹ Overview · Config ›                       │
 │ ● qat                guarded │▏│                                             │
 │ ● local                      │▏│ prd                                         │
-│ ✗ scratch                    │▏│ protected — never a target                  │
-╰───────╭──────────────────────────────────────────────────────────────╮       │
-╭─ [2] D│Leave while apply → qat is running?                           │       │
-│ produc│                                                              │       │
-│ claims│It is cancelled rather than abandoned, so the engine's        │       │
-│ quote │onFailure and postApply hooks still run — they are what       │       │
-╰───────│bring an environment back up. Anything already written stays  │       │
-╭─ [3] S│written.                                                      │       │
-│   08-2│                                                              │       │
-╰───────│y cancel it and leave · esc stay                              │       │
-╭─ [4] S╰──────────────────────────────────────────────────────────────╯       │
-│ claims                   2+2 │▏│   newest 14h ago  prd/product-development/… │
+╰──────────────────────────────╯▏│ protected — never a target                  │
+╭─ [2] D╭──────────────────────────────────────────────────────────────╮       │
+│ produc│Leave while apply → qat is running?                           │       │
+│ claims│                                                              │       │
+╰───────│It is cancelled rather than abandoned, so the engine's        │       │
+╭─ [3] S│onFailure and postApply hooks still run — they are what       │       │
+│   08-2│bring an environment back up. Anything already written stays  │       │
+╰───────│written.                                                      │       │
+╭─ [4] R│                                                              │       │
+│       │y cancel it and leave · esc stay                              │       │
+╰───────╰──────────────────────────────────────────────────────────────╯       │
+╭─ [5] Sets (1) ───────────────╮▏│   newest 14h ago  prd/product-development/… │
+│ claims                   2+2 │▏│                                             │
 ╰──────────────────────────────╯▏│                                             │
-╭─ [5] Runs (2) ───────────────╮▏│                                             │
+╭─ [6] Runs (2) ───────────────╮▏│                                             │
 │ ⠋ apply → qat           1:41 │▏│                                             │
-│ ✓ snapshot prd          3:22 │▏│                                             │
 ╰──────────────────────────────╯▏╰─────────────────────────────────────────────╯
 q stop and leave · ] log · ? keys

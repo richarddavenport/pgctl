@@ -11,7 +11,6 @@ import (
 
 	"github.com/richarddavenport/pgctl/internal/config"
 	"github.com/richarddavenport/pgctl/internal/engine"
-	"github.com/richarddavenport/pgctl/internal/snapshot"
 )
 
 // viewConnectionTab is the detail beside the Connections panel.
@@ -337,85 +336,124 @@ func (m *Model) winningRule(table string) int {
 	return winner
 }
 
+// viewSnapshotTab is the detail beside either snapshot panel.
+//
+// A snapshot is a RUN — every database taken at one instant — so every tab here
+// is about several manifests rather than one, and each one names the database it
+// is talking about. A warning about `quotes.quote` means nothing without it.
 func (m *Model) viewSnapshotTab(tab, width int) paneContent {
-	entry, ok := m.selectedSnapshot()
+	run, ok := m.selectedSnapshot()
 	if !ok {
-		return facts(m.detail(comp.Block{Text: "no snapshot selected. Press n to take one."}))
+		return facts(m.detail(comp.Block{
+			Text: "no snapshot selected. Press n to take one; panel 4 lists what " +
+				"other connections have that can be restored here.",
+		}))
 	}
-	man := entry.Manifest
 
 	switch tab {
 	case 1: // Tables
-		rows := make([][]comp.Segment, 0, len(man.Tables))
-		for _, t := range man.Tables {
-			// What the snapshot actually CARRIES for this table, which is the
-			// question this column exists to answer: everything, nothing, or the
-			// rows a filter admitted. The amber is on the two that are not
-			// everything, because a table restored with fewer rows than it had
-			// is the surprise worth catching before the apply rather than after.
-			carried := comp.Segment{Text: "all", Style: &mutedStyle}
-			switch t.Data {
-			case config.DataNone:
-				carried = comp.Segment{Text: "none", Style: &warnStyle}
-			case config.DataFiltered:
-				carried = comp.Segment{
-					Text:  fmt.Sprintf("%s rows", compactCount(t.Rows)),
-					Style: &warnStyle,
+		var rows [][]comp.Segment
+		for _, member := range run.Members {
+			man := member.Manifest
+			for _, t := range man.Tables {
+				carried := comp.Segment{Text: "all", Style: &mutedStyle}
+				switch t.Data {
+				case config.DataNone:
+					carried = comp.Segment{Text: "none", Style: &warnStyle}
+				case config.DataFiltered:
+					carried = comp.Segment{
+						Text:  fmt.Sprintf("%s rows", compactCount(t.Rows)),
+						Style: &warnStyle,
+					}
 				}
+				rows = append(rows, cells(
+					text(man.Database),
+					text(t.Name),
+					text(engine.HumanBytes(t.SourceBytes)),
+					text(compactCount(t.SourceRows)),
+					carried,
+				))
 			}
-			rows = append(rows, cells(
-				text(t.Name),
-				text(engine.HumanBytes(t.SourceBytes)),
-				text(compactCount(t.SourceRows)),
-				carried,
-			))
 		}
-		sort.Slice(rows, func(i, j int) bool { return rows[i][0].Text < rows[j][0].Text })
+		sort.Slice(rows, func(i, j int) bool {
+			if rows[i][0].Text != rows[j][0].Text {
+				return rows[i][0].Text < rows[j][0].Text
+			}
+			return rows[i][1].Text < rows[j][1].Text
+		})
 		return paneContent{lines: tableRows(width,
-			[]string{"TABLE", "SOURCE SIZE", "ROWS", "CARRIED"},
-			[]comp.Column{{Fill: true}, {Width: 12, Right: true},
+			[]string{"DATABASE", "TABLE", "SOURCE SIZE", "ROWS", "CARRIED"},
+			[]comp.Column{{Width: 20}, {Fill: true}, {Width: 12, Right: true},
 				{Width: 8, Right: true}, {Width: 12}}, rows)}
 
 	case 2: // Warnings
-		if len(man.Warnings) == 0 {
-			d := m.detail(comp.Block{Text: "no warnings"})
+		var warnings []comp.Fact
+		for _, member := range run.Members {
+			for _, w := range member.Manifest.Warnings {
+				warnings = append(warnings,
+					comp.Fact{Label: member.Manifest.Database, Value: w})
+			}
+		}
+		if len(warnings) == 0 {
+			d := m.detail(comp.Block{Text: "no warnings, in any of its databases"})
 			d.LabelStyle = &okStyle
 			return facts(d)
 		}
-		// One block of facts labelled "!", not a heading each: a heading names
-		// what is UNDER it, and "!" names nothing — it marks the line it is on.
-		// As a label it stays on that line, and the amber is the label's.
-		warnings := make([]comp.Fact, 0, len(man.Warnings))
-		for _, w := range man.Warnings {
-			warnings = append(warnings, comp.Fact{Label: "!", Value: w})
-		}
+		// The DATABASE as the label, not "!": with six of them the question a
+		// reader has is which one, and the amber is the label's either way.
 		d := m.detail(comp.Block{Facts: warnings})
 		d.LabelStyle = &warnStyle
 		return facts(d)
 
 	case 3: // Drift
-		return facts(m.viewDrift(man))
+		return facts(m.viewDrift(run))
 
 	default: // Manifest
-		taken := comp.Fact{
-			Label: "taken",
-			Value: man.StartedAt.Local().Format("2006-01-02 15:04") +
-				"  " + age(m.now.Sub(man.StartedAt)),
-		}
-		state := comp.Fact{Label: "took", Value: elapsed(man.FinishedAt.Sub(man.StartedAt))}
-		if !man.Complete() {
-			// The one fact on this tab that decides whether the snapshot is
-			// usable at all, so it is the one that is red.
-			state = comp.Fact{
-				Label: "state",
-				Value: "did not finish — cannot be applied",
-				Style: &dangerStyle,
+		return facts(m.viewManifest(run, width))
+	}
+}
+
+// viewManifest is what a snapshot is: when it was taken, from where, and the
+// databases it covers.
+func (m *Model) viewManifest(run *engine.Run, width int) comp.Detail {
+	first := run.Members[0].Manifest
+
+	state := comp.Fact{Label: "state", Value: "complete"}
+	if !run.Complete() {
+		// The one fact here that decides whether the snapshot can be used at
+		// all, so it is the one that is red. A run is complete only if every
+		// member is.
+		var unfinished []string
+		for _, member := range run.Members {
+			if !member.Manifest.Complete() {
+				unfinished = append(unfinished, member.Manifest.Database)
 			}
 		}
+		state = comp.Fact{
+			Label: "state",
+			Value: "did not finish: " + strings.Join(unfinished, ", ") +
+				" — it cannot be applied",
+			Style: &dangerStyle,
+		}
+	}
 
-		var source int64
-		filtered, empty := 0, 0
-		for _, t := range man.Tables {
+	where := comp.Fact{Label: "where", Value: strings.Join(run.Locations(), "+")}
+	if len(run.Locations()) == 0 {
+		// No destination holds ALL of it, which is a different thing from
+		// "nowhere" and worth saying: some members uploaded and some did not.
+		where = comp.Fact{
+			Label: "where",
+			Value: "no destination holds every database of it",
+			Style: &warnStyle,
+		}
+	}
+
+	var source int64
+	filtered, empty := 0, 0
+	tables := 0
+	for _, member := range run.Members {
+		for _, t := range member.Manifest.Tables {
+			tables++
 			source += t.SourceBytes
 			switch t.Data {
 			case config.DataFiltered:
@@ -424,153 +462,169 @@ func (m *Model) viewSnapshotTab(tab, width int) paneContent {
 				empty++
 			}
 		}
-
-		contents := []comp.Fact{
-			{Label: "whole", Value: fmt.Sprint(len(man.Tables) - filtered - empty)},
-		}
-		if filtered > 0 {
-			contents = append(contents, comp.Fact{
-				Label: "filtered", Value: fmt.Sprint(filtered), Style: &warnStyle,
-			})
-		}
-		if empty > 0 {
-			contents = append(contents, comp.Fact{
-				Label: "no data", Value: fmt.Sprint(empty), Style: &warnStyle,
-			})
-		}
-		contents = append(contents, comp.Fact{
-			Label: "foreign keys", Value: fmt.Sprint(len(man.ForeignKeys)),
-		})
-		if len(man.Extensions) > 0 {
-			names := make([]string, 0, len(man.Extensions))
-			for _, e := range man.Extensions {
-				names = append(names, e.Name)
-			}
-			// Not truncated here. comp.Detail wraps a value to the pane, which
-			// is what this wanted: the old version cut the list at width-16 and
-			// a target that cannot install an extension is exactly the failure
-			// the list exists to warn about.
-			contents = append(contents, comp.Fact{
-				Label: "extensions", Value: strings.Join(names, ", "),
-			})
-		}
-
-		d := m.detail(
-			comp.Block{Facts: []comp.Fact{
-				taken,
-				state,
-				{Label: "size", Value: engine.HumanBytes(man.Bytes)},
-				{Label: "tables", Value: fmt.Sprint(len(man.Tables))},
-				{Label: "where", Value: entry.Location()},
-				{Label: "server", Value: "PostgreSQL " +
-					formatServerVersion(man.ServerVersion) + "   pg_dump " + man.PgDumpVersion},
-				{Label: "compression", Value: man.Compression +
-					fmt.Sprintf("   %d jobs", man.Jobs)},
-				{Label: "source size", Value: engine.HumanBytes(source)},
-			}},
-			comp.Block{Heading: heading("contents"), Facts: contents},
-		)
-		d.Title = man.ID
-		if n := len(man.Warnings); n > 0 {
-			d.Blocks = append(d.Blocks, comp.Block{Facts: []comp.Fact{{
-				Label: "!",
-				Value: fmt.Sprintf("%d warnings — see the Warnings tab", n),
-				Style: &warnStyle,
-			}}})
-		}
-		return facts(d)
 	}
+
+	contents := []comp.Fact{{Label: "whole", Value: fmt.Sprint(tables - filtered - empty)}}
+	if filtered > 0 {
+		contents = append(contents, comp.Fact{
+			Label: "filtered", Value: fmt.Sprint(filtered), Style: &warnStyle,
+		})
+	}
+	if empty > 0 {
+		contents = append(contents, comp.Fact{
+			Label: "no data", Value: fmt.Sprint(empty), Style: &warnStyle,
+		})
+	}
+
+	d := m.detail(
+		comp.Block{Facts: []comp.Fact{
+			{Label: "taken", Value: run.At.Local().Format("2006-01-02 15:04") +
+				"  " + age(m.now.Sub(run.At))},
+			{Label: "from", Value: run.Connection},
+			state,
+			{Label: "databases", Value: fmt.Sprint(len(run.Members))},
+			{Label: "size", Value: engine.HumanBytes(run.Bytes())},
+			{Label: "tables", Value: fmt.Sprint(tables)},
+			where,
+			{Label: "server", Value: "PostgreSQL " +
+				formatServerVersion(first.ServerVersion) + "   pg_dump " + first.PgDumpVersion},
+			{Label: "compression", Value: first.Compression +
+				fmt.Sprintf("   %d jobs", first.Jobs)},
+			{Label: "source size", Value: engine.HumanBytes(source)},
+		}},
+		comp.Block{Heading: heading("contents"), Facts: contents},
+	)
+	d.Title = run.ID
+
+	// The databases, with what each one carries — the members of the run, which
+	// is the thing this screen exists to make visible. A snapshot used to BE a
+	// database, and now it has them.
+	members := make([]comp.Fact, 0, len(run.Members))
+	for _, member := range run.Members {
+		man := member.Manifest
+		value := fmt.Sprintf("%s  %s", engine.HumanBytes(man.Bytes),
+			plural(len(man.Tables), "table"))
+		fact := comp.Fact{Label: man.Database, Value: value}
+		if !man.Complete() {
+			fact.Value, fact.Style = value+"  did not finish", &dangerStyle
+		}
+		members = append(members, fact)
+	}
+	d.Blocks = append(d.Blocks,
+		comp.Block{Heading: heading("databases"), Facts: members})
+
+	if n := len(m.runWarnings(run)); n > 0 {
+		d.Blocks = append(d.Blocks, comp.Block{Facts: []comp.Fact{{
+			Label: "!",
+			Value: fmt.Sprintf("%s — see the Warnings tab", plural(n, "warning")),
+			Style: &warnStyle,
+		}}})
+	}
+	_ = width
+	return d
 }
 
-// viewDrift compares the snapshot's source structure with a live environment's,
-// which is the question "will this restore cleanly" asked before it is tried.
-// viewDrift compares a snapshot's tables against the target's.
+// viewDrift compares a snapshot's tables against a target's, per database.
 //
-// The asymmetry is the point, and it is why the two lists are separate blocks
-// with separate warnings rather than one diff. A table in the snapshot and not
-// on the target is a migration having dropped it. A table on the target and not
-// in the snapshot is the dangerous one: a whole-database apply drops it, and a
-// set-level apply leaves it holding rows that reference data about to be
-// replaced.
-func (m *Model) viewDrift(man *snapshot.Manifest) comp.Detail {
+// The asymmetry is the point, and it is why the two lists are separate rather
+// than one diff. A table in the snapshot and not on the target is a migration
+// having dropped it. A table on the target and not in the snapshot is the
+// dangerous one: a whole-database apply drops it, and a set-level apply leaves
+// it holding rows that reference data about to be replaced.
+//
+// Per database, and only for the databases whose catalog has been read: the
+// live tables are loaded lazily, one database at a time, because reading six
+// catalogs to draw a tab nobody opened is six connections nobody asked for.
+func (m *Model) viewDrift(run *engine.Run) comp.Detail {
 	conn, ok := m.selectedConn()
 	if !ok {
 		return m.detail(comp.Block{Text: "select a connection to compare against"})
 	}
-	key := liveKey(conn.Name, man.Database)
-	tables := m.liveTable[key]
-	if tables == nil {
-		return m.detail(comp.Block{
-			Facts: []comp.Fact{
-				{Label: "snapshot", Value: man.ID},
-				{Label: "compared to", Value: conn.Name},
-			},
-		}, comp.Block{
-			Text: spinner(m.now) + " reading " + conn.Name + "… open the Databases " +
-				"panel's Tables tab to load it.",
-		})
-	}
-
-	inSnapshot := map[string]bool{}
-	for _, t := range man.Tables {
-		inSnapshot[t.Name] = true
-	}
-	live := map[string]bool{}
-	for _, t := range tables {
-		live[t.Name] = true
-	}
-
-	var onlyLive, onlySnapshot []string
-	for name := range live {
-		if !inSnapshot[name] {
-			onlyLive = append(onlyLive, name)
-		}
-	}
-	for name := range inSnapshot {
-		if !live[name] {
-			onlySnapshot = append(onlySnapshot, name)
-		}
-	}
-	sort.Strings(onlyLive)
-	sort.Strings(onlySnapshot)
 
 	blocks := []comp.Block{{Facts: []comp.Fact{
-		{Label: "snapshot", Value: man.ID},
+		{Label: "snapshot", Value: run.ID},
 		{Label: "compared to", Value: conn.Name},
 	}}}
 
-	if len(onlyLive) == 0 && len(onlySnapshot) == 0 {
-		d := m.detail(append(blocks, comp.Block{
-			Heading: heading("no drift"),
-			Text:    "The same tables exist on both sides.",
-		})...)
-		d.HeadingStyle = &okStyle
-		return d
+	var unread []string
+	drifted := false
+	for _, member := range run.Members {
+		database := member.Manifest.Database
+		tables := m.liveTable[liveKey(conn.Name, database)]
+		if tables == nil {
+			unread = append(unread, database)
+			continue
+		}
+
+		inSnapshot := map[string]bool{}
+		for _, t := range member.Manifest.Tables {
+			inSnapshot[t.Name] = true
+		}
+		live := map[string]bool{}
+		for _, t := range tables {
+			live[t.Name] = true
+		}
+
+		var onlyLive, onlySnapshot []string
+		for name := range live {
+			if !inSnapshot[name] {
+				onlyLive = append(onlyLive, name)
+			}
+		}
+		for name := range inSnapshot {
+			if !live[name] {
+				onlySnapshot = append(onlySnapshot, name)
+			}
+		}
+		sort.Strings(onlyLive)
+		sort.Strings(onlySnapshot)
+
+		if len(onlyLive) == 0 && len(onlySnapshot) == 0 {
+			blocks = append(blocks, comp.Block{
+				Heading: heading(database),
+				Facts:   []comp.Fact{{Value: "the same tables on both sides", Style: &okStyle}},
+			})
+			continue
+		}
+		drifted = true
+
+		facts := make([]comp.Fact, 0, len(onlySnapshot)+len(onlyLive))
+		for _, n := range onlySnapshot {
+			facts = append(facts, comp.Fact{Label: "only in the snapshot", Value: n})
+		}
+		for _, n := range onlyLive {
+			facts = append(facts, comp.Fact{
+				Label: "only on " + conn.Name, Value: n, Style: &warnStyle,
+			})
+		}
+		blocks = append(blocks, comp.Block{Heading: heading(database), Facts: facts})
 	}
 
-	named := func(names []string) []comp.Fact {
-		out := make([]comp.Fact, 0, len(names))
-		for _, n := range names {
-			out = append(out, comp.Fact{Value: n})
-		}
-		return out
-	}
-	if len(onlySnapshot) > 0 {
+	if len(unread) > 0 {
 		blocks = append(blocks, comp.Block{
-			Heading: heading(fmt.Sprintf("in the snapshot, not on %s (%d)",
-				conn.Name, len(onlySnapshot))),
-			Text: "A migration dropped these, or the snapshot is newer.",
-		}, comp.Block{Indent: 1, Facts: named(onlySnapshot)})
+			Heading: heading("not compared"),
+			Text: strings.Join(unread, ", ") + " — select one in panel 2 and open " +
+				"its Tables tab, which is what reads a catalog. Six are not read to " +
+				"draw a tab nobody opened.",
+		})
 	}
-	if len(onlyLive) > 0 {
-		blocks = append(blocks, comp.Block{
-			Heading: heading(fmt.Sprintf("on %s, not in the snapshot (%d)",
-				conn.Name, len(onlyLive))),
-			Text: "A whole-database apply drops these. A set-level apply leaves them, " +
-				"holding rows that reference data about to be replaced.",
-		}, comp.Block{Indent: 1, Facts: named(onlyLive)})
+
+	d := m.detail(blocks...)
+	if drifted {
+		// A table on the target and not in the snapshot is what a
+		// whole-database apply drops, so the heading style says read this.
+		d.HeadingStyle = &warnStyle
 	}
-	return m.detail(blocks...)
+	return d
+}
+
+// runWarnings is every member's warnings.
+func (m *Model) runWarnings(run *engine.Run) []string {
+	var out []string
+	for _, member := range run.Members {
+		out = append(out, member.Manifest.Warnings...)
+	}
+	return out
 }
 
 func (m *Model) viewSetTab(tab, width int) paneContent {

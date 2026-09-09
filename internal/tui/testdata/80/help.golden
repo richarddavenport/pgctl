@@ -19,5 +19,5 @@
         │p          prune snapshots by the retention policy            │
         │x          delete the selected snapshot                       │
         │r          reload snapshots and re-probe connections          │
-        │↓ 36 more                                                     │
+        │↓ 42 more                                                     │
         ╰──────────────────────────────────────────────────────────────╯

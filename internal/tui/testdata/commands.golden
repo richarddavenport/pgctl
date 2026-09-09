@@ -12,16 +12,16 @@ pgctl  pgctl.yaml
 ╰─────────────────│──────────────────────────────────────────────────────────────────────────────────────────────│                 │
 ╭─ [3] Snapshots (│ Operations                                                           act on what is selected │                 │
 │   08-27 22:00   │  snapshot                    n    read the chosen databases and write a compressed copy      │                 │
-╰─────────────────│  apply                       a    replace data with prd/product-development/20260828T030000Z │                 │
-╭─ [4] Sets (1) ──│  move                        m    snapshot one connection into another and delete the copy   │                 │
-│ claims          │  prune                       p    report what the retention policy would remove              │                 │
+╰─────────────────│  apply                       a    restore 1 database of prd/20260828T030000Z — the plan is sh│                 │
+╭─ [4] Restorable │  move                        m    snapshot one connection into another and delete the copy   │                 │
+│                 │  prune                       p    report what the retention policy would remove              │                 │
 ╰─────────────────│  delete the snapshot         x    remove it from disk and from storage — this cannot be undon│                 │
-╭─ [5] Runs ──────│ Reading                                                                   nothing is written │                 │
-│ nothing run yet │  reload                      r    re-list snapshots and re-probe every connection pgctl has r│                 │
+╭─ [5] Sets (1) ──│ Reading                                                                   nothing is written │                 │
+│ claims          │  reload                      r    re-list snapshots and re-probe every connection pgctl has r│                 │
 ╰─────────────────│  filter                      /    narrow the focused panel                                   │                 │
-                  │  next tab                    ]    what the detail pane is showing                            │                 │
-                  │  detail pane                 tab  focus it, and back                                         │                 │
-                  │  keys                        ?    every binding, by screen                                   │                 │
+╭─ [6] Runs ──────│  next tab                    ]    what the detail pane is showing                            │                 │
+│ nothing run yet │  detail pane                 tab  focus it, and back                                         │                 │
+╰─────────────────│  keys                        ?    every binding, by screen                                   │                 │
                   │                                                                                              │                 │
                   │                                                                                        12/12 │                 │
                   │──────────────────────────────────────────────────────────────────────────────────────────────│                 │

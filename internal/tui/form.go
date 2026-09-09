@@ -110,9 +110,13 @@ type actionModel struct {
 	fields []formField
 	cursor int
 
+	// run is the snapshot an apply is of, held so the form does not have to
+	// re-resolve it from a cursor that may have moved.
+	run *engine.Run
+
 	// stage separates filling the form from reading the plan it produced.
 	stage actionStage
-	plan  *engine.Plan
+	plan  *engine.RunPlan
 
 	// plannedAt is when the plan was asked for, so the wait can say how long it
 	// has been waiting. A plan against a large target reads its whole foreign
@@ -369,18 +373,29 @@ func (m *Model) noDatabase(conn config.Connection) error {
 	}
 }
 
-// openApply builds the apply form for the selected snapshot: where to, how much
-// of it, and the flags that decide what happens to a selection that is not
-// referentially closed.
+// openApply builds the apply form for the selected snapshot: where to, which of
+// its databases, and how much of one of them.
+//
+// The databases default to ALL of them, which is the change this form needed.
+// A snapshot is a run — every database taken at one instant — so restoring it
+// is one act, and a form that made you pick databases a second time was asking
+// the same question the snapshot form already answered. Somebody said so:
+// *"making it appear as if I have to select multiple databases for the snapshot
+// AND the restore creates a lot of friction"*.
+//
+// The target defaults to the connection panel 1 is on when the snapshot came
+// from somewhere else — which is what standing on qat and pressing `a` in the
+// Restorable panel means — and to the first other connection otherwise.
 func (m *Model) openApply() {
-	entry, ok := m.selectedSnapshot()
+	run, ok := m.selectedSnapshot()
 	if !ok {
-		m.err = fmt.Errorf("no snapshot selected — press n to take one, " +
-			"or move to the Snapshots panel")
+		m.err = fmt.Errorf("no snapshot selected — press n to take one, or move " +
+			"to panel 4, which lists what other connections have that can be " +
+			"restored here")
 		return
 	}
-	if !entry.Manifest.Complete() {
-		m.err = fmt.Errorf("%s did not finish and cannot be applied", entry.Manifest.ID)
+	if !run.Complete() {
+		m.err = fmt.Errorf("%s did not finish and cannot be applied", run.ID)
 		return
 	}
 
@@ -391,10 +406,32 @@ func (m *Model) openApply() {
 		return
 	}
 
+	// The connection under panel 1's cursor, when it is a legal target and is
+	// not where the snapshot came from. Standing on qat and pressing `a` on
+	// prd's snapshot means "put this here", and the form should not make you
+	// say it again.
+	target := 0
+	if conn, ok := m.selectedConn(); ok && conn.Name != run.Connection {
+		for i, name := range targets {
+			if name == conn.Name {
+				target = i
+			}
+		}
+	}
+
+	databases := m.databaseField(run.Databases())
+	// ALL of them, unlike the snapshot form's, which defaults to the one the
+	// panel is on: this is a restore of a snapshot, and the snapshot is what it
+	// covers.
+	for i := range databases.options {
+		databases.selected[i] = true
+	}
+	databases.choice = 0
+
 	scopes := []string{"whole database"}
 	scopeLabels := []string{"whole database — drop and recreate it"}
 	for _, s := range m.cfg.Sets {
-		if s.Database != entry.Manifest.Database {
+		if _, ok := run.Member(s.Database); !ok {
 			continue
 		}
 		scopes = append(scopes, "set:"+s.Name)
@@ -407,12 +444,19 @@ func (m *Model) openApply() {
 	scopes = append(scopes, "tables")
 	scopeLabels = append(scopeLabels, "tables — name them yourself")
 
+	targetField := newChoice("target", "Target", targets, labels)
+	targetField.choice = target
+
 	m.action = &actionModel{
-		kind:    actionApply,
-		title:   "Apply " + entry.Manifest.ID,
-		explain: "Replaces data on the target. The plan is shown before anything is touched.",
+		kind:  actionApply,
+		run:   run,
+		title: "Apply " + run.ID,
+		explain: fmt.Sprintf("Replaces data on the target, one database at a time. "+
+			"%s taken %s. The plan is shown before anything is touched.",
+			plural(len(run.Members), "database"), age(m.now.Sub(run.At))),
 		fields: []formField{
-			newChoice("target", "Target", targets, labels),
+			targetField,
+			databases,
 			newChoice("scope", "Scope", scopes, scopeLabels),
 			newText("tables", "Tables",
 				"comma separated, schema-qualified — used when scope is `tables`"),
@@ -490,16 +534,18 @@ func (m *Model) openPrune() {
 }
 
 func (m *Model) openDelete() {
-	entry, ok := m.selectedSnapshot()
+	run, ok := m.selectedSnapshot()
 	if !ok {
 		m.err = fmt.Errorf("no snapshot selected")
 		return
 	}
 	m.action = &actionModel{
 		kind:  actionDelete,
-		title: "Delete " + entry.Manifest.ID,
-		explain: fmt.Sprintf("Removes %s from %s. This cannot be undone.",
-			engine.HumanBytes(entry.Manifest.Bytes), entry.Location()),
+		run:   run,
+		title: "Delete " + run.ID,
+		explain: fmt.Sprintf("Removes %s of %s from %s. This cannot be undone.",
+			engine.HumanBytes(run.Bytes()), plural(len(run.Members), "database"),
+			strings.Join(run.Locations(), " and ")),
 		fields: []formField{
 			newToggle("confirm", "Yes, delete it", "space toggles"),
 		},
@@ -750,9 +796,9 @@ func (m *Model) planKey(key string) (tea.Cmd, bool) {
 		// Checked here rather than at the keystroke that typed it, because this
 		// is the moment it gates.
 		if f := a.field("confirm"); f != nil && !f.disabled &&
-			f.text != a.plan.Target.Conn.Name {
+			f.text != a.plan.Target {
 			a.err = fmt.Errorf("%s is guarded: go back and type its name in full",
-				a.plan.Target.Conn.Name)
+				a.plan.Target)
 			a.stage = stageForm
 			a.cursor = len(a.fields) - 1
 			return nil, true

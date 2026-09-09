@@ -14,7 +14,7 @@ import (
 // planReadyMsg carries a computed plan back to the form that asked for it.
 type planReadyMsg struct {
 	gen  int
-	plan *engine.Plan
+	plan *engine.RunPlan
 	err  error
 }
 
@@ -113,12 +113,12 @@ func (m *Model) submitAction() tea.Cmd {
 			a.err = fmt.Errorf("not confirmed")
 			return nil
 		}
-		entry, ok := m.selectedSnapshot()
-		if !ok {
+		run := a.run
+		if run == nil {
 			m.action = nil
 			return nil
 		}
-		id := entry.Manifest.ID
+		id := run.ID
 		m.action = nil
 		e := m.engine
 		return m.start("delete "+id, "Removing "+id+".", 0,
@@ -135,16 +135,23 @@ func (m *Model) submitAction() tea.Cmd {
 // planApply computes the plan the operator will confirm.
 func (m *Model) planApply() tea.Cmd {
 	a := m.action
-	entry, ok := m.selectedSnapshot()
-	if !ok {
+	if a.run == nil {
 		m.action = nil
 		return nil
 	}
 
-	req := engine.ApplyRequest{
-		Snapshot: entry.Manifest.ID,
-		Target:   a.value("target"),
-		Widen:    a.enabled("widen"),
+	databases := m.chosenDatabases()
+	if len(databases) == 0 {
+		a.err = fmt.Errorf("choose at least one database of the snapshot — " +
+			"space chooses, a takes all")
+		return nil
+	}
+
+	req := engine.RunApplyRequest{
+		Run:       a.run.ID,
+		Target:    a.value("target"),
+		Databases: databases,
+		Widen:     a.enabled("widen"),
 	}
 	scope := a.value("scope")
 	switch {
@@ -173,7 +180,7 @@ func (m *Model) planApply() tea.Cmd {
 	return func() tea.Msg {
 		ctx, cancel := context.WithTimeout(context.Background(), loadTimeout)
 		defer cancel()
-		plan, err := e.Plan(ctx, req, nil)
+		plan, err := e.PlanRun(ctx, req, nil)
 		return planReadyMsg{gen: gen, plan: plan, err: err}
 	}
 }
@@ -198,27 +205,27 @@ func (m *Model) planArrived(msg planReadyMsg) {
 	m.planView.Goto(0)
 }
 
-func (m *Model) executePlan(plan *engine.Plan) tea.Cmd {
+func (m *Model) executePlan(plan *engine.RunPlan) tea.Cmd {
 	m.action = nil
 	e := m.engine
 
-	what := fmt.Sprintf("%d tables", len(plan.Selection))
-	if plan.WholeDatabase {
-		what = "the whole " + plan.Snapshot.Database + " database"
+	databases := make([]string, 0, len(plan.Plans))
+	for _, one := range plan.Plans {
+		databases = append(databases, one.Snapshot.Database)
 	}
-	explain := fmt.Sprintf("Replacing %s on %s with the contents of %s.",
-		what, plan.Target.Conn.Name, plan.Snapshot.ID)
+	explain := fmt.Sprintf("Replacing %s on %s with the contents of %s: %s.",
+		plural(plan.Tables(), "table"), plan.Target, plan.Run.ID,
+		strings.Join(databases, ", "))
 
-	// The one operation that knows its own denominator: the plan resolved the
+	// The one operation that knows its own denominator: every plan resolved its
 	// selection against the target's catalog, so the meter has something real
-	// to divide by.
-	return m.start("apply → "+plan.Target.Conn.Name, explain, len(plan.Selection),
+	// to divide by — the tables of every database it will restore.
+	return m.start("apply → "+plan.Target, explain, plan.Tables(),
 		func(ctx context.Context, report engine.Reporter) (string, error) {
-			if err := e.Execute(ctx, plan, report); err != nil {
+			if err := e.ExecuteRun(ctx, plan, report); err != nil {
 				return "", err
 			}
-			return fmt.Sprintf("applied %s to %s",
-				plan.Snapshot.ID, plan.Target.Conn.Name), nil
+			return fmt.Sprintf("applied %s to %s", plan.Run.ID, plan.Target), nil
 		})
 }
 

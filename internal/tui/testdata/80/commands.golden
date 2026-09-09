@@ -3,20 +3,20 @@ pgctl  pgctl.yaml
 │ │>   type to search 10 commands                                            │ │
 │ │every key that acts right now; a greyed row says why it cannot    10 of 10│ │
 │ │──────────────────────────────────────────────────────────────────────────│ │
-│ │ Operations                                       act on what is selected │ │
-╰─│  snapshot                    n    read the chosen databases and write a c│ │
-╭─│  apply                       a    replace data with prd/product-developme│ │
+╰─│ Operations                                       act on what is selected │ │
+╭─│  snapshot                    n    read the chosen databases and write a c│ │
+│ │  apply                       a    restore 1 database of prd/20260828T0300│ │
 │ │  move                        m    snapshot one connection into another an│ │
-│ │  prune                       p    report what the retention policy would │ │
-│ │  delete the snapshot         x    remove it from disk and from storage — │ │
-╰─│ Reading                                               nothing is written │ │
-╭─│  reload                      r    re-list snapshots and re-probe every co│ │
-│ │  filter                      /    narrow the focused panel               │ │
-╰─│  next tab                    ]    what the detail pane is showing        │ │
-╭─│  detail pane                 tab  focus it, and back                     │ │
-│ │  keys                        ?    every binding, by screen               │ │
-╰─│                                                                          │ │
-╭─│                                                                    12/12 │ │
-│ │──────────────────────────────────────────────────────────────────────────│ │
-╰─│  enter run · ↑↓ move · esc close                                         │ │
-  ╰──────────────────────────────────────────────────────────────────────────╯─╯
+╰─│  prune                       p    report what the retention policy would │ │
+╭─│  delete the snapshot         x    remove it from disk and from storage — │ │
+│ │ Reading                                               nothing is written │ │
+╰─│  reload                      r    re-list snapshots and re-probe every co│ │
+╭─│  filter                      /    narrow the focused panel               │ │
+│ │  next tab                    ]    what the detail pane is showing        │ │
+╰─│  detail pane                 tab  focus it, and back                     │ │
+╭─│  keys                        ?    every binding, by screen               │ │
+│ │                                                                          │ │
+╰─│                                                                    12/12 │ │
+╭─│──────────────────────────────────────────────────────────────────────────│ │
+│ │  enter run · ↑↓ move · esc close                                         │ │
+╰─╰──────────────────────────────────────────────────────────────────────────╯─╯

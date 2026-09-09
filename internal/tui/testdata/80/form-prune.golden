@@ -3,20 +3,20 @@ pgctl  pgctl.yaml
 │ ● prd              protected │▏│ ‹ Overview · Config ›                       │
 │ ● qat                guarded │▏│                                             │
 │ ● local                      │▏│ prd                                         │
-│ ✗ scratch                    │▏│ protected — never a target                  │
-╰──╭────────────────────────────────────────────────────────────────────────╮  │
-╭─ │ Prune snapshots                                                        │  │
-│ p│                                                                        │  │
-│ c│ Retention: 2 daily, 0 weekly, 0 monthly. An incomplete snapshot is     │  │
-│ q│ never kept, and the newest always is.                                  │  │
-╰──│                                                                        │  │
-╭─ │ ▸ Connection   ‹ all ›  (1/5)                                          │  │
-│  │   Delete them  no                                                      │  │
-╰──│ ← → to change                                                          │  │
-╭─ │   ↑↓ field · ←→ change · enter prune · esc cancel                      │  │
-│ c╰────────────────────────────────────────────────────────────────────────╯… │
+╰──────────────────────────────╯▏│ protected — never a target                  │
+╭─ ╭────────────────────────────────────────────────────────────────────────╮  │
+│ p│ Prune snapshots                                                        │  │
+│ c│                                                                        │  │
+╰──│ Retention: 2 daily, 0 weekly, 0 monthly. An incomplete snapshot is     │  │
+╭─ │ never kept, and the newest always is.                                  │  │
+│  │                                                                        │  │
+╰──│ ▸ Connection   ‹ all ›  (1/5)                                          │  │
+╭─ │   Delete them  no                                                      │  │
+│  │ ← → to change                                                          │  │
+╰──│   ↑↓ field · ←→ change · enter prune · esc cancel                      │  │
+╭─ ╰────────────────────────────────────────────────────────────────────────╯… │
+│ claims                   2+2 │▏│                                             │
 ╰──────────────────────────────╯▏│                                             │
-╭─ [5] Runs ───────────────────╮▏│                                             │
+╭─ [6] Runs ───────────────────╮▏│                                             │
 │ nothing run yet              │▏│                                             │
-╰──────────────────────────────╯▏│                                             │
-                                ▏╰─────────────────────────────────────────────╯
+╰──────────────────────────────╯▏╰─────────────────────────────────────────────╯

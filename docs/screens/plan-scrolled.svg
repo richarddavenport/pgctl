@@ -46,29 +46,28 @@
 <text x="14" y="105.92" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="29.6" y="105.92" textLength="7.8" lengthAdjust="spacing" fill="#cd0000" font-weight="600" xml:space="preserve">✗</text>
 <text x="45.2" y="105.92" textLength="54.6" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">scratch</text>
-<text x="263.6" y="105.92" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
-<text x="271.4" y="105.92" textLength="7.8" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">▏</text>
-<text x="279.2" y="105.92" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
-<text x="294.8" y="105.92" textLength="202.8" lengthAdjust="spacing" fill="#cd0000" font-weight="600" xml:space="preserve">protected — never a target</text>
+<text x="99.8" y="105.92" textLength="858" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">╭────────────────────────────────────────────────────────────────────────────────────────────────────────────╮</text>
 <text x="1035.8" y="105.92" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="14" y="122.17" textLength="85.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">╰──────────</text>
-<text x="99.8" y="122.17" textLength="858" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">╭────────────────────────────────────────────────────────────────────────────────────────────────────────────╮</text>
+<text x="99.8" y="122.17" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
+<text x="115.4" y="122.17" textLength="202.8" lengthAdjust="spacing" fill="#ff00ff" font-weight="600" xml:space="preserve">Apply prd/20260828T030000Z</text>
+<text x="950" y="122.17" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="1035.8" y="122.17" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="14" y="138.43" textLength="15.6" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">╭─</text>
 <text x="29.6" y="138.43" textLength="70.2" lengthAdjust="spacing" fill="#7f7f7f" font-weight="600" xml:space="preserve"> [2] Data</text>
 <text x="99.8" y="138.43" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
-<text x="115.4" y="138.43" textLength="358.8" lengthAdjust="spacing" fill="#ff00ff" font-weight="600" xml:space="preserve">Apply prd/product-development/20260828T030000Z</text>
 <text x="950" y="138.43" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="1035.8" y="138.43" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="14" y="154.68" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="29.6" y="154.68" textLength="70.2" lengthAdjust="spacing" fill="#ff00ff" font-weight="600" xml:space="preserve">product-d</text>
 <text x="99.8" y="154.68" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
+<text x="107.6" y="154.68" textLength="811.2" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve"> Replaces data on the target, one database at a time. 1 database taken 14h ago. The plan is shown before</text>
 <text x="950" y="154.68" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="1035.8" y="154.68" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="14" y="170.93" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="21.8" y="170.93" textLength="54.6" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve"> claims</text>
 <text x="99.8" y="170.93" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
-<text x="107.6" y="170.93" textLength="585" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve"> Replaces data on the target. The plan is shown before anything is touched.</text>
+<text x="107.6" y="170.93" textLength="163.8" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve"> anything is touched.</text>
 <text x="950" y="170.93" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="1035.8" y="170.93" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="14" y="187.18" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
@@ -78,96 +77,103 @@
 <text x="1035.8" y="187.18" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="14" y="203.43" textLength="85.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">╰──────────</text>
 <text x="99.8" y="203.43" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
-<text x="115.4" y="203.43" textLength="358.8" lengthAdjust="spacing" fill="#cd0000" font-weight="600" xml:space="preserve">REPLACE 6 tables in product-development on qat</text>
+<text x="115.4" y="203.43" textLength="249.6" lengthAdjust="spacing" fill="#cd0000" font-weight="600" xml:space="preserve">REFUSED, and skipped: 1 database</text>
 <text x="950" y="203.43" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="1035.8" y="203.43" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="14" y="219.68" textLength="15.6" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">╭─</text>
 <text x="29.6" y="219.68" textLength="70.2" lengthAdjust="spacing" fill="#7f7f7f" font-weight="600" xml:space="preserve"> [3] Snap</text>
 <text x="99.8" y="219.68" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
-<text x="115.4" y="219.68" textLength="709.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">from prd/product-development/20260828T030000Z taken 2026-08-27 22:00, 2.3 GB of source data</text>
+<text x="115.4" y="219.68" textLength="795.6" lengthAdjust="spacing" fill="#cdcd00" xml:space="preserve">hasura — snapshot prd/hasura/20260828T030000Z does not contain hdb_catalog.hdb_version — it predates a</text>
 <text x="950" y="219.68" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="1035.8" y="219.68" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="14" y="235.93" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="45.2" y="235.93" textLength="54.6" lengthAdjust="spacing" fill="#ff00ff" font-weight="600" xml:space="preserve">08-27 2</text>
 <text x="99.8" y="235.93" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
+<text x="115.4" y="235.93" textLength="195" lengthAdjust="spacing" fill="#cdcd00" xml:space="preserve">migration that created it</text>
 <text x="950" y="235.93" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="1035.8" y="235.93" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="14" y="252.18" textLength="85.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">╰──────────</text>
 <text x="99.8" y="252.18" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
-<text x="115.4" y="252.18" textLength="538.2" lengthAdjust="spacing" fill="#cdcd00" xml:space="preserve">widened to include 2 more: operations.policy_contract, public.address</text>
 <text x="950" y="252.18" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="1035.8" y="252.18" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="14" y="268.43" textLength="15.6" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">╭─</text>
-<text x="29.6" y="268.43" textLength="70.2" lengthAdjust="spacing" fill="#7f7f7f" font-weight="600" xml:space="preserve"> [4] Sets</text>
+<text x="29.6" y="268.43" textLength="70.2" lengthAdjust="spacing" fill="#7f7f7f" font-weight="600" xml:space="preserve"> [4] Rest</text>
 <text x="99.8" y="268.43" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
+<text x="115.4" y="268.43" textLength="288.6" lengthAdjust="spacing" fill="#cd0000" font-weight="600" xml:space="preserve">REPLACE 6 tables in 1 database on qat</text>
 <text x="950" y="268.43" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="1035.8" y="268.43" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="14" y="284.68" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
-<text x="29.6" y="284.68" textLength="46.8" lengthAdjust="spacing" fill="#ff00ff" font-weight="600" xml:space="preserve">claims</text>
 <text x="99.8" y="284.68" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
-<text x="107.6" y="284.68" textLength="436.8" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve"> 81 foreign keys dropped and rebuilt, 31 indexes rebuilt</text>
+<text x="115.4" y="284.68" textLength="553.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">from prd/20260828T030000Z taken 2026-08-27 22:00, 2.3 GB of source data</text>
 <text x="950" y="284.68" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="1035.8" y="284.68" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="14" y="300.93" textLength="85.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">╰──────────</text>
 <text x="99.8" y="300.93" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
-<text x="107.6" y="300.93" textLength="390" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve"> 12 user triggers disabled for the load on 1 table</text>
 <text x="950" y="300.93" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="1035.8" y="300.93" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="14" y="317.18" textLength="15.6" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">╭─</text>
-<text x="29.6" y="317.18" textLength="70.2" lengthAdjust="spacing" fill="#7f7f7f" font-weight="600" xml:space="preserve"> [5] Runs</text>
+<text x="29.6" y="317.18" textLength="70.2" lengthAdjust="spacing" fill="#7f7f7f" font-weight="600" xml:space="preserve"> [5] Sets</text>
 <text x="99.8" y="317.18" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
+<text x="115.4" y="317.18" textLength="296.4" lengthAdjust="spacing" fill="#7f7f7f" font-weight="600" xml:space="preserve">product-development — 6 tables, 2.3 GB</text>
 <text x="950" y="317.18" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="1035.8" y="317.18" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="14" y="333.43" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
-<text x="29.6" y="333.43" textLength="70.2" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">nothing r</text>
+<text x="29.6" y="333.43" textLength="46.8" lengthAdjust="spacing" fill="#ff00ff" font-weight="600" xml:space="preserve">claims</text>
 <text x="99.8" y="333.43" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
-<text x="115.4" y="333.43" textLength="78" lengthAdjust="spacing" fill="#7f7f7f" font-weight="600" xml:space="preserve">LOAD ORDER</text>
+<text x="115.4" y="333.43" textLength="538.2" lengthAdjust="spacing" fill="#cdcd00" xml:space="preserve">widened to include 2 more: operations.policy_contract, public.address</text>
 <text x="950" y="333.43" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="1035.8" y="333.43" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="14" y="349.68" textLength="85.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">╰──────────</text>
 <text x="99.8" y="349.68" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
-<text x="107.6" y="349.68" textLength="140.4" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve"> 1. public.address</text>
+<text x="107.6" y="349.68" textLength="436.8" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve"> 81 foreign keys dropped and rebuilt, 31 indexes rebuilt</text>
 <text x="950" y="349.68" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="1035.8" y="349.68" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
+<text x="14" y="365.93" textLength="15.6" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">╭─</text>
+<text x="29.6" y="365.93" textLength="70.2" lengthAdjust="spacing" fill="#7f7f7f" font-weight="600" xml:space="preserve"> [6] Runs</text>
 <text x="99.8" y="365.93" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
-<text x="107.6" y="365.93" textLength="694.2" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve"> 2. operations.cancellation, operations.policy_contract, operations.policy_contract_quote</text>
+<text x="107.6" y="365.93" textLength="390" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve"> 12 user triggers disabled for the load on 1 table</text>
 <text x="950" y="365.93" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="1035.8" y="365.93" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
+<text x="14" y="382.18" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
+<text x="29.6" y="382.18" textLength="70.2" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">nothing r</text>
 <text x="99.8" y="382.18" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
-<text x="107.6" y="382.18" textLength="179.4" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve"> 3. claims.policy_claim</text>
+<text x="107.6" y="382.18" textLength="140.4" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve"> 1. public.address</text>
 <text x="950" y="382.18" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="1035.8" y="382.18" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
+<text x="14" y="398.43" textLength="85.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">╰──────────</text>
 <text x="99.8" y="398.43" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
-<text x="107.6" y="398.43" textLength="179.4" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve"> 4. claims.claim_detail</text>
+<text x="107.6" y="398.43" textLength="694.2" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve"> 2. operations.cancellation, operations.policy_contract, operations.policy_contract_quote</text>
 <text x="950" y="398.43" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="1035.8" y="398.43" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="99.8" y="414.68" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
-<text x="115.4" y="414.68" textLength="709.8" lengthAdjust="spacing" fill="#cdcd00" xml:space="preserve">ring: operations.cancellation, operations.policy_contract, operations.policy_contract_quote</text>
+<text x="107.6" y="414.68" textLength="179.4" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve"> 3. claims.policy_claim</text>
 <text x="950" y="414.68" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="1035.8" y="414.68" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="99.8" y="430.93" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
+<text x="107.6" y="430.93" textLength="179.4" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve"> 4. claims.claim_detail</text>
 <text x="950" y="430.93" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="1035.8" y="430.93" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="99.8" y="447.18" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
-<text x="115.4" y="447.18" textLength="694.2" lengthAdjust="spacing" fill="#cdcd00" xml:space="preserve">! audit.logged_actions carries no data in this snapshot, so applying it empties the table</text>
+<text x="115.4" y="447.18" textLength="709.8" lengthAdjust="spacing" fill="#cdcd00" xml:space="preserve">ring: operations.cancellation, operations.policy_contract, operations.policy_contract_quote</text>
 <text x="950" y="447.18" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="1035.8" y="447.18" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="99.8" y="463.43" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
-<text x="895.4" y="463.43" textLength="39" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">16/16</text>
+<text x="115.4" y="463.43" textLength="694.2" lengthAdjust="spacing" fill="#cdcd00" xml:space="preserve">! audit.logged_actions carries no data in this snapshot, so applying it empties the table</text>
 <text x="950" y="463.43" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="1035.8" y="463.43" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="99.8" y="479.68" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
-<text x="115.4" y="479.68" textLength="405.6" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">read it, then confirm. Nothing has been touched yet.</text>
+<text x="895.4" y="479.68" textLength="39" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">17/17</text>
 <text x="950" y="479.68" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="1035.8" y="479.68" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="99.8" y="495.93" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
-<text x="115.4" y="495.93" textLength="288.6" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">  enter apply it · ↑↓ read · esc back</text>
+<text x="115.4" y="495.93" textLength="405.6" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">read it, then confirm. Nothing has been touched yet.</text>
 <text x="950" y="495.93" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="1035.8" y="495.93" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
-<text x="99.8" y="512.17" textLength="858" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">╰────────────────────────────────────────────────────────────────────────────────────────────────────────────╯</text>
+<text x="99.8" y="512.17" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
+<text x="115.4" y="512.17" textLength="288.6" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">  enter apply it · ↑↓ read · esc back</text>
+<text x="950" y="512.17" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="1035.8" y="512.17" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
-<text x="14" y="528.42" textLength="265.2" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">                                 ▏</text>
-<text x="279.2" y="528.42" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
+<text x="99.8" y="528.42" textLength="858" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">╰────────────────────────────────────────────────────────────────────────────────────────────────────────────╯</text>
 <text x="1035.8" y="528.42" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="14" y="544.67" textLength="265.2" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">                                 ▏</text>
 <text x="279.2" y="544.67" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>

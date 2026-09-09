@@ -3,20 +3,20 @@ pgctl  pgctl.yaml
 │ ●│ Take a snapshot of prd                                                 │  │
 │ ●│                                                                        │  │
 │ ●│ Reads the chosen databases and writes a compressed copy. Nothing is    │  │
-│ ✗│ written to prd. Choose where they go: keeping them here, sending them  │  │
-╰──│ away, or both.                                                         │  │
+╰──│ written to prd. Choose where they go: keeping them here, sending them  │  │
+╭─ │ away, or both.                                                         │  │
+│ p│                                                                        │  │
+│ c│  choose at least one destination — space chooses, and more than one i… │  │
+╰──│                                                                        │  │
 ╭─ │                                                                        │  │
-│ p│  choose at least one destination — space chooses, and more than one i… │  │
-│ c│                                                                        │  │
-│ q│                                                                        │  │
-╰──│   Databases      1 of 3                                                │  │
-╭─ │ ▸ ●   product-development                                              │  │
-│  │   ○   claims                                                           │  │
-╰──│   ○   quote                                                            │  │
-╭─ │   Where it goes  nothing chosen yet                                    │  │
-│ c│   ○   local           keep it on this machine, in .pgctl/snapshots     │… │
-╰──│   ○   snapshots       upload it to the pg-snapshots container          │  │
-╭─ │ product-development alone                                              │  │
-│ n│   ↑↓ move · space choose · a all · tab field · enter take it · esc can │  │
-╰──╰────────────────────────────────────────────────────────────────────────╯  │
-                                ▏╰─────────────────────────────────────────────╯
+│  │   Databases      1 of 3                                                │  │
+╰──│ ▸ ●   product-development                                              │  │
+╭─ │   ○   claims                                                           │  │
+│  │   ○   quote                                                            │  │
+╰──│   Where it goes  nothing chosen yet                                    │  │
+╭─ │   ○   local           keep it on this machine, in .pgctl/snapshots     │… │
+│ c│   ○   snapshots       upload it to the pg-snapshots container          │  │
+╰──│ product-development alone                                              │  │
+╭─ │   ↑↓ move · space choose · a all · tab field · enter take it · esc can │  │
+│ n╰────────────────────────────────────────────────────────────────────────╯  │
+╰──────────────────────────────╯▏╰─────────────────────────────────────────────╯

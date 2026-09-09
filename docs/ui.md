@@ -16,9 +16,10 @@ Five panels down the left, and each one is **about the row selected above it**.
 ```
 [1] Connections   the servers pgctl can reach
 [2] Databases       …on the selected connection, discovered from the server
-[3] Snapshots       …taken from the selected connection
-[4] Sets            …declared for the selected database
-[5] Runs          this session's operations
+[3] Snapshots     what was taken FROM the selected connection
+[4] Restorable    what can be put ON it — every other connection's, by source
+[5] Sets            …declared for the selected database
+[6] Runs          this session's operations
 ```
 
 The number is bracketed because it is a **key**, not a quantity: bare, it sat
@@ -45,7 +46,7 @@ so moving between panels changes the questions the pane can answer:
 |---|---|
 | Connections | Overview · Config |
 | Databases | Tables · Rules · Foreign keys |
-| Snapshots | Manifest · Tables · Warnings · Drift |
+| Snapshots, Restorable | Manifest · Tables · Warnings · Drift |
 | Sets | Members · Closure · Load order |
 | Runs | Steps · Log |
 
@@ -67,6 +68,25 @@ tab shows each rule with how many tables it matched on this database. A rule tha
 matched **nothing** is coloured, because that is what a renamed table leaves
 behind and it is otherwise invisible. [`config.md`](./config.md) has the rest,
 including which rule wins when two match the same table.
+
+## A snapshot is a run, and two panels list them
+
+**One snapshot is one press of `n`** — every database taken at one instant, with
+the id `prd/20260909T153059Z`. Its databases are members of it, listed on the
+**Manifest** tab. Restoring one restores all of them unless you narrow it, so
+you choose databases when you take a snapshot and *not* again when you put it
+back.
+
+**Panel 3 and panel 4 are two questions, and one list cannot answer both.**
+Panel 3 is what was taken **from** the selected connection. Panel 4 is what can
+be put **on** it: every other connection's snapshots, under a heading naming
+where each came from. Standing on `qat`, panel 3 is empty and correct — nothing
+is ever taken from qat — and panel 4 is how you refresh it, which is what most
+people open this tool to do.
+
+So a restore is: stand on the target, `[4]`, `a`. The form's target is already
+the connection you are standing on and every database of the snapshot is already
+chosen; `enter` plans it.
 
 ## What the markers mean
 
@@ -99,8 +119,10 @@ facts about it, on the **Overview** tab.
 
 ### A snapshot row says what applying it will cost
 
-`↓` means the files are **not on this machine**, so an apply downloads them
-first. Nothing there means they are here and an apply reads them off the disk.
+The left column carries one of three states, in the order they matter: `✗` a
+database of it did not finish, so it cannot be applied at all; `↓` it can, but
+the files are not on this machine and an apply downloads them first; blank means
+it is here and ready. The right side is the count of databases and the size.
 
 That is the cost, not the location — which is the question being decided when
 you pick a snapshot to apply, and it needs no legend once seen. The panel used

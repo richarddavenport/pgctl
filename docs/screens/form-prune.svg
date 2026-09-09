@@ -105,12 +105,11 @@
 <text x="950" y="252.18" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="1035.8" y="252.18" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="14" y="268.43" textLength="15.6" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">╭─</text>
-<text x="29.6" y="268.43" textLength="70.2" lengthAdjust="spacing" fill="#7f7f7f" font-weight="600" xml:space="preserve"> [4] Sets</text>
+<text x="29.6" y="268.43" textLength="70.2" lengthAdjust="spacing" fill="#7f7f7f" font-weight="600" xml:space="preserve"> [4] Rest</text>
 <text x="99.8" y="268.43" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="950" y="268.43" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="1035.8" y="268.43" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="14" y="284.68" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
-<text x="29.6" y="284.68" textLength="46.8" lengthAdjust="spacing" fill="#ff00ff" font-weight="600" xml:space="preserve">claims</text>
 <text x="99.8" y="284.68" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="107.6" y="284.68" textLength="819" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve"> Retention: 2 daily, 0 weekly, 0 monthly. An incomplete snapshot is never kept, and the newest always is.</text>
 <text x="950" y="284.68" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
@@ -120,14 +119,14 @@
 <text x="950" y="300.93" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="1035.8" y="300.93" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="14" y="317.18" textLength="15.6" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">╭─</text>
-<text x="29.6" y="317.18" textLength="70.2" lengthAdjust="spacing" fill="#7f7f7f" font-weight="600" xml:space="preserve"> [5] Runs</text>
+<text x="29.6" y="317.18" textLength="70.2" lengthAdjust="spacing" fill="#7f7f7f" font-weight="600" xml:space="preserve"> [5] Sets</text>
 <text x="99.8" y="317.18" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="115.4" y="317.18" textLength="93.6" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">▸ Connection</text>
 <text x="232.4" y="317.18" textLength="109.2" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">‹ all ›  (1/5)</text>
 <text x="950" y="317.18" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="1035.8" y="317.18" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="14" y="333.43" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
-<text x="29.6" y="333.43" textLength="70.2" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">nothing r</text>
+<text x="29.6" y="333.43" textLength="46.8" lengthAdjust="spacing" fill="#ff00ff" font-weight="600" xml:space="preserve">claims</text>
 <text x="99.8" y="333.43" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="131" y="333.43" textLength="117" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">Delete them  no</text>
 <text x="950" y="333.43" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
@@ -137,13 +136,18 @@
 <text x="115.4" y="349.68" textLength="101.4" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">← → to change</text>
 <text x="950" y="349.68" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="1035.8" y="349.68" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
+<text x="14" y="365.93" textLength="15.6" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">╭─</text>
+<text x="29.6" y="365.93" textLength="70.2" lengthAdjust="spacing" fill="#7f7f7f" font-weight="600" xml:space="preserve"> [6] Runs</text>
 <text x="99.8" y="365.93" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="115.4" y="365.93" textLength="382.2" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">  ↑↓ field · ←→ change · enter prune · esc cancel</text>
 <text x="950" y="365.93" textLength="7.8" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">│</text>
 <text x="1035.8" y="365.93" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
+<text x="14" y="382.18" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
+<text x="29.6" y="382.18" textLength="70.2" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">nothing r</text>
 <text x="99.8" y="382.18" textLength="858" lengthAdjust="spacing" fill="#ff00ff" xml:space="preserve">╰────────────────────────────────────────────────────────────────────────────────────────────────────────────╯</text>
 <text x="1035.8" y="382.18" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
-<text x="14" y="398.43" textLength="265.2" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">                                 ▏</text>
+<text x="14" y="398.43" textLength="257.4" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">╰───────────────────────────────╯</text>
+<text x="271.4" y="398.43" textLength="7.8" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">▏</text>
 <text x="279.2" y="398.43" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="1035.8" y="398.43" textLength="7.8" lengthAdjust="spacing" fill="#7f7f7f" xml:space="preserve">│</text>
 <text x="14" y="414.68" textLength="265.2" lengthAdjust="spacing" fill="#d0d0d0" xml:space="preserve">                                 ▏</text>

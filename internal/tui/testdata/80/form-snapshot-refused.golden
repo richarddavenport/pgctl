@@ -11,13 +11,13 @@ pgctl  pgctl.yaml
 ╭─ [3] Snapshots ──────────────╮▏│ r retries. A secrets file that will not     │
 │ none on scratch — press n    │▏│ decrypt, a firewall rule that does not list │
 ╰──────────────────────────────╯▏│ this address, and a stopped server all look │
-╭─ [4] Sets (1) ───────────────╮▏│ the same from here.                         │
+╭─ [4] Restorable (1) ─────────╮▏│ the same from here.                         │
+│   prd                        │▏│                                             │
+╰──────────────────────────────╯▏│                                             │
+╭─ [5] Sets (1) ───────────────╮▏│                                             │
 │ claims                     ? │▏│                                             │
 ╰──────────────────────────────╯▏│                                             │
-╭─ [5] Runs ───────────────────╮▏│                                             │
+╭─ [6] Runs ───────────────────╮▏│                                             │
 │ nothing run yet              │▏│                                             │
-╰──────────────────────────────╯▏│                                             │
-                                ▏│                                             │
-                                ▏│                                             │
-                                ▏╰─────────────────────────────────────────────╯
+╰──────────────────────────────╯▏╰─────────────────────────────────────────────╯
 n snapshot · a apply · m move · p prune · / filter · [ ] tabs · ? keys

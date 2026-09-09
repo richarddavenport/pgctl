@@ -1,14 +1,15 @@
 pgctl  pgctl.yaml
 ╭─ [1] Connections (4) ────────╮▏╭─────────────────────────────────────────────╮
 │ ● prd              protected │▏│ ‹ Manifest · Tables · Warnings · Drift ›    │
-│ ● qat                guarded │▏│                                             │
 │ ●╭────────────────────────────────────────────────────────────────────────╮  │
-│ ✗│ Apply prd/product-development/20260828T030000Z                         │  │
+│ ●│ Apply prd/20260828T030000Z                                             │  │
 ╰──│                                                                        │  │
-╭─ │ Replaces data on the target. The plan is shown before anything is      │  │
-│ p│ touched.                                                               │  │
+╭─ │ Replaces data on the target, one database at a time. 1 database taken  │  │
+│ p│ 14h ago. The plan is shown before anything is touched.                 │  │
 │ c│                                                                        │  │
-│ q│ ▸ Target                  ‹ qat  (guarded — needs its name typed) ›  ( │  │
+╰──│ ▸ Target                  ‹ qat  (guarded — needs its name typed) ›  ( │  │
+╭─ │   Databases               all 1                                        │  │
+│  │   ●   product-development                                              │  │
 ╰──│   Scope                   ‹ whole database — drop and recreate it ›  ( │  │
 ╭─ │   Tables                  nothing yet                                  │  │
 │  │   Widen to closure        no                                           │  │
@@ -16,7 +17,6 @@ pgctl  pgctl.yaml
 ╭─ │ ← → to change                                                          │  │
 │ c│   ↑↓ field · ←→ change · enter plan it · esc cancel                    │  │
 ╰──╰────────────────────────────────────────────────────────────────────────╯  │
-╭─ [5] Runs ───────────────────╮▏│   no data      1                            │
-│ nothing run yet              │▏│   foreign keys 0                            │
-╰──────────────────────────────╯▏│                                             │
-                                ▏╰─────────────────────────────────────────────╯
+╭─ [6] Runs ───────────────────╮▏│   filtered 1                                │
+│ nothing run yet              │▏│   no data  1                                │
+╰──────────────────────────────╯▏╰─────────────────────────────────────────────╯

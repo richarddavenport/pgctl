@@ -1,0 +1,23 @@
+pgctl  pgctl.yaml
+╭─ [1] Connections (4) ────────╮▏╭─────────────────────────────────────────────╮
+│ ● prd              protected │▏│ ‹ Manifest · Tables · Warnings · Drift ›    │
+│ ● qat                guarded │▏│                                             │
+│ ● local                      │▏│ no snapshot selected. Press n to take one;  │
+╰──────────────────────────────╯▏│ panel 4 lists what other connections have   │
+╭─ [2] Databases (3) ──────────╮▏│ that can be restored here.                  │
+│ product-development  11.0 GB │▏│                                             │
+│ claims               48.0 MB │▏│                                             │
+╰──────────────────────────────╯▏│                                             │
+╭─ [3] Snapshots (1) ──────────╮▏│                                             │
+│   08-27 22:00     1db 1.9 GB │▏│                                             │
+╰──────────────────────────────╯▏│                                             │
+╭─ [4] Restorable ─────────────╮▏│                                             │
+│                              │▏│                                             │
+╰──────────────────────────────╯▏│                                             │
+╭─ [5] Sets (1) ───────────────╮▏│                                             │
+│ claims                   2+2 │▏│                                             │
+╰──────────────────────────────╯▏│                                             │
+╭─ [6] Runs ───────────────────╮▏│                                             │
+│ nothing run yet              │▏│                                             │
+╰──────────────────────────────╯▏╰─────────────────────────────────────────────╯
+n snapshot · a apply · m move · p prune · / filter · [ ] tabs · ? keys

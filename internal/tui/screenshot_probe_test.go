@@ -101,7 +101,11 @@ func TestCaptureScreens(t *testing.T) {
 
 	// 6. The plan, which is the last thing before a destructive act.
 	m.action.stage = stagePlan
-	m.action.plan = capturePlan(m)
+	m.action.plan = &engine.RunPlan{
+		Run:    m.snaps[len(m.snaps)-1],
+		Target: "qat",
+		Plans:  []*engine.Plan{capturePlan(m)},
+	}
 	// Half typed, because a guarded target's phrase is a FIELD now and the
 	// half-typed state is the one worth looking at.
 	if f := m.action.field("confirm"); f != nil {
@@ -207,7 +211,7 @@ func captureModel(t *testing.T) *Model {
 		}
 	}
 
-	m.entries = []*engine.Entry{captureSnapshot(name, database, tables)}
+	m.setEntries([]*engine.Entry{captureSnapshot(name, database, tables)})
 	return m
 }
 
@@ -262,10 +266,14 @@ func captureSnapshot(connection, database string, tables []pg.TableInfo) *engine
 // capturePlan is a plan of the shape a set-level apply produces, with the load
 // order that came out of the real schema on this machine.
 func capturePlan(m *Model) *engine.Plan {
-	entry, _ := m.selectedSnapshot()
+	run, _ := m.selectedSnapshot()
+	member := run.Members[0].Manifest
 	return &engine.Plan{
-		Snapshot:  entry.Manifest,
-		Target:    &engine.Target{Conn: config.Connection{Name: "qat", Guarded: true}, Database: entry.Manifest.Database},
+		Snapshot: member,
+		Target: &engine.Target{
+			Conn:     config.Connection{Name: "qat", Guarded: true},
+			Database: member.Database,
+		},
 		Selection: make([]string, 38),
 		Added: []string{
 			"operations.remittance", "operations.remittance_status_type", "ory.identity",

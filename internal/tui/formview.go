@@ -456,7 +456,9 @@ func (m *Model) actionHintList() []comp.Hint {
 		return []comp.Hint{{Key: "esc", Label: "cancel"}}
 	case stagePlan:
 		hints := []comp.Hint{{Key: "enter", Label: "apply it"}}
-		if a.plan != nil && len(a.plan.Added) == 0 && !a.plan.WholeDatabase {
+		// Widening is offered when some plan could use it: a whole-database
+		// apply has nothing to widen, and one already widened has nothing left.
+		if a.plan != nil && a.plan.CanWiden() {
 			hints = append(hints, comp.Hint{Key: "w", Label: "widen to closure"})
 		}
 		return append(hints,
@@ -514,11 +516,11 @@ func (m *Model) submitLabel() string {
 
 // planLines is the plan as a document.
 //
-// Built from the Plan's fields rather than from Plan.Describe(): the engine's
+// Built from the RunPlan's fields rather than from Plan.Describe(): the engine's
 // description is written for a terminal that has already scrolled — the CLI
 // prints it once and it stays on screen — while this is read in a box, so the
-// heaviest facts go first and the load order last. Both come from the same
-// struct, so neither can claim something the other does not.
+// heaviest facts go first and the load orders last. Both come from the same
+// structs, so neither can claim something the other does not.
 func (m *Model) planLines(width int) []comp.Line {
 	p := m.action.plan
 	if p == nil {
@@ -535,62 +537,70 @@ func (m *Model) planLines(width int) []comp.Line {
 		}
 	}
 
-	// What is destroyed, first. This is the last thing between an operator and
-	// a destructive act.
-	if p.WholeDatabase {
-		wrapped(fmt.Sprintf("DROP AND RECREATE %s on %s",
-			p.Snapshot.Database, p.Target.Conn.Name), &dangerStyle)
-	} else {
-		wrapped(fmt.Sprintf("REPLACE %s in %s on %s",
-			plural(len(p.Selection), "table"), p.Snapshot.Database,
-			p.Target.Conn.Name), &dangerStyle)
+	// The refusals FIRST, before what will happen, because they are the part
+	// that changes what a reader is about to confirm: five databases restoring
+	// and one refused is a decision, and finding the refusal below two hundred
+	// lines of load order is not one.
+	if len(p.Refusals) > 0 {
+		wrapped(fmt.Sprintf("REFUSED, and skipped: %s",
+			plural(len(p.Refusals), "database")), &dangerStyle)
+		for _, r := range p.Refusals {
+			wrapped("  "+r.Database+" — "+r.Reason, &warnStyle)
+		}
+		line("", nil)
 	}
+
+	// What is destroyed, and how much of it. This is the last thing between an
+	// operator and a destructive act.
+	wrapped(fmt.Sprintf("REPLACE %s in %s on %s",
+		plural(p.Tables(), "table"), plural(len(p.Plans), "database"), p.Target),
+		&dangerStyle)
 	wrapped(fmt.Sprintf("from %s taken %s, %s of source data",
-		p.Snapshot.ID, p.Snapshot.StartedAt.Local().Format("2006-01-02 15:04"),
-		engine.HumanBytes(p.Bytes)), &mutedStyle)
+		p.Run.ID, p.Run.At.Local().Format("2006-01-02 15:04"),
+		engine.HumanBytes(p.Bytes())), &mutedStyle)
 
-	if len(p.Added) > 0 {
+	for _, one := range p.Plans {
 		line("", nil)
-		wrapped(fmt.Sprintf("widened to include %d more: %s",
-			len(p.Added), strings.Join(p.Added, ", ")), &warnStyle)
-	}
+		what := plural(len(one.Selection), "table")
+		if one.WholeDatabase {
+			what = "the whole database"
+		}
+		wrapped(fmt.Sprintf("%s — %s, %s", one.Snapshot.Database, what,
+			engine.HumanBytes(one.Bytes)), &headerStyle)
 
-	if !p.WholeDatabase {
-		line("", nil)
-		wrapped(fmt.Sprintf("%s dropped and rebuilt, %s rebuilt",
-			plural(len(p.DropFKs)+len(p.BlockingFKs), "foreign key"),
-			plural(len(p.DropIndexes), "index")), nil)
-		if n := len(p.TriggerTables); n > 0 {
-			triggers := 0
-			for _, t := range p.TriggerTables {
-				triggers += len(t.Triggers)
+		if len(one.Added) > 0 {
+			wrapped(fmt.Sprintf("  widened to include %d more: %s",
+				len(one.Added), strings.Join(one.Added, ", ")), &warnStyle)
+		}
+		if !one.WholeDatabase {
+			wrapped(fmt.Sprintf("  %s dropped and rebuilt, %s rebuilt",
+				plural(len(one.DropFKs)+len(one.BlockingFKs), "foreign key"),
+				plural(len(one.DropIndexes), "index")), nil)
+			if n := len(one.TriggerTables); n > 0 {
+				triggers := 0
+				for _, t := range one.TriggerTables {
+					triggers += len(t.Triggers)
+				}
+				wrapped(fmt.Sprintf("  %s disabled for the load on %s",
+					plural(triggers, "user trigger"), plural(n, "table")), nil)
 			}
-			wrapped(fmt.Sprintf("%s disabled for the load on %s",
-				plural(triggers, "user trigger"), plural(n, "table")), nil)
+			for i, layer := range one.Order.Layers {
+				wrapped(fmt.Sprintf("  %d. %s", i+1, strings.Join(layer, ", ")), nil)
+			}
+			for _, cycle := range one.Order.Cycles {
+				wrapped("  ring: "+strings.Join(cycle, ", "), &warnStyle)
+			}
 		}
-
-		line("", nil)
-		line("LOAD ORDER", &headerStyle)
-		for i, layer := range p.Order.Layers {
-			wrapped(fmt.Sprintf("%d. %s", i+1, strings.Join(layer, ", ")), nil)
+		if len(one.MissingFromSnapshot) > 0 {
+			wrapped("  missing from the snapshot: "+
+				strings.Join(one.MissingFromSnapshot, ", "), &dangerStyle)
 		}
-		for _, cycle := range p.Order.Cycles {
-			wrapped("ring: "+strings.Join(cycle, ", "), &warnStyle)
+		for _, d := range one.Drift {
+			wrapped("  drift: "+d, &warnStyle)
 		}
-	}
-
-	if len(p.MissingFromSnapshot) > 0 {
-		line("", nil)
-		wrapped("missing from the snapshot: "+
-			strings.Join(p.MissingFromSnapshot, ", "), &dangerStyle)
-	}
-	for _, d := range p.Drift {
-		line("", nil)
-		wrapped("drift: "+d, &warnStyle)
-	}
-	for _, w := range p.Warnings {
-		line("", nil)
-		wrapped("! "+w, &warnStyle)
+		for _, w := range one.Warnings {
+			wrapped("  ! "+w, &warnStyle)
+		}
 	}
 	return out
 }
